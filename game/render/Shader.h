@@ -21,15 +21,15 @@ public:
 
     GLint initializeShader(const std::string& vertex, const std::string& fragment);
 
+    static std::string loadShaderFromFile(const std::string& path);
+    static GLint createShader(const std::string& shader, GLuint shaderPtr);
+public:
     static const char* defaultVertexShader;
     static const char* defaultFragmentShader;
-protected:
+private:
     GLuint vertexShader;
     GLuint fragmentShader;
     GLuint shaderID;
-private:
-    static std::string loadShaderFromFile(const std::string& path);
-    static GLint createShader(const std::string& shader, GLuint shaderPtr);
 };
 
 

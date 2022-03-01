@@ -1,0 +1,157 @@
+#version 430
+
+precision highp float;
+
+layout(local_size_x = 2, local_size_y = 2) in;
+
+struct Color {
+    float r;
+    float g;
+    float b;
+};
+
+layout(std430, binding=4) readonly buffer Octree_data {
+    Color voxels[];
+};
+
+layout(rgba32f) uniform image2D img_output;
+
+layout(location=2) uniform vec3 start_position;
+
+layout(location=3) uniform vec2 camera_angles;
+
+layout(location=4) uniform vec2 window_size;
+
+struct HitPoint {
+    float distance;
+
+    bool hit;
+
+    vec3 color;
+};
+
+void testRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
+    result.hit = false;
+
+    vec3 rayStartPos = start_position;
+    ivec3 mapCheck = ivec3(rayStartPos.x, rayStartPos.y, rayStartPos.z);
+
+    float distance = 0.0f;
+    int iter = 0;
+    while(!result.hit && distance < maxDistance && iter < maxDistance) {
+        iter++;
+        rayStartPos += rayDirection;
+        distance += length(rayDirection);
+        mapCheck = ivec3(rayStartPos.x, rayStartPos.y, rayStartPos.z);
+
+        if (mapCheck.x >= 0 && mapCheck.x < 400 && mapCheck.y >= 0 && mapCheck.y < 400 && mapCheck.z >= 0 && mapCheck.z < 400) {
+            Color col = voxels[mapCheck.x + mapCheck.y * 400 + mapCheck.z * 160000];
+            if (col.b != 0) {
+                result.hit = true;
+                result.distance = distance;
+                result.color = vec3(col.r, col.g, col.b);
+            }
+        }
+    }
+}
+
+void castRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
+    result.hit = false;
+
+    vec3 rayStartPos = start_position;
+    vec3 rayStepSize = abs(1 / rayDirection);
+    ivec3 mapCheck = ivec3(rayStartPos.x, rayStartPos.y, rayStartPos.z);
+    vec3 rayLenght;
+    ivec3 step;
+
+    if (rayDirection.x < 0) {
+        step.x = -1;
+        rayLenght.x = (rayStartPos.x - float(mapCheck.x)) * rayStepSize.x;
+    } else {
+        step.x = 1;
+        rayLenght.x = (float(mapCheck.x + 1) - rayStartPos.x) * rayStepSize.x;
+    }
+
+    if (rayDirection.y < 0) {
+        step.y = -1;
+        rayLenght.y = (rayStartPos.y - float(mapCheck.y)) * rayStepSize.y;
+    } else {
+        step.y = 1;
+        rayLenght.y = (float(mapCheck.y + 1) - rayStartPos.y) * rayStepSize.y;
+    }
+
+    if (rayDirection.z < 0) {
+        step.z = -1;
+        rayLenght.z = (rayStartPos.z - float(mapCheck.z)) * rayStepSize.z;
+    } else {
+        step.z = 1;
+        rayLenght.z = (float(mapCheck.z + 1) - rayStartPos.z) * rayStepSize.z;
+    }
+
+    float distance = 0.0f;
+    while(!result.hit && distance < maxDistance) {
+        if (rayLenght.x < rayLenght.y) {
+            if (rayLenght.x < rayLenght.z) {
+                mapCheck.x += step.x;
+                distance = rayLenght.x;
+                rayLenght.x += rayStepSize.x;
+            } else {
+                mapCheck.z += step.z;
+                distance = rayLenght.z;
+                rayLenght.z += rayStepSize.z;
+            }
+        } else {
+            if (rayLenght.y < rayLenght.z) {
+                mapCheck.y += step.y;
+                distance = rayLenght.y;
+                rayLenght.y += rayStepSize.y;
+            } else {
+                mapCheck.z += step.z;
+                distance = rayLenght.z;
+                rayLenght.z += rayStepSize.z;
+            }
+        }
+
+        if (mapCheck.x >= 0 && mapCheck.x < 400 && mapCheck.y >= 0 && mapCheck.y < 400 && mapCheck.z >= 0 && mapCheck.z < 400) {
+            Color col = voxels[mapCheck.x + mapCheck.y * 400 + mapCheck.z * 160000];
+            if (col.b != 0) {
+                result.hit = true;
+                result.distance = distance;
+                result.color = vec3(col.r, col.g, col.b);
+            }
+        } else {
+            break;
+        }
+    }
+}
+
+
+void main() {
+    ivec2 pixel_coord = ivec2(gl_GlobalInvocationID.xy);
+    vec2 screen_offset = vec2(window_size.x / 2.0, window_size.y / 2.0);
+    vec3 camera_origin = vec3(0, 0, -window_size.x);
+    vec3 screen_coord = vec3(pixel_coord - screen_offset, 0.0);
+
+    HitPoint result;
+
+    // Ray calculation
+    float sinX = sin(-camera_angles.x);
+    float cosX = cos(-camera_angles.x);
+    float sinY = sin(camera_angles.y);
+    float cosY = cos(camera_angles.y);
+
+    vec3 ray = normalize(screen_coord - camera_origin);
+    ray = vec3(ray.x, ray.y * cosY - ray.z * sinY, ray.y * sinY + ray.z * cosY);
+    ray = vec3(ray.x * cosX - ray.z * sinX, ray.y, ray.x * sinX + ray.z * cosX);
+
+    const float maxDist = 500.0f;
+    castRay(ray, maxDist, result);
+
+    vec3 pixel = vec3(0, 0, 0);
+    if (result.hit) {
+        pixel.r = result.color.r - result.distance / maxDist;
+        pixel.g = result.color.g - result.distance / maxDist;
+        pixel.b = result.color.b - result.distance / maxDist;
+    }
+    imageStore(img_output, pixel_coord, vec4(pixel, 1.0));
+}

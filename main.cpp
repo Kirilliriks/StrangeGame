@@ -5,57 +5,45 @@
 #include "GLFW/glfw3.h"
 
 #include "game/Game.h"
+#include "game/render/Window.h"
 
-Game *game;
+#include "glm/gtc/noise.hpp"
 
 int main() {
-    if(!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
-        return -1;
-    }
+//    int size = 300;
+//    for (int z = 0; z < size; z++) {
+//        for (int x = 0; x < size; x++) {
+//            std::cout << "Y " << glm::perlin(glm::vec3(x, z, 0.5f)) << std::endl;
+//        }
+//    }
+//    return 0;
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // OpenGL 4.3
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Discard old OpenGL
+    Window *window = new Window();
 
-    GLFWwindow* window = glfwCreateWindow(320, 200, "Red Triangle",
-                                          nullptr, nullptr);
-    if(window == nullptr) {
-        std::cerr << "Failed to open GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
+    GLFWwindow *glWindow = window->getGLWindow();
+    Game *game = new Game(window);
 
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Vsync
-    glfwShowWindow(window);
+    double deltaTime;
+    double lastFrame = 0;
+    while(glfwWindowShouldClose(glWindow) == GL_FALSE) {
+        const double currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_DOUBLEBUFFER);
-    glDepthFunc(GL_LESS);
-
-    glClearColor(0, 0, 0, 0);
-
-    game = new Game();
-    while(glfwWindowShouldClose(window) == GL_FALSE) {
-        const double deltaTime = glfwGetTime();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glColor4f(0, 0, 0, 0);
 
         game->update(deltaTime);
         game->render(deltaTime);
 
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(glWindow);
         glfwPollEvents();
     }
 
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(glWindow);
     glfwTerminate();
+
+    delete game;
+    delete window;
     return 0;
 }
