@@ -6,11 +6,12 @@
 #define STRANGEGAME_VOXELRENDER_H
 
 #include <vector>
-#include "Shader.h"
+#include "shaders/Shader.h"
 #include "GLFW/glfw3.h"
 #include "../Game.h"
 #include "Camera.h"
 #include "../utils/Color.h"
+#include "shaders/RaycastShader.h"
 
 class Game;
 class VoxelRender {
@@ -36,6 +37,8 @@ private:
     GLuint worldBufferID;
 
     std::vector<Color> worldBuffer;
+
+    RaycastShader *rayShader;
 };
 
 

@@ -6,7 +6,7 @@
 #define STRANGEGAME_SHADER_H
 
 #include <iostream>
-#include <glad.h>
+#include "glad.h"
 
 class Shader {
 public:
