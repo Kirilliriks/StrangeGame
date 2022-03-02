@@ -4,14 +4,15 @@
 
 #ifndef STRANGEGAME_VOXELRENDER_H
 #define STRANGEGAME_VOXELRENDER_H
+#define GLFW_INCLUDE_NONE
 
 #include <vector>
-#include "shaders/Shader.h"
 #include "GLFW/glfw3.h"
+#include "shaders/Shader.h"
 #include "../Game.h"
 #include "Camera.h"
-#include "../utils/Color.h"
 #include "shaders/RaycastShader.h"
+#include "../world/Octree.h"
 
 class Game;
 class VoxelRender {
@@ -35,8 +36,9 @@ private:
     GLuint windowBuffer;
 
     GLuint worldBufferID;
+    GLuint textureWindowID;
 
-    std::vector<Color> worldBuffer;
+    Octree octree;
 
     RaycastShader *rayShader;
 };

@@ -1,10 +1,7 @@
 //
-// Created by KirilliriK on 01.03.2022.
+// Created by KirilliriK on 02.03.2022.
 //
-
 #include "Node.h"
-
-#include <iostream>
 
 // Little help struct, TODO delete
 enum nodeIndex {
@@ -18,79 +15,57 @@ enum nodeIndex {
     UPPER_RIGHT_BACK = 7   //111
 };
 
-
-Node::Node(int index, int size, glm::ivec3 position) {
+Node::Node(int size, const glm::ivec3& position) {
+    this->halfSize = size / 2;
     this->position = position;
-    this->index = index;
-    this->size = size;
-    for (int &sub : subs) {
-        sub = -1;
-    }
+    sub = -1;
     leaf = false;
-    color = Color(0, 0, 0);
+    color = Color(0.0f, 1.0f, 0.0f);
 }
 
-int Node::getSubIndex(glm::ivec3 vec) {
-    int subIndex = 0;
+bool Node::isEmpty() {
+    return sub == -1;
+}
 
-    subIndex |= vec.x > position.x ? 2 : 0;
-    subIndex |= vec.y > position.y ? 4 : 0;
-    subIndex |= vec.z > position.z ? 1 : 0;
+void Node::divide(std::vector<Node> &nodes) {
+    sub = nodes.size();
+    for (int i = 0; i < 8; i++) {
+        glm::ivec3 pos = position;
+
+        if ((i & 2) == 2) {
+            pos.x += halfSize;
+        }
+
+        if ((i & 4) == 4) {
+            pos.y += halfSize;
+        }
+
+        if ((i & 1) == 1) {
+            pos.z += halfSize;
+        }
+
+        nodes.emplace_back(halfSize, pos);
+    }
+}
+
+int Node::getSubIndex(const glm::ivec3& vec) {
+    int subIndex = 0;
+    subIndex |= vec.x >= (position.x + halfSize)? 2 : 0;
+    subIndex |= vec.y >= (position.y + halfSize)? 4 : 0;
+    subIndex |= vec.z >= (position.z + halfSize)? 1 : 0;
 
     return subIndex;
 }
 
-bool Node::isEmpty() {
-    return subs[0] == -1;
-}
-
-void Node::divide(std::vector<Node> &nodes) {
-    for (int i = 0; i < 8; i++) {
-        glm::ivec3 pos = position;
-        const int offset = (int)((float)size * 0.25f);
-
-        if ((i & 2) == 2) {
-            pos.x += offset;
-        } else {
-            pos.x -= offset;
-        }
-
-        if ((i & 4) == 4) {
-            pos.y += offset;
-        } else {
-            pos.y -= offset;
-        }
-
-        if ((i & 1) == 1) {
-            pos.z += offset;
-        } else {
-            pos.z -= offset;
-        }
-
-
-        const int sizeNodes = nodes.size();
-        subs[i] = sizeNodes;
-        nodes.emplace_back(subs[i], size / 2, pos);
-    }
-}
-
 void Node::setColor(Color color) {
     leaf = true;
-    this->color = color;
+    this->color = Color(1.0f, 0.0f, 0.0);
 }
 
-int Node::getIndex() {
-    return index;
-}
-
-glm::ivec3 Node::getPosition() {
-    return position;
-}
-
-int Node::getSubNodeIndex(glm::ivec3 vec) {
+int Node::getSubNodeIndex(const glm::ivec3& vec) {
     return getSubNodeIndex(getSubIndex(vec));
 }
 
 int Node::getSubNodeIndex(int subIndex) {
-    return subs[subIndex];
+    return sub + subIndex;
 }

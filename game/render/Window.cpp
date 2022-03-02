@@ -15,8 +15,8 @@ long clp2(long x) {
 }
 
 Window::Window() {
-    width = 640;
-    height = 400;
+    width = 320;
+    height = 200;
     powWidth = clp2(width);
     powHeight = clp2(height);
 
@@ -38,7 +38,7 @@ Window::Window() {
     glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
     glWindow = glfwCreateWindow(mode->width, mode->height, "StrangeGame",
-                                monitor, nullptr);
+                                nullptr, nullptr);
     if(glWindow == nullptr) {
         std::cerr << "Failed to open GLFW window" << std::endl;
         glfwTerminate();

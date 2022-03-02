@@ -6,13 +6,8 @@
 
 #include "game/Game.h"
 #include "game/render/Window.h"
-#include "game/world/Octree.h"
 
 int main() {
-    Octree octree;
-    octree.setVoxel(glm::ivec3(0, 0, 0), Color(1, 1, 1));
-    octree.setVoxel(glm::ivec3(128, 128, 128), Color(1, 1, 1));
-    return 0;
     Window *window = new Window();
 
     GLFWwindow *glWindow = window->getGLWindow();

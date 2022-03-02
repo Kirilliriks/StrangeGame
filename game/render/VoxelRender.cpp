@@ -7,12 +7,13 @@
 #include <random>
 #include "glm/gtc/noise.hpp"
 #include "shaders/RaycastShader.h"
+#include "../utils/Color.h"
 
 VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
     this->game = game;
     window = game->getWindow();
 
-    worldSize = 400;
+    worldSize = octree.getSize();
     shader = Shader(R"(D:\StrangeGame\game\resources\shaders\vertex.glsl)",
                     R"(D:\StrangeGame\game\resources\shaders\fragment.glsl)");
 
@@ -51,43 +52,39 @@ void VoxelRender::render(double deltaTime) {
 
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-    glClear(GL_COLOR_BUFFER_BIT);
     shader.bind();
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     shader.unbind();
 }
 
 void VoxelRender::createWorld() {
-    int doubleSize = worldSize * worldSize;
-    worldBuffer.resize(worldSize * doubleSize);
-
-
     std::random_device dev;
     std::mt19937 rng(dev());
     std::uniform_int_distribution<int> rand(-1024,1024);
     int seed = rand(rng);
-    for (int z = 0; z < worldSize; z++) {
-        for (int x = 0; x < worldSize; x++) {
-            float per = glm::simplex(glm::vec3(x / 32.0f, z / 32.0f, seed));
-            per = (per + 1) / 2;
-            //std::cout << "Per " << per << std::endl;
-            int y = (int)(per * (float)32);
-            if (y < 0 || y >= worldSize) continue;
+    for (int z = 0; z < worldSize / 2; z++) {
+        for (int x = 0; x < worldSize / 2; x++) {
+//            float per = glm::simplex(glm::vec3(x / 32.0f, z / 32.0f, seed));
+//            per = (per + 1) / 2;
+//            int y = (int)(per * (float)32);
+//            if (y < 0 || y >= worldSize) continue;
 
-
-            for (int i = 0; i <= y; i++) {
-                worldBuffer[x + i * worldSize + z * doubleSize] = Color(per, per, 1);
-            }
+            //for (int i = 0; i <= y; i++) {
+                octree.setVoxel(glm::ivec3(x, 0, z), Color(1.0f, 0.0f, 0.0f));
+            //}
         }
     }
-
     updateWorld();
+
+    std::cout << "Generation end, nodes count: " << octree.nodesCount() << std::endl;
 }
 
 void VoxelRender::updateWorld() {
     glGenBuffers(1, &worldBufferID);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, worldBufferID);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, worldBuffer.size() * sizeof(Color), worldBuffer.data(), GL_STATIC_DRAW);
+    glBufferData(GL_SHADER_STORAGE_BUFFER,
+                 octree.nodesCount() * sizeof(Node),
+                 octree.getData(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, worldBufferID);
 }
 
@@ -100,13 +97,13 @@ GLuint VoxelRender::genTexture() {
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texHandle);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, window->width, window->height, 0, GL_RGBA, GL_FLOAT, nullptr);
 
     // Because we're also using this tex as an image (in order to write to it),
     // we bind it to an image unit as well
-    glBindImageTexture(0, texHandle, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    glBindImageTexture(0, texHandle, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
     std::cout << "DONE" << std::endl;
     return texHandle;
 }

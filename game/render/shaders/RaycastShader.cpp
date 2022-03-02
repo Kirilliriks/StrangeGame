@@ -14,7 +14,7 @@ RaycastShader::RaycastShader(std::string shader) {
     GLuint cs = glCreateShader(GL_COMPUTE_SHADER);
 
     // In order to write to a texture, we have to introduce it as image2D.
-    // local_size_x/y/z layout variables define the work group size.
+    // local_size_x/y/z layout variables define the work group halfSize.
     // gl_GlobalInvocationID is a uvec3 variable giving the global ID of the thread,
     // gl_LocalInvocationID is the local index within the work group, and
     // gl_WorkGroupID is the work group's index

@@ -30,7 +30,7 @@ private:
     float yaw;
     float pitch;
 
-    float speed = 100;
+    float speed = 60;
 };
 
 

@@ -2,16 +2,24 @@
 
 precision highp float;
 
-layout(local_size_x = 2, local_size_y = 2) in;
+layout(local_size_x = 1, local_size_y = 1) in;
 
-struct Color {
-    float r;
-    float g;
-    float b;
+struct Node {
+    int position[3];
+    int halfSize;
+    int sub;
+    bool leaf;
+    float color[3];
+};
+
+struct HitPoint {
+    float distance;
+    bool hit;
+    vec3 color;
 };
 
 layout(std430, binding=4) readonly buffer Octree_data {
-    Color voxels[];
+    Node nodes[];
 };
 
 layout(rgba32f) uniform image2D img_output;
@@ -22,75 +30,116 @@ layout(location=3) uniform vec2 camera_angles;
 
 layout(location=4) uniform vec2 window_size;
 
-struct HitPoint {
-    float distance;
-    bool hit;
-    vec3 color;
-};
+int getSubIndex(in ivec3 vec, in int pos[3], in int halfSize) {
+    int subIndex = 0;
+
+    if (vec.x < pos[0]) return -1;
+    if (vec.y < pos[1]) return -2;
+    if (vec.z < pos[2]) return -3;
+
+    const int size = halfSize * 2;
+    if (vec.x >= pos[0] + size) return -4;
+    if (vec.y >= pos[1] + size) return -5;
+    if (vec.z >= pos[2] + size) return -6;
+
+    subIndex |= vec.x >= pos[0] + halfSize? 2 : 0;
+    subIndex |= vec.y >= pos[1] + halfSize? 4 : 0;
+    subIndex |= vec.z >= pos[2] + halfSize? 1 : 0;
+
+    return subIndex;
+}
+
+
+void findVoxel(in ivec3 voxelPos, inout HitPoint result) {
+    int index = 0;
+    const int maxSize = nodes.length();
+    while(index != -1 && index < maxSize) {
+        Node currentNode = nodes[index];
+        if (currentNode.sub == -1) return;
+        if (currentNode.leaf) {
+            result.hit = true;
+            result.color = vec3(currentNode.color[0], currentNode.color[1], currentNode.color[2]);
+            break;
+        }
+
+        const int subIndex = getSubIndex(voxelPos, currentNode.position, currentNode.halfSize);
+        if (subIndex < 0) return;
+
+        index = currentNode.sub + subIndex;
+    }
+}
 
 void castRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
     result.hit = false;
 
+    const int worldSize = nodes[0].halfSize * 2;
+    const int powWorldSize = worldSize * worldSize;
+
     const vec3 rayStepSize = abs(1.0f / rayDirection);
-    ivec3 mapCheck = ivec3(start_position);
     vec3 rayLenght;
+    ivec3 voxelPos = ivec3(start_position);
     ivec3 step;
 
     if (rayDirection.x < 0) {
         step.x = -1;
-        rayLenght.x = (start_position.x - float(mapCheck.x)) * rayStepSize.x;
+        rayLenght.x = (start_position.x - float(voxelPos.x)) * rayStepSize.x;
     } else {
         step.x = 1;
-        rayLenght.x = (float(mapCheck.x + 1) - start_position.x) * rayStepSize.x;
+        rayLenght.x = (float(voxelPos.x + 1) - start_position.x) * rayStepSize.x;
     }
 
     if (rayDirection.y < 0) {
         step.y = -1;
-        rayLenght.y = (start_position.y - float(mapCheck.y)) * rayStepSize.y;
+        rayLenght.y = (start_position.y - float(voxelPos.y)) * rayStepSize.y;
     } else {
         step.y = 1;
-        rayLenght.y = (float(mapCheck.y + 1) - start_position.y) * rayStepSize.y;
+        rayLenght.y = (float(voxelPos.y + 1) - start_position.y) * rayStepSize.y;
     }
 
     if (rayDirection.z < 0) {
         step.z = -1;
-        rayLenght.z = (start_position.z - float(mapCheck.z)) * rayStepSize.z;
+        rayLenght.z = (start_position.z - float(voxelPos.z)) * rayStepSize.z;
     } else {
         step.z = 1;
-        rayLenght.z = (float(mapCheck.z + 1) - start_position.z) * rayStepSize.z;
+        rayLenght.z = (float(voxelPos.z + 1) - start_position.z) * rayStepSize.z;
     }
 
     while(result.distance < maxDistance) {
         if (rayLenght.x < rayLenght.y) {
             if (rayLenght.x < rayLenght.z) {
-                mapCheck.x += step.x;
+                voxelPos.x += step.x;
                 result.distance = rayLenght.x;
                 rayLenght.x += rayStepSize.x;
             } else {
-                mapCheck.z += step.z;
+                voxelPos.z += step.z;
                 result.distance = rayLenght.z;
                 rayLenght.z += rayStepSize.z;
             }
         } else {
             if (rayLenght.y < rayLenght.z) {
-                mapCheck.y += step.y;
+                voxelPos.y += step.y;
                 result.distance = rayLenght.y;
                 rayLenght.y += rayStepSize.y;
             } else {
-                mapCheck.z += step.z;
+                voxelPos.z += step.z;
                 result.distance = rayLenght.z;
                 rayLenght.z += rayStepSize.z;
             }
         }
 
-        if (mapCheck.x >= 0 && mapCheck.x < 400 && mapCheck.y >= 0 && mapCheck.y < 400 && mapCheck.z >= 0 && mapCheck.z < 400) {
-            const Color col = voxels[mapCheck.x + mapCheck.y * 400 + mapCheck.z * 160000];
-            if (col.b != 0) {
-                result.hit = true;
-                result.color = vec3(col.r, col.g, col.b);
-                break;
-            }
-        } else {
+        findVoxel(voxelPos, result);
+//        if (voxelPos.x == 1 && voxelPos.y == 0 && voxelPos.z == 0) {
+//            result.hit = true;
+//            result.color.r = 1.0f;
+//        } else if (voxelPos.x == 0 && voxelPos.y == 1 && voxelPos.z == 0) {
+//            result.hit = true;
+//            result.color.g = 1.0f;
+//        } else if (voxelPos.x == 0 && voxelPos.y == 0 && voxelPos.z == 1) {
+//            result.hit = true;
+//            result.color.b = 1.0f;
+//        }
+
+        if (result.hit) {
             break;
         }
     }
@@ -120,7 +169,36 @@ void main() {
 
     vec3 pixel = vec3(0, 0, 0);
     if (result.hit) {
-        pixel = result.color - result.distance / maxDist;
+        pixel = result.color;
     }
     imageStore(img_output, pixel_coord, vec4(pixel, 1.0));
 }
+
+//float poss = nodes[1].color[0];
+//    int halfS = nodes[1].halfSize;
+//   bool leaf = nodes[1].leaf;
+////    int leaf = nodes[0].leaf;
+//    //if (leaf == 22) {
+//    //if (nodes.length() == 1)
+//        //pixel.r = 1.0f;
+//    //}
+////    if (nodes[0].color.y != 0) {
+////        pixel.r = 1.0f;
+////    }
+//    if (leaf) {
+//        pixel.r = 1.0f;
+//    }
+//if (halfS == 2) {
+//    pixel.r = 1.0f;
+//}
+//
+//
+//    if (poss == 1.0f) {
+//        pixel.g = 1.0f;
+//    }
+//    if (poss.y > 1) {
+//        pixel.g = 1.0f;
+//    }
+//    if (poss.z > 1) {
+//        pixel.b = 1.0f;
+//    }
