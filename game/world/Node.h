@@ -23,7 +23,6 @@ struct Node {
     alignas(16) glm::vec4 color;
     int halfSize;
     int sub;
-    int leaf;
 };
 
 

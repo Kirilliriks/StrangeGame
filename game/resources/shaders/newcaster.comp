@@ -9,7 +9,6 @@ struct Node {
     vec4 color;
     int halfSize;
     int sub;
-    bool leaf;
 };
 
 uniform Check {
@@ -59,7 +58,7 @@ void findVoxel(in ivec3 voxelPos, inout HitPoint result) {
     while(index != -1) {
         const Node currentNode = nodes[index];
         if (currentNode.sub == -1) {
-            if (currentNode.leaf) {
+            if (currentNode.color.a != -1.0f) {
                 result.hit = true;
                 result.color = currentNode.color.rgb;
                 return;

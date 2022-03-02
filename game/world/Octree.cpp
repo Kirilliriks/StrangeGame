@@ -60,7 +60,7 @@ Node Octree::getNode(const glm::ivec3& vec) {
         std::cout << "Y " << currentNode.position.y << std::endl;
         std::cout << "Z " << currentNode.position.z << std::endl;
         if (currentNode.isEmpty()) {
-            if (currentNode.leaf) {
+            if (currentNode.color.a != -1.0f) {
                 std::cout << "!!!!!!!!!!!!!!!!" << std::endl;
                 return currentNode;
             }
