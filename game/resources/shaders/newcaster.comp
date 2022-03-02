@@ -11,10 +11,6 @@ struct Node {
     int sub;
 };
 
-uniform Check {
-    vec4 position;
-};
-
 layout(std430, binding=4) readonly buffer Octree_data {
     Node nodes[];
 };
@@ -52,33 +48,29 @@ int getSubIndex(in ivec3 vec, in ivec4 pos, in int halfSize) {
     return subIndex;
 }
 
-void findVoxel(in ivec3 voxelPos, inout HitPoint result) {
+bool findVoxel(in ivec3 voxelPos, inout HitPoint result) {
     int index = 0;
-    int iter = 0;
     while(index != -1) {
         const Node currentNode = nodes[index];
         if (currentNode.sub == -1) {
             if (currentNode.color.a != -1.0f) {
                 result.hit = true;
                 result.color = currentNode.color.rgb;
-                return;
+                return true;
             }
-            return;
+            return true;
         }
 
         const int subIndex = getSubIndex(voxelPos, currentNode.position, currentNode.halfSize);
-        if (subIndex < 0) return;
+        if (subIndex < 0) return false;
 
         index = currentNode.sub + subIndex;
-        iter++;
     }
+    return false;
 }
 
 void castRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
     result.hit = false;
-
-    const int worldSize = nodes[0].halfSize * 2;
-    const int powWorldSize = worldSize * worldSize;
 
     const vec3 rayStepSize = abs(1.0f / rayDirection);
     vec3 rayLenght;
@@ -132,7 +124,16 @@ void castRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
             }
         }
 
-        findVoxel(voxelPos, result);
+        if (!findVoxel(voxelPos, result)) {
+            break;
+        }
+
+        if (result.hit) {
+            break;
+        }
+    }
+}
+// DEBUG TOOL
 //        if (voxelPos.x == 1 && voxelPos.y == 0 && voxelPos.z == 0) {
 //            result.hit = true;
 //            result.color.r = 1.0f;
@@ -143,12 +144,6 @@ void castRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
 //            result.hit = true;
 //            result.color.b = 1.0f;
 //        }
-
-        if (result.hit) {
-            break;
-        }
-    }
-}
 
 
 void main() {
@@ -172,12 +167,7 @@ void main() {
     HitPoint result;
     castRay(ray, maxDist, result);
 
-    vec3 pixel = vec3(0, 0, 0);
-    if (result.hit) {
-        pixel = result.color;
-    }
-
-    imageStore(img_output, pixel_coord, vec4(pixel, 1.0));
+    imageStore(img_output, pixel_coord, vec4(result.color, 1.0));
 }
 
 

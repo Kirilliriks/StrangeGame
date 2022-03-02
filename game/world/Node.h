@@ -19,9 +19,9 @@ struct Node {
     int getSubNodeIndex(const glm::ivec3& vec);
     int getSubNodeIndex(int subIndex);
 
-    alignas(16) glm::ivec4 position;
+    alignas(16) glm::ivec4 position; // TODO remove? Если мы знаем изначальный центр дерева то по идее можем вычислить координаты вокселя
     alignas(16) glm::vec4 color;
-    int halfSize;
+    int halfSize; // TODO remove? Если мы знаем изначальный размер дерева то по идее можем вычислить размер ноды
     int sub;
 };
 
