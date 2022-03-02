@@ -10,7 +10,13 @@ Node::Node(int size, glm::ivec3 position) {
     this->position = glm::vec4(position, 0.0f);
     sub = -1;
     leaf = false;
-    color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+//    std::cout << "@HalfSize " << halfSize << std::endl;
+//    std::cout << "X " << position.x << std::endl;
+//    std::cout << "Y " << position.y << std::endl;
+//    std::cout << "Z " << position.z << std::endl;
+//    std::cout << "@@@@ " << halfSize << std::endl;
 }
 
 bool Node::isEmpty() {
@@ -47,9 +53,10 @@ int Node::getSubIndex(const glm::ivec3& vec) {
     return subIndex;
 }
 
-void Node::setColor(glm::vec4 color) {
+void Node::setVoxel(glm::vec4 color) {
+
     leaf = true;
-    this->color = glm::vec4(0.0f, 1.0f, 0.0, 1.0f);
+    this->color = color;
 }
 
 int Node::getSubNodeIndex(const glm::ivec3& vec) {

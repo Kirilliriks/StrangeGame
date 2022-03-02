@@ -16,6 +16,8 @@ public:
 
     Node *getData();
     int nodesCount();
+
+    Node getNode(const glm::ivec3& vec);
 private:
     void setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 color);
 

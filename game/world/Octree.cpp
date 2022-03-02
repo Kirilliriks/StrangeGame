@@ -10,7 +10,7 @@ Octree::Octree() {
     maxDepth = 6;
     size = 1 << maxDepth; // std::pow(2, maxDepth);
 
-    nodes.emplace_back(8, glm::ivec3(0, 0, 0));
+    nodes.emplace_back(size, glm::ivec3(0, 0, 0));
 }
 
 int Octree::getSize() {
@@ -25,7 +25,8 @@ void Octree::setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 col
     Node currentNode = nodes.at(index);
 
     if (depth == maxDepth) {
-        currentNode.setColor(color);
+        currentNode.setVoxel(color);
+        nodes[index] = currentNode;
         return;
     }
 
@@ -46,6 +47,34 @@ Node *Octree::getData() {
 
 int Octree::nodesCount() {
     return nodes.size();
+}
+
+//TODO сделать рабочий алгоритм!
+Node Octree::getNode(const glm::ivec3& vec) {
+    int index = 0;
+    while(index != -1) {
+        Node currentNode = nodes[index];
+
+        std::cout << "HalfSize " << currentNode.halfSize << std::endl;
+        std::cout << "X " << currentNode.position.x << std::endl;
+        std::cout << "Y " << currentNode.position.y << std::endl;
+        std::cout << "Z " << currentNode.position.z << std::endl;
+        if (currentNode.isEmpty()) {
+            if (currentNode.leaf) {
+                std::cout << "!!!!!!!!!!!!!!!!" << std::endl;
+                return currentNode;
+            }
+            return Node(-32, glm::ivec3(0, 0, 0));
+        }
+
+        const int subIndex = currentNode.getSubIndex(vec);
+        if (subIndex < 0) {
+            return Node(-16, glm::ivec3(0, 0, 0));
+        }
+
+        index = currentNode.sub + subIndex;
+    }
+    return Node(-8, glm::ivec3(0, 0, 0));
 }
 
 

@@ -15,8 +15,8 @@ long clp2(long x) {
 }
 
 Window::Window() {
-    width = 320;
-    height = 200;
+    width = 640;
+    height = 400;
     powWidth = clp2(width);
     powHeight = clp2(height);
 
@@ -46,7 +46,7 @@ Window::Window() {
     }
 
     glfwMakeContextCurrent(glWindow);
-    glfwSwapInterval(1); // Vsync
+    glfwSwapInterval(0); // Vsync
     glfwShowWindow(glWindow);
 
     glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

@@ -61,18 +61,28 @@ void VoxelRender::createWorld() {
     std::mt19937 rng(dev());
     std::uniform_int_distribution<int> rand(-1024,1024);
     int seed = rand(rng);
-    for (int z = 0; z < worldSize / 2; z++) {
-        for (int x = 0; x < worldSize / 2; x++) {
-//            float per = glm::simplex(glm::vec3(x / 32.0f, z / 32.0f, seed));
-//            per = (per + 1) / 2;
-//            int y = (int)(per * (float)32);
-//            if (y < 0 || y >= worldSize) continue;
+    for (int z = 0; z < worldSize; z++) {
+        for (int x = 0; x < worldSize; x++) {
+            float per = glm::simplex(glm::vec3(x / 32.0f, z / 32.0f, seed));
+            per = (per + 1) / 2;
+            int y = (int)(per * (float)32);
+            if (y < 0 || y >= worldSize) continue;
 
-            //for (int i = 0; i <= y; i++) {
-                octree.setVoxel(glm::ivec3(x, 0, z), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-            //}
+            for (int i = 0; i <= y; i++) {
+                octree.setVoxel(glm::ivec3(x, i, z), glm::vec4(per, per, per, 1.0f));
+            }
         }
     }
+//    glm::ivec3 fnd(10, 10, 10);
+//    octree.setVoxel(fnd, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+//    Node findedNode = octree.getNode(fnd);
+//    if (findedNode.leaf) {
+//        std::cout << "Founded!" << std::endl;
+//    } else {
+//        std::cout << "Size " << findedNode.halfSize << std::endl;
+//    }
+//    exit(0);
+
     updateWorld();
 
     std::cout << "Generation end, nodes count: " << octree.nodesCount() << std::endl;

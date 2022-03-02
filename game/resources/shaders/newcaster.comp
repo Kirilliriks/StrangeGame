@@ -42,9 +42,9 @@ int getSubIndex(in ivec3 vec, in ivec4 pos, in int halfSize) {
     if (vec.z < pos.z) return -3;
 
     const int size = halfSize * 2;
-    if (vec.x >= pos.x + size) return -4;
-    if (vec.y >= pos.y + size) return -5;
-    if (vec.z >= pos.z + size) return -6;
+    if (vec.x > pos.x + size) return -4;
+    if (vec.y > pos.y + size) return -5;
+    if (vec.z > pos.z + size) return -6;
 
     subIndex |= vec.x >= pos.x + halfSize? 2 : 0;
     subIndex |= vec.y >= pos.y + halfSize? 4 : 0;
@@ -56,35 +56,19 @@ int getSubIndex(in ivec3 vec, in ivec4 pos, in int halfSize) {
 void findVoxel(in ivec3 voxelPos, inout HitPoint result) {
     int index = 0;
     int iter = 0;
-    const int maxSize = nodes.length();
-    while(index != -1 && index < maxSize) {
+    while(index != -1) {
         const Node currentNode = nodes[index];
         if (currentNode.sub == -1) {
-            result.hit = true;
-            result.color.r = 1.0f;
             if (currentNode.leaf) {
                 result.hit = true;
-                result.color.g = 1.0f;
+                result.color = currentNode.color.rgb;
                 return;
             }
             return;
         }
 
-        if (currentNode.leaf) {
-            result.hit = true;
-            result.color.b = 1.0f;
-            return;
-        }
-
         const int subIndex = getSubIndex(voxelPos, currentNode.position, currentNode.halfSize);
-        if (subIndex < 0) {
-            if (iter != 0) {
-                result.hit = true;
-                result.color.r = 1.0f;
-                result.color.g = 1.0f;
-            }
-            return;
-        }
+        if (subIndex < 0) return;
 
         index = currentNode.sub + subIndex;
         iter++;

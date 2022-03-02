@@ -15,7 +15,7 @@ struct Node {
     bool isEmpty();
     int getSubIndex(const glm::ivec3& vec);
     void divide(std::vector<Node> &nodes);
-    void setColor(glm::vec4 color);
+    void setVoxel(glm::vec4 color);
     int getSubNodeIndex(const glm::ivec3& vec);
     int getSubNodeIndex(int subIndex);
 
