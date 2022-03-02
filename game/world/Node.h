@@ -10,7 +10,7 @@
 #include "../utils/Color.h"
 
 struct Node {
-    Node(int size, const glm::ivec3& position);
+    Node(int size, glm::ivec3 position);
 
     bool isEmpty();
     int getSubIndex(const glm::ivec3& vec);
@@ -19,8 +19,8 @@ struct Node {
     int getSubNodeIndex(const glm::ivec3& vec);
     int getSubNodeIndex(int subIndex);
 
-    glm::ivec4 position;
-    glm::vec4 color;
+    alignas(16) glm::ivec4 position;
+    alignas(16) glm::vec4 color;
     int halfSize;
     int sub;
     int leaf;

@@ -69,7 +69,7 @@ void VoxelRender::createWorld() {
 //            if (y < 0 || y >= worldSize) continue;
 
             //for (int i = 0; i <= y; i++) {
-                //octree.setVoxel(glm::ivec3(x, 0, z), Color(1.0f, 0.0f, 0.0f));
+                octree.setVoxel(glm::ivec3(x, 0, z), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
             //}
         }
     }
