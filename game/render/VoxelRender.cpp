@@ -7,7 +7,6 @@
 #include <random>
 #include "glm/gtc/noise.hpp"
 #include "shaders/RaycastShader.h"
-#include "../utils/Color.h"
 
 VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
     this->game = game;
@@ -70,7 +69,7 @@ void VoxelRender::createWorld() {
 //            if (y < 0 || y >= worldSize) continue;
 
             //for (int i = 0; i <= y; i++) {
-                octree.setVoxel(glm::ivec3(x, 0, z), Color(1.0f, 0.0f, 0.0f));
+                //octree.setVoxel(glm::ivec3(x, 0, z), Color(1.0f, 0.0f, 0.0f));
             //}
         }
     }

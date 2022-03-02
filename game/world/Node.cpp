@@ -17,10 +17,10 @@ enum nodeIndex {
 
 Node::Node(int size, const glm::ivec3& position) {
     this->halfSize = size / 2;
-    this->position = position;
+    this->position = glm::vec4(position, 0.0f);
     sub = -1;
-    leaf = false;
-    color = Color(0.0f, 1.0f, 0.0f);
+    leaf = 0;
+    color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 }
 
 bool Node::isEmpty() {
@@ -30,7 +30,7 @@ bool Node::isEmpty() {
 void Node::divide(std::vector<Node> &nodes) {
     sub = nodes.size();
     for (int i = 0; i < 8; i++) {
-        glm::ivec3 pos = position;
+        glm::ivec3 pos = glm::ivec3(position);
 
         if ((i & 2) == 2) {
             pos.x += halfSize;
@@ -57,9 +57,9 @@ int Node::getSubIndex(const glm::ivec3& vec) {
     return subIndex;
 }
 
-void Node::setColor(Color color) {
-    leaf = true;
-    this->color = Color(1.0f, 0.0f, 0.0);
+void Node::setColor(glm::vec4 color) {
+    leaf = 1;
+    this->color = glm::vec4(0.0f, 1.0f, 0.0, 1.0f);
 }
 
 int Node::getSubNodeIndex(const glm::ivec3& vec) {

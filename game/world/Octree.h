@@ -12,12 +12,12 @@ class Octree {
 public:
     Octree();
     int getSize();
-    void setVoxel(const glm::ivec3& vec, Color color);
+    void setVoxel(const glm::ivec3& vec, glm::vec4 color);
 
     Node *getData();
     int nodesCount();
 private:
-    void setVoxel(int index, int depth, const glm::ivec3& vec, Color color);
+    void setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 color);
 
     std::vector<Node> nodes;
     int maxDepth; //

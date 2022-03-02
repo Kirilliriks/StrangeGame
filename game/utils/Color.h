@@ -10,7 +10,7 @@ class Color {
 public:
     Color();
     Color(float r, float g, float b);
-    float r, g, b;
+    float r, g, b, a;
 };
 
 
