@@ -6,18 +6,12 @@
 
 #include "game/Game.h"
 #include "game/render/Window.h"
-
-#include "glm/gtc/noise.hpp"
+#include "game/world/Octree.h"
 
 int main() {
-//    int size = 300;
-//    for (int z = 0; z < size; z++) {
-//        for (int x = 0; x < size; x++) {
-//            std::cout << "Y " << glm::perlin(glm::vec3(x, z, 0.5f)) << std::endl;
-//        }
-//    }
-//    return 0;
-
+    Octree octree;
+    octree.setVoxel(glm::ivec3(0, 0, 0), Color(1, 1, 1));
+    return 0;
     Window *window = new Window();
 
     GLFWwindow *glWindow = window->getGLWindow();
