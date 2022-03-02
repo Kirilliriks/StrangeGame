@@ -37,11 +37,6 @@ int Node::getSubIndex(glm::ivec3 vec) {
     subIndex |= vec.y > position.y ? 4 : 0;
     subIndex |= vec.z > position.z ? 1 : 0;
 
-//    std::cout << "! " << subIndex << std::endl;
-//    std::cout << vec.x << "=" << position.x << std::endl;
-//    std::cout << vec.y << "=" << position.y << std::endl;
-//    std::cout << vec.z << "=" << position.z << std::endl;
-//    std::cout << "? " << subIndex << std::endl;
     return subIndex;
 }
 
@@ -72,12 +67,6 @@ void Node::divide(std::vector<Node> &nodes) {
             pos.z -= offset;
         }
 
-//        std::cout << "Index=" << index << std::endl;
-//        std::cout << "Offset=" << offset << std::endl;
-//        std::cout << pos.x << "=" << position.x << std::endl;
-//        std::cout << pos.y << "=" << position.y << std::endl;
-//        std::cout << pos.z << "=" << position.z << std::endl;
-//        std::cout << "@@@" << std::endl;
 
         const int sizeNodes = nodes.size();
         subs[i] = sizeNodes;
