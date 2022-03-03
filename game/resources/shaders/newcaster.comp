@@ -48,12 +48,16 @@ int getSubIndex(in ivec3 vec, in ivec4 pos, in int halfSize) {
     return subIndex;
 }
 
+bool nodeIsLeaf(in Node node) {
+    return node.color.a != -1.0f;
+}
+
 bool findVoxel(in ivec3 voxelPos, inout HitPoint result) {
     int index = 0;
     while(index != -1) {
         const Node currentNode = nodes[index];
         if (currentNode.sub == -1) {
-            if (currentNode.color.a != -1.0f) {
+            if (nodeIsLeaf(currentNode)) {
                 result.hit = true;
                 result.color = currentNode.color.rgb;
                 return true;
@@ -133,18 +137,6 @@ void castRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
         }
     }
 }
-// DEBUG TOOL
-//        if (voxelPos.x == 1 && voxelPos.y == 0 && voxelPos.z == 0) {
-//            result.hit = true;
-//            result.color.r = 1.0f;
-//        } else if (voxelPos.x == 0 && voxelPos.y == 1 && voxelPos.z == 0) {
-//            result.hit = true;
-//            result.color.g = 1.0f;
-//        } else if (voxelPos.x == 0 && voxelPos.y == 0 && voxelPos.z == 1) {
-//            result.hit = true;
-//            result.color.b = 1.0f;
-//        }
-
 
 void main() {
     const ivec2 pixel_coord = ivec2(gl_GlobalInvocationID.xy);
@@ -170,31 +162,14 @@ void main() {
     imageStore(img_output, pixel_coord, vec4(result.color, 1.0));
 }
 
-
-//    int halfS = nodes[1].halfSize;
-//   bool leaf = nodes[1].leaf;
-////    int leaf = nodes[0].leaf;
-//    //if (leaf == 22) {
-//    //if (nodes.length() == 1)
-//        //pixel.r = 1.0f;
-//    //}
-////    if (nodes[0].color.y != 0) {
-////        pixel.r = 1.0f;
-////    }
-//    if (leaf) {
-//        pixel.r = 1.0f;
-//    }
-//if (halfS == 2) {
-//    pixel.r = 1.0f;
-//}
-//
-//
-//    if (poss == 1.0f) {
-//        pixel.g = 1.0f;
-//    }
-//    if (poss.y > 1) {
-//        pixel.g = 1.0f;
-//    }
-//    if (poss.z > 1) {
-//        pixel.b = 1.0f;
-//    }
+// DEBUG TOOL
+//        if (voxelPos.x == 1 && voxelPos.y == 0 && voxelPos.z == 0) {
+//            result.hit = true;
+//            result.color.r = 1.0f;
+//        } else if (voxelPos.x == 0 && voxelPos.y == 1 && voxelPos.z == 0) {
+//            result.hit = true;
+//            result.color.g = 1.0f;
+//        } else if (voxelPos.x == 0 && voxelPos.y == 0 && voxelPos.z == 1) {
+//            result.hit = true;
+//            result.color.b = 1.0f;
+//        }

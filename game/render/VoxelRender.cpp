@@ -73,15 +73,6 @@ void VoxelRender::createWorld() {
             }
         }
     }
-//    glm::ivec3 fnd(10, 10, 10);
-//    octree.setVoxel(fnd, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-//    Node findedNode = octree.getNode(fnd);
-//    if (findedNode.leaf) {
-//        std::cout << "Founded!" << std::endl;
-//    } else {
-//        std::cout << "Size " << findedNode.halfSize << std::endl;
-//    }
-//    exit(0);
 
     updateWorld();
 
@@ -110,8 +101,6 @@ GLuint VoxelRender::genTexture() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, window->width, window->height, 0, GL_RGBA, GL_FLOAT, nullptr);
 
-    // Because we're also using this tex as an image (in order to write to it),
-    // we bind it to an image unit as well
     glBindImageTexture(0, texHandle, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
     std::cout << "DONE" << std::endl;
     return texHandle;

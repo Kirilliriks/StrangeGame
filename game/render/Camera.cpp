@@ -16,7 +16,7 @@ Camera::Camera(Window *window) {
     direction = glm::vec3(0, 0, -1);
     yaw = 7.0f;
     pitch = 0.0f;
-    position = glm::vec3(-1.5, 3, -1.5);
+    position = glm::vec3(1.5, 3, 1.5);
 }
 
 void Camera::update(double deltaTime, float mouseX, float mouseY) {
@@ -104,7 +104,7 @@ glm::vec3 Camera::getDirection() {
     const float sinAngY = std::sin(-pitch);
     const float cosAngY = std::cos(-pitch);
 
-    glm::vec3 dir(0,
+    const glm::vec3 dir(0,
                   -1 * sinAngY,
                   -1 * cosAngY);
 
