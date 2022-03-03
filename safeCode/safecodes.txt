@@ -1,0 +1,19 @@
+
+// Простой и удобный способ получить rayLength для любого размера ноды
+    if (rayDirection.x < 0) {
+        rayLength.x = start_position.x * rayStepSize.x;
+    } else {
+        rayLength.x = (nodeSize - start_position.x) * rayStepSize.x;
+    }
+
+    if (rayDirection.y < 0) {
+        rayLength.y = start_position.y * rayStepSize.y;
+    } else {
+        rayLength.y = (nodeSize - start_position.y) * rayStepSize.y;
+    }
+
+    if (rayDirection.z < 0) {
+        rayLength.z = start_pos.z * rayStepSize.z;
+    } else {
+        rayLength.z = (nodeSize - start_position.z) * rayStepSize.z;
+    }
