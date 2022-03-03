@@ -76,7 +76,10 @@ bool findVoxel(in ivec3 voxelPos, inout HitPoint result) {
 void castRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
     result.hit = false;
 
+    // ВЫЧИСЛЯЕТСЯ РАССТОЯНИЕ ДО СЛЕДУЮЩЕГО ПЕРЕСЕЧЕНИЯ ПО ОСИ ЕСЛИ 0.1 = 
+    // угол по X то 1 / 0.1 = 10 значит через расстояние = 10 луч пересечётся с осью Y
     const vec3 rayStepSize = abs(1.0f / rayDirection);
+
     vec3 rayLenght;
     ivec3 voxelPos = ivec3(start_position);
     ivec3 step;
@@ -107,7 +110,6 @@ void castRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
         rayLenght.z = (float(voxelPos.z + 1) - start_position.z) * rayStepSize.z;
     }
 
-    int index = 0;
     while(result.distance < maxDistance) {
         if (rayLenght.x < rayLenght.y) {
             if (rayLenght.x < rayLenght.z) {
@@ -130,24 +132,6 @@ void castRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
                 rayLenght.z += rayStepSize.z;
             }
         }
-
-//        const Node currentNode = nodes[index];
-//
-//        // If sub == -1 node can be voxel
-//        if (currentNode.sub == -1) {
-//            if (nodeIsLeaf(currentNode)) { // Node is voxel
-//                result.hit = true;
-//                result.color = currentNode.color.rgb;
-//                return;
-//            } else { // Node is empty
-//
-//            }
-//        }
-//
-//        const int subIndex = getSubIndex(voxelPos, currentNode.position, currentNode.halfSize);
-//        if (subIndex < 0) return;
-//
-//        index = currentNode.sub + subIndex;
 
         if (!findVoxel(voxelPos, result)) {
             break;
