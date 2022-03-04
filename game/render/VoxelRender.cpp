@@ -7,6 +7,7 @@
 #include <random>
 #include "glm/gtc/noise.hpp"
 #include "shaders/RaycastShader.h"
+#include "imgui.h"
 
 VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
     this->game = game;

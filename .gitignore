@@ -1,5 +1,5 @@
 # Project exclude paths
 /cmake-build-debug/
-!/glfw/
-!/glm/
-!/imgui/
+/glfw/
+/glm/
+/imgui/

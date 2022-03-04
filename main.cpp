@@ -30,6 +30,9 @@ int main() {
         glColor4f(0, 0, 0, 0);
 
         game->update(deltaTime);
+        ImGui::Begin("Hello");
+        ImGui::Text("Hello, world %d", 123);
+        ImGui::End();
         ImGui::Render();
         game->render(deltaTime);
 
