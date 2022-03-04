@@ -9,19 +9,9 @@
 
 #include <iostream>
 
-long clp2(long x) {
-    long p2=1;
-    for(;;) {
-        if (p2>=x) return p2;
-        p2<<=1;
-    }
-}
-
 Window::Window() {
     width = 320;
     height = 200;
-    powWidth = clp2(width);
-    powHeight = clp2(height);
 
     if(!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;

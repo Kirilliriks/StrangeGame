@@ -14,7 +14,6 @@ public:
     GLFWwindow *getGLWindow();
 
     int width, height;
-    int powWidth, powHeight;
 private:
     GLFWwindow *glWindow;
 };
