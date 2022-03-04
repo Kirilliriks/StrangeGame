@@ -2,3 +2,4 @@
 /cmake-build-debug/
 !/glfw/
 !/glm/
+!/imgui/
