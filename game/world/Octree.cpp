@@ -33,10 +33,9 @@ void Octree::setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 col
 
     if (currentNode.isEmpty()) {
         currentNode.divide(nodes);
-        depth++;
-
         nodes[index] = currentNode;
     }
+    depth++;
 
     const int nextIndex = currentNode.getSubNodeIndex(vec);
     setVoxel(nextIndex, depth, vec, color);
@@ -290,16 +289,15 @@ glm::ivec3 Octree::castNode(const glm::vec3& rayDirection, const glm::vec3& star
 
     // ВЫЧИСЛЯЕТСЯ РАССТОЯНИЕ ДО СЛЕДУЮЩЕГО ПЕРЕСЕЧЕНИЯ ПО ОСИ ЕСЛИ 0.1 =
     // угол по X то 1 / 0.1 = 10 значит через расстояние = 10 луч пересечётся с осью X
-    const int maxDp = 6; //
     const glm::vec3 rayStep = glm::abs((1.0f / rayDirection));
     const glm::ivec3 step = glm::ivec3(glm::sign(rayDirection));
 
     glm::vec3 rayLength;
     glm::ivec3 voxelPos = glm::ivec3(start_position);
 
-    Layer layers[maxDp + 1];
+    Layer layers[maxDepth + 1];
 
-    int currentDepth = maxDp;
+    int currentDepth = maxDepth;
 
     int index = 0;
     Layer currentLayer;
@@ -318,6 +316,9 @@ glm::ivec3 Octree::castNode(const glm::vec3& rayDirection, const glm::vec3& star
 
         if (currentNode.sub != -1) { // Node have subNodes
             voxelPos = glm::ivec3(start_position + rayDirection * result.distance); // Calculate current voxelPosition
+            result.debugPos.x = 15;
+            result.debugPos.y = 15;
+            result.debugPos.z = 15;
 
             const int subIndex = getSubIndex(voxelPos, currentNode);
             if (subIndex < 0) return glm::ivec3(-1, -1, -1); // EXIT, or maybe check error?
@@ -335,9 +336,9 @@ glm::ivec3 Octree::castNode(const glm::vec3& rayDirection, const glm::vec3& star
             if (currentNode.color.a != -1.0f) { //Node is voxel
 //                result.hit = true;
 //                result.color = currentNode.color.rgb;
-                result.debugPos.x = 15;
-                result.debugPos.y = 15;
-                result.debugPos.z = 15;
+                result.debugPos.x = -2;
+                result.debugPos.y = -2;
+                result.debugPos.z = -2;
                 return result.debugPos;
             } else { // Find next node
                 if (first) { // If first iter calculate first nearest intersect pos
@@ -356,7 +357,7 @@ glm::ivec3 Octree::castNode(const glm::vec3& rayDirection, const glm::vec3& star
         }
     }
 
-    return glm::ivec3(-1, -1, -1);;
+    return result.debugPos;
 }
 
 

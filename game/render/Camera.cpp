@@ -108,9 +108,3 @@ glm::vec3 Camera::getDirection() {
     glm::mat4 ry = glm::rotate(rota, glm::degrees(pitch), glm::vec3(1.0f, 0.0f, 0.0f));
     return glm::vec3(rx * ry * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 }
-
-/*
-              glm::normalize(glm::vec3(glm::cos(yaw) * glm::cos(pitch),
-                                       glm::sin(pitch),
-                                       glm::sin(yaw) * glm::cos(pitch)));
- */
