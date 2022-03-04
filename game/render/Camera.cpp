@@ -13,9 +13,9 @@
 Camera::Camera(Window *window) {
     this->window = window;
 
-    direction = glm::vec3(0, 0, -1);
-    yaw = 7.0f;
-    pitch = 0.0f;
+    direction = glm::vec3(0, 0, 1);
+    yaw = 0;
+    pitch = 0;
     position = glm::vec3(1.5, 3, 1.5);
 }
 
@@ -27,10 +27,12 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
     title.append(std::to_string(position.y));
     title.append(" Z ");
     title.append(std::to_string(position.z));
-    title.append(" YAW ");
-    title.append(std::to_string(glm::degrees(yaw)));
-    title.append(" PITCH ");
-    title.append(std::to_string(glm::degrees(pitch)));
+    title.append(" DirX ");
+    title.append(std::to_string(direction.x));
+    title.append(" DirY ");
+    title.append(std::to_string(direction.y));
+    title.append(" DirZ ");
+    title.append(std::to_string(direction.z));
     glfwSetWindowTitle(window->getGLWindow(), title.c_str());
     glm::vec3 movement = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -40,22 +42,22 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
     GLFWwindow * glWindow = window->getGLWindow();
     int state = glfwGetKey(glWindow, GLFW_KEY_W);
     if (state == GLFW_PRESS) {
-        movement = -speed * movementVector;
+        movement = speed * movementVector;
     }
 
     state = glfwGetKey(glWindow, GLFW_KEY_S);
     if (state == GLFW_PRESS) {
-        movement = speed * movementVector;
+        movement = -speed * movementVector;
     }
 
     state = glfwGetKey(glWindow, GLFW_KEY_A);
     if (state == GLFW_PRESS) {
-        movement = speed * glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), direction));
+        movement = speed * glm::normalize(glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f)));
     }
 
     state = glfwGetKey(glWindow, GLFW_KEY_D);
     if (state == GLFW_PRESS) {
-        movement = speed * glm::normalize(glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f)));
+        movement = speed * glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), direction));
     }
 
     state = glfwGetKey(glWindow, GLFW_KEY_SPACE);
@@ -71,9 +73,7 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
     position += glm::vec3(movement.x * deltaTime, movement.y * deltaTime, movement.z * deltaTime);
 
     yaw = (mouseX - (float)window->width / 2.0f) * 0.005f;
-    float lastPitch = pitch;
     pitch = (mouseY - (float)window->height / 2.0f) * 0.005f;
-    if (glm::degrees(pitch) > 90 || glm::degrees(pitch) < -90) pitch = 89;
 
     direction = getDirection();
 }
@@ -98,17 +98,19 @@ float Camera::getZ() {
     return position.z;
 }
 
-glm::vec3 Camera::getDirection() {
-    const float sinAng = std::sin(-yaw);
-    const float cosAng = std::cos(-yaw);
-    const float sinAngY = std::sin(-pitch);
-    const float cosAngY = std::cos(-pitch);
-
-    const glm::vec3 dir(0,
-                  -1 * sinAngY,
-                  -1 * cosAngY);
-
-    return glm::vec3(dir.x * cosAng - dir.z * sinAng,
-                     dir.y,
-                     dir.x * sinAng + dir.z * cosAng);
+glm::vec3 Camera::getPosition() {
+    return position;
 }
+
+glm::vec3 Camera::getDirection() {
+    glm::mat4 rota(1.0f);
+    glm::mat4 rx = glm::rotate(rota, glm::degrees(yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 ry = glm::rotate(rota, glm::degrees(pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+    return glm::vec3(rx * ry * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+}
+
+/*
+              glm::normalize(glm::vec3(glm::cos(yaw) * glm::cos(pitch),
+                                       glm::sin(pitch),
+                                       glm::sin(yaw) * glm::cos(pitch)));
+ */

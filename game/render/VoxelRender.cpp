@@ -47,6 +47,9 @@ void VoxelRender::render(double deltaTime) {
     glUniform2f(3, camera.getYaw(), camera.getPitch());
     glUniform2f(4, (float)window->width, (float)window->height);
 
+    const glm::ivec3 vec = octree.debugCast(camera.getDirection(), camera.getPosition(), 500);
+    glUniform3i(5, vec.x, vec.y, vec.z);
+
     glDispatchCompute((GLuint)(window->width), (GLuint)(window->height), 1);
 
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);

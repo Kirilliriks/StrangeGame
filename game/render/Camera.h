@@ -21,6 +21,7 @@ public:
     float getY();
     float getZ();
 
+    glm::vec3 getPosition();
     glm::vec3 getDirection();
 private:
     Window *window;
