@@ -1,19 +1,24 @@
+// С помощью вычисления subIndexVector и прибавлении к нему степов можно вычислить выходим ли мы за рамки ноды
 
-// Простой и удобный способ получить rayLength для любого размера ноды
+// =) вроде теперь норм
+    const ivec3 node_pos = currentNode.position.xyz;
+    const int halfSize = currentNode.halfSize;
+    const int nodeSize = halfSize * 2;
+
     if (rayDirection.x < 0) {
-        rayLength.x = start_position.x * rayStepSize.x;
+       rayLength.x = (start_position.x - float(node_pos.x - halfSize)) * rayStepSize.x;
     } else {
-        rayLength.x = (nodeSize - start_position.x) * rayStepSize.x;
+       rayLength.x = (float(node_pos.x + halfSize) - start_position.x) * rayStepSize.x;
     }
 
     if (rayDirection.y < 0) {
-        rayLength.y = start_position.y * rayStepSize.y;
+       rayLength.y = (start_position.y - float(node_pos.y - halfSize)) * rayStepSize.y;
     } else {
-        rayLength.y = (nodeSize - start_position.y) * rayStepSize.y;
+       rayLength.y = (float(node_pos.y + halfSize) - start_position.y) * rayStepSize.y;
     }
 
     if (rayDirection.z < 0) {
-        rayLength.z = start_pos.z * rayStepSize.z;
+       rayLength.z = (start_position.z - float(node_pos.z - halfSize)) * rayStepSize.z;
     } else {
-        rayLength.z = (nodeSize - start_position.z) * rayStepSize.z;
+       rayLength.z = (float(node_pos.z + halfSize) - start_position.z) * rayStepSize.z;
     }

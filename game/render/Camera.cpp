@@ -73,7 +73,7 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
     yaw = (mouseX - (float)window->width / 2.0f) * 0.005f;
     float lastPitch = pitch;
     pitch = (mouseY - (float)window->height / 2.0f) * 0.005f;
-    if (glm::degrees(pitch) > 90 || glm::degrees(pitch) < -90) pitch = lastPitch;
+    if (glm::degrees(pitch) > 90 || glm::degrees(pitch) < -90) pitch = 89;
 
     direction = getDirection();
 }

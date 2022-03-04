@@ -36,7 +36,7 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
 
     genTexture(); // WINDOW TEXTURE
 
-    rayShader = new RaycastShader(R"(D:\StrangeGame\game\resources\shaders\newcaster.comp)");
+    rayShader = new RaycastShader(R"(D:\StrangeGame\game\resources\shaders\newnewcaster.comp)");
     raycastShaderID = rayShader->getHandle();
 }
 
@@ -61,8 +61,8 @@ void VoxelRender::createWorld() {
     std::mt19937 rng(dev());
     std::uniform_int_distribution<int> rand(-1024,1024);
     int seed = rand(rng);
-    for (int z = 0; z < worldSize; z++) {
-        for (int x = 0; x < worldSize; x++) {
+    for (int z = 0; z <= worldSize; z++) {
+        for (int x = 0; x <= worldSize; x++) {
             float per = glm::simplex(glm::vec3(x / 32.0f, z / 32.0f, seed));
             per = (per + 1) / 2;
             int y = (int)(per * (float)32);
@@ -73,6 +73,7 @@ void VoxelRender::createWorld() {
             }
         }
     }
+    octree.setVoxel(glm::ivec3(0, 0, 0), glm::vec4(1.0f, 0, 0, 1.0f));
 
     updateWorld();
 

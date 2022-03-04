@@ -15,8 +15,8 @@ long clp2(long x) {
 }
 
 Window::Window() {
-    width = 640;
-    height = 400;
+    width = 320;
+    height = 200;
     powWidth = clp2(width);
     powHeight = clp2(height);
 

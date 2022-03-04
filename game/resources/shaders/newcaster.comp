@@ -82,31 +82,25 @@ void castRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
 
     vec3 rayLenght;
     ivec3 voxelPos = ivec3(start_position);
-    ivec3 step;
+    ivec3 step = ivec3(sign(rayDirection));
 
     int nodeSize = nodes[0].halfSize * 2;
 
     if (rayDirection.x < 0) {
-        step.x = -1;
         rayLenght.x = (start_position.x - float(voxelPos.x)) * rayStepSize.x;
     } else {
-        step.x = 1;
         rayLenght.x = (float(voxelPos.x + 1) - start_position.x) * rayStepSize.x;
     }
 
     if (rayDirection.y < 0) {
-        step.y = -1;
         rayLenght.y = (start_position.y - float(voxelPos.y)) * rayStepSize.y;
     } else {
-        step.y = 1;
         rayLenght.y = (float(voxelPos.y + 1) - start_position.y) * rayStepSize.y;
     }
 
     if (rayDirection.z < 0) {
-        step.z = -1;
         rayLenght.z = (start_position.z - float(voxelPos.z)) * rayStepSize.z;
     } else {
-        step.z = 1;
         rayLenght.z = (float(voxelPos.z + 1) - start_position.z) * rayStepSize.z;
     }
 
