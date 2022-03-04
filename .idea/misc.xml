@@ -5,6 +5,7 @@
     <libraryRoots>
       <file path="$PROJECT_DIR$/glfw" />
       <file path="$PROJECT_DIR$/glm" />
+      <file path="$PROJECT_DIR$/imgui" />
     </libraryRoots>
   </component>
 </project>

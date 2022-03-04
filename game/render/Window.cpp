@@ -3,6 +3,9 @@
 //
 
 #include "Window.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 #include <iostream>
 
@@ -56,6 +59,14 @@ Window::Window() {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return;
     }
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(glWindow, true);
+    ImGui_ImplOpenGL3_Init("#version 430");
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_DOUBLEBUFFER);

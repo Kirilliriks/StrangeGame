@@ -303,10 +303,6 @@ void castRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
 
         if (currentNode.sub != -1) { // Node have subNodes
             voxelPos = ivec3(start_position + rayDirection * result.distance); // Calculate current voxelPosition
-            result.debug = true;
-            result.debugPos.x = voxelPos.x;
-            result.debugPos.y = voxelPos.y;
-            result.debugPos.z = voxelPos.z;
 
             const int subIndex = getSubIndex(voxelPos, currentNode);
             if (subIndex < 0) return; // EXIT, or maybe check error?
@@ -322,8 +318,8 @@ void castRay(in vec3 rayDirection, in float maxDistance, out HitPoint result) {
             continue;
         } else { // Node can be voxel or be empty
             if (nodeIsLeaf(currentNode)) { //Node is voxel
-//                result.hit = true;
-//                result.color = currentNode.color.rgb;
+                result.hit = true;
+                result.color = currentNode.color.rgb;
                 return;
             } else { // Find next node
                 if (first) { // If first iter calculate first nearest intersect pos

@@ -17,3 +17,10 @@ add_executable(StrangeGame ${SOURCE_FILES})
 
 target_link_libraries(StrangeGame glfw ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
 target_link_libraries(StrangeGame Game)
+
+set(IMGUI_PATH  "imgui/")
+file(GLOB IMGUI_SOURCES ${IMGUI_PATH}/*.cpp ${IMGUI_PATH}/*.h)
+add_library("ImGui" STATIC ${IMGUI_SOURCES})
+target_include_directories("ImGui" PUBLIC ${IMGUI_PATH})
+target_link_libraries(StrangeGame ImGui)
+

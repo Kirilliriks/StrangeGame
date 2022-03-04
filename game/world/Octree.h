@@ -19,7 +19,6 @@ public:
 
     glm::ivec3 castNode(const glm::vec3& rayDirection, const glm::vec3& start_position);
     glm::ivec3 debugCast(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance);
-    Node getNode(const glm::ivec3& vec);
 private:
     void setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 color);
 

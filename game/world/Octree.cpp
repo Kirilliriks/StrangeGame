@@ -25,11 +25,11 @@ void Octree::setVoxel(const glm::ivec3& vec, glm::vec4 color) {
 void Octree::setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 color) {
     Node currentNode = nodes.at(index);
 
-    if (depth == maxDepth) {
+    if (depth == maxDepth) { // If in voxel depth
         currentNode.setVoxel(color);
         nodes[index] = currentNode;
         return;
-    }
+    } // else go deeper, AND INCREMENT DEPTH!!!
 
     if (currentNode.isEmpty()) {
         currentNode.divide(nodes);
@@ -48,30 +48,6 @@ Node *Octree::getData() {
 int Octree::nodesCount() {
     return nodes.size();
 }
-
-//TODO сделать рабочий алгоритм!
-Node Octree::getNode(const glm::ivec3& vec) {
-    int index = 0;
-    while(index != -1) {
-        Node currentNode = nodes[index];
-
-        if (currentNode.isEmpty()) {
-            if (currentNode.color.a != -1.0f) {
-                return currentNode;
-            }
-            return Node(-32, glm::ivec3(0, 0, 0));
-        }
-
-        const int subIndex = currentNode.getSubIndex(vec);
-        if (subIndex < 0) {
-            return Node(-16, glm::ivec3(0, 0, 0));
-        }
-
-        index = currentNode.sub + subIndex;
-    }
-    return Node(-8, glm::ivec3(0, 0, 0));
-}
-
 
 struct Layer {
     int nodeIndex;
@@ -316,9 +292,6 @@ glm::ivec3 Octree::castNode(const glm::vec3& rayDirection, const glm::vec3& star
 
         if (currentNode.sub != -1) { // Node have subNodes
             voxelPos = glm::ivec3(start_position + rayDirection * result.distance); // Calculate current voxelPosition
-            result.debugPos.x = 15;
-            result.debugPos.y = 15;
-            result.debugPos.z = 15;
 
             const int subIndex = getSubIndex(voxelPos, currentNode);
             if (subIndex < 0) return glm::ivec3(-1, -1, -1); // EXIT, or maybe check error?
@@ -334,16 +307,18 @@ glm::ivec3 Octree::castNode(const glm::vec3& rayDirection, const glm::vec3& star
             continue;
         } else { // Node can be voxel or be empty
             if (currentNode.color.a != -1.0f) { //Node is voxel
-//                result.hit = true;
-//                result.color = currentNode.color.rgb;
-                result.debugPos.x = -2;
-                result.debugPos.y = -2;
-                result.debugPos.z = -2;
-                return result.debugPos;
+                //result.debugPos = glm::ivec3(currentNode.position);
+                return glm::ivec3(1, 40, 1);//result.debugPos;
             } else { // Find next node
                 if (first) { // If first iter calculate first nearest intersect pos
                     first = false;
+                    float dist = result.distance;
                     calculate_rayLength(currentNode, start_position, rayDirection, rayStep, rayLength, result);
+                    if (dist != result.distance) {
+                        //exit(0);
+                    }
+                    voxelPos = glm::ivec3(start_position + rayDirection * result.distance);
+                    result.debugPos = voxelPos;
                     continue;
                 }
 
@@ -357,7 +332,7 @@ glm::ivec3 Octree::castNode(const glm::vec3& rayDirection, const glm::vec3& star
         }
     }
 
-    return result.debugPos;
+    return glm::ivec3(-1, -1, -1);
 }
 
 

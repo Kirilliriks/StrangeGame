@@ -6,6 +6,8 @@
 
 #include "game/Game.h"
 #include "game/render/Window.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_glfw.h"
 
 int main() {
     Window *window = new Window();
@@ -16,6 +18,10 @@ int main() {
     double deltaTime;
     double lastFrame = 0;
     while(glfwWindowShouldClose(glWindow) == GL_FALSE) {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
         const double currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -24,11 +30,16 @@ int main() {
         glColor4f(0, 0, 0, 0);
 
         game->update(deltaTime);
+        ImGui::Render();
         game->render(deltaTime);
 
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(glWindow);
         glfwPollEvents();
     }
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwDestroyWindow(glWindow);
     glfwTerminate();
