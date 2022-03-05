@@ -22,3 +22,14 @@
     } else {
        rayLength.z = (float(node_pos.z + halfSize) - start_position.z) * rayStepSize.z;
     }
+
+// VERY FAST DDA
+    rayLength = (step * (voxelPos - start_position) + (step * 0.5f) + 0.5f) * rayStepSize;
+
+    bvec3 mask;
+    int iter = 0;
+    while(iter++ < 200) {
+        mask = lessThanEqual(rayLength.xyz, min(rayLength.yzx, rayLength.zxy));
+        rayLength += vec3(mask) * rayStepSize;
+        voxelPos += ivec3(vec3(mask)) * step;
+    }
