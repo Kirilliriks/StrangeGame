@@ -42,6 +42,7 @@ private:
     Octree octree;
 
     RaycastShader *rayShader;
+    Octree::DebugCast debugCast;
     glm::ivec3 frontVoxel;
 };
 

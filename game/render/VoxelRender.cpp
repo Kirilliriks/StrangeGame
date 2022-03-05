@@ -42,7 +42,8 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
 }
 
 void VoxelRender::update(double deltaTime) {
-    frontVoxel = octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500.0f);
+    debugCast = octree.castNode(camera.getDirection(), camera.getPosition());
+    frontVoxel = debugCast.voxelPos;
 }
 
 void VoxelRender::render(double deltaTime) {
@@ -53,6 +54,11 @@ void VoxelRender::render(double deltaTime) {
     glUniform2f(4, (float)window->width, (float)window->height);
 
     glUniform3i(5, frontVoxel.x, frontVoxel.y, frontVoxel.z);
+    glUniform3i(6, debugCast.nodePos.x, debugCast.nodePos.y, debugCast.nodePos.z);
+    glUniform1i(7, debugCast.nodeSize);
+    glUniform3i(8, debugCast.initPos.x, debugCast.initPos.y, debugCast.initPos.z);
+    glUniform3i(9, debugCast.nextNodePos.x, debugCast.nextNodePos.y, debugCast.nextNodePos.z);
+    glUniform3i(10, 56, 40, 56);
 
     glDispatchCompute((GLuint)(window->width), (GLuint)(window->height), 1);
 
@@ -64,10 +70,20 @@ void VoxelRender::render(double deltaTime) {
 }
 
 void VoxelRender::imgui(double deltaTime) {
+    static glm::ivec3 lastPos = glm::ivec3(0, 0, 0);
     /// TODO
     ImGui::Begin("Info window");
-    ImGui::SetWindowSize(ImVec2(200, 100));
+    ImGui::SetWindowSize(ImVec2(250, 150));
+    ImGui::Text("Cam x=%d y=%d z=%d", (int)camera.getX(), (int)camera.getY(), (int)camera.getZ());
     ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
+    if (frontVoxel.x != -1 || frontVoxel.y != -1 || frontVoxel.z != -1) {
+        lastPos = frontVoxel;
+    }
+    ImGui::Text("Last x=%d y=%d z=%d", lastPos.x, lastPos.y, lastPos.z);
+    ImGui::Text("Init x=%d y=%d z=%d", debugCast.initPos.x, debugCast.initPos.y, debugCast.initPos.z);
+    ImGui::Text("NextNode x=%d y=%d z=%d", debugCast.nextNodePos.x, debugCast.nextNodePos.y, debugCast.nextNodePos.z);
+    ImGui::Text("Distance = %f", debugCast.distance);
+    ImGui::Text("NodeSize = %d", debugCast.nodeSize);
     ImGui::End();
     ImGui::Render();
     ///

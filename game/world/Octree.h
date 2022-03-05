@@ -10,6 +10,15 @@
 
 class Octree {
 public:
+    struct DebugCast {
+        glm::ivec3 voxelPos;
+        glm::ivec3 initPos;
+        glm::ivec3 nextNodePos;
+        glm::ivec3 nodePos;
+        int nodeSize;
+        float distance;
+    };
+
     Octree();
     int getSize();
     void setVoxel(const glm::ivec3& vec, glm::vec4 color);
@@ -17,7 +26,7 @@ public:
     Node *getData();
     int nodesCount();
 
-    glm::ivec3 castNode(const glm::vec3& rayDirection, const glm::vec3& start_position);
+    DebugCast castNode(const glm::vec3& rayDirection, const glm::vec3& start_position);
     glm::ivec3 voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance);
 private:
     void setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 color);

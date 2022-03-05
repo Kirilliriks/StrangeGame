@@ -108,24 +108,24 @@ int getSubIndex(const glm::ivec3& vec, const Node& node) {
 
 void calculate_rayLength(const Node& currentNode, const glm::vec3& start_position, const glm::vec3& rayDirection, const glm::vec3& rayStepSize, glm::vec3 &rayLength, HitPoint &result) {
     const glm::ivec3 node_pos = glm::ivec3(currentNode.position);
-    const int halfSize = currentNode.halfSize;
+    const int size = currentNode.halfSize * 2 + 1;
 
     if (rayDirection.x < 0) {
-        rayLength.x = (start_position.x - float(node_pos.x - halfSize)) * rayStepSize.x;
+        rayLength.x = (start_position.x - float(node_pos.x - 1)) * rayStepSize.x;
     } else {
-        rayLength.x = (float(node_pos.x + halfSize) - start_position.x) * rayStepSize.x;
+        rayLength.x = (float(node_pos.x + size) - start_position.x) * rayStepSize.x;
     }
 
     if (rayDirection.y < 0) {
-        rayLength.y = (start_position.y - float(node_pos.y - halfSize)) * rayStepSize.y;
+        rayLength.y = (start_position.y - float(node_pos.y - 1)) * rayStepSize.y;
     } else {
-        rayLength.y = (float(node_pos.y + halfSize) - start_position.y) * rayStepSize.y;
+        rayLength.y = (float(node_pos.y + size) - start_position.y) * rayStepSize.y;
     }
 
     if (rayDirection.z < 0) {
-        rayLength.z = (start_position.z - float(node_pos.z - halfSize)) * rayStepSize.z;
+        rayLength.z = (start_position.z - float(node_pos.z - 1)) * rayStepSize.z;
     } else {
-        rayLength.z = (float(node_pos.z + halfSize) - start_position.z) * rayStepSize.z;
+        rayLength.z = (float(node_pos.z + size) - start_position.z) * rayStepSize.z;
     }
 
     if (rayLength.x < rayLength.y) {
@@ -144,16 +144,17 @@ void calculate_rayLength(const Node& currentNode, const glm::vec3& start_positio
 }
 
 bool move_next(const Layer& layer, const glm::ivec3& step, glm::vec3 &rayLength, HitPoint &result) {
+    bool out = true;
     if (rayLength.x < rayLength.y) {
         if (rayLength.x < rayLength.z) {
             const int tmp = layer.subVector.x + step.x;
-            if (tmp > 1 || tmp < 0) return false;
+            if (tmp > 1 || tmp < 0) out = false;
 
             result.distance = rayLength.x;
             rayLength.x += layer.step.x;
         } else {
             const int tmp = layer.subVector.z + step.z;
-            if (tmp > 1 || tmp < 0) return false;
+            if (tmp > 1 || tmp < 0) out = false;
 
             result.distance = rayLength.z;
             rayLength.z += layer.step.z;
@@ -161,19 +162,19 @@ bool move_next(const Layer& layer, const glm::ivec3& step, glm::vec3 &rayLength,
     } else {
         if (rayLength.y < rayLength.z) {
             const int tmp = layer.subVector.y + step.y;
-            if (tmp > 1 || tmp < 0) return false;
+            if (tmp > 1 || tmp < 0) out = false;
 
             result.distance = rayLength.y;
             rayLength.y += layer.step.y;
         } else {
             const int tmp = layer.subVector.z + step.z;
-            if (tmp > 1 || tmp < 0) return false;
+            if (tmp > 1 || tmp < 0) out = false;
 
             result.distance = rayLength.z;
             rayLength.z += layer.step.z;
         }
     }
-    return true;
+    return out;
 }
 
 int Octree::findVoxel(const glm::ivec3& voxelPos) {
@@ -257,11 +258,17 @@ glm::ivec3 Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& 
     return glm::ivec3(-1, -1, -1);
 }
 
-glm::ivec3 Octree::castNode(const glm::vec3& rayDirection, const glm::vec3& start_position) {
+Octree::DebugCast Octree::castNode(const glm::vec3& rayDirection, const glm::vec3& start_position) {
     HitPoint result;
     result.debug = false;
     result.hit = false;
     result.distance = 0.0f;
+
+    DebugCast debugCast;
+    debugCast.voxelPos = glm::ivec3(-1, -1, -1);
+    debugCast.initPos =  glm::ivec3(-1, -1, -1);
+    debugCast.nodePos =  glm::ivec3(-1, -1, -1);
+    debugCast.nodeSize = 0;
 
     // ВЫЧИСЛЯЕТСЯ РАССТОЯНИЕ ДО СЛЕДУЮЩЕГО ПЕРЕСЕЧЕНИЯ ПО ОСИ ЕСЛИ 0.1 =
     // угол по X то 1 / 0.1 = 10 значит через расстояние = 10 луч пересечётся с осью X
@@ -291,40 +298,55 @@ glm::ivec3 Octree::castNode(const glm::vec3& rayDirection, const glm::vec3& star
         currentLayer = layers[currentDepth];
 
         if (currentNode.sub != -1) { // Node have subNodes
-            voxelPos = glm::ivec3(start_position + rayDirection * result.distance); // Calculate current voxelPosition
-
             const int subIndex = getSubIndex(voxelPos, currentNode);
-            if (subIndex < 0) return glm::ivec3(-1, -1, -1); // EXIT, or maybe check error?
+            if (subIndex < 0) {
+                //debugCast.initPos = glm::ivec3(-1, -1, -1);
+                //return debugCast; // EXIT, or maybe check error?
+                currentDepth++;
+                index = layers[currentDepth].nodeIndex;
+                continue;
+            }
 
             index = currentNode.sub + subIndex;
             currentDepth--;
 
             Layer newLayer;
-            newLayer.step = glm::abs(glm::vec3(currentNode.halfSize) / rayDirection);
+            const Node newNode = nodes[index];
+            newLayer.step = glm::abs(glm::vec3(currentNode.halfSize) / rayDirection); // Use currentNode.halfsize e.t.c subnode have halfsize = halsize / 2;
             newLayer.nodeIndex = index;
-            newLayer.subVector = getSubVector(voxelPos, currentNode);
+            newLayer.subVector = getSubVector(voxelPos, newNode);
+
+            debugCast.nodeSize = currentNode.halfSize;
+            debugCast.nodePos = glm::ivec3(newNode.position);
+
             layers[currentDepth] = newLayer;
             continue;
         } else { // Node can be voxel or be empty
             if (currentNode.color.a != -1.0f) { //Node is voxel
-                //result.debugPos = glm::ivec3(currentNode.position);
-                return glm::ivec3(1, 40, 1);//result.debugPos;
+                debugCast.voxelPos = glm::ivec3(currentNode.position);
+                debugCast.distance = result.distance;
+                return debugCast;
             } else { // Find next node
-                if (first) { // If first iter calculate first nearest intersect pos
-                    first = false;
-                    float dist = result.distance;
+//                if (first) { // If first iter calculate first nearest intersect pos
+//                    first = false;
                     calculate_rayLength(currentNode, start_position, rayDirection, rayStep, rayLength, result);
-                    if (dist != result.distance) {
-                        //exit(0);
-                    }
-                    voxelPos = glm::ivec3(start_position + rayDirection * result.distance);
-                    result.debugPos = voxelPos;
-                    continue;
-                }
-
-                if(move_next(currentLayer, step, rayLength, result)) {
-                    continue;
-                }
+                    //debugCast.initPos = glm::ivec3(start_position + rayDirection * result.distance);
+                    //voxelPos = glm::ivec3(start_position + rayDirection * result.distance); // Calculate current voxelPosition
+                //} else {
+                    //bool moveNext = move_next(currentLayer, step, rayLength, result);
+                    voxelPos = glm::ivec3(start_position + rayDirection * result.distance); // Calculate current voxelPosition
+                    debugCast.initPos = voxelPos;
+//                    if (voxelPos != debugCast.initPos) {
+//                        debugCast.nextNodePos = voxelPos;
+//                        //return debugCast;
+//                    }
+//
+//                    if(!moveNext) {
+//                        currentDepth += 2;
+//                        index = layers[currentDepth].nodeIndex;
+//                    }
+//                    continue;
+                //}
 
                 currentDepth++;
                 index = layers[currentDepth].nodeIndex;
@@ -332,7 +354,7 @@ glm::ivec3 Octree::castNode(const glm::vec3& rayDirection, const glm::vec3& star
         }
     }
 
-    return glm::ivec3(-1, -1, -1);
+    return debugCast;
 }
 
 
