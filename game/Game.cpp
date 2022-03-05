@@ -14,10 +14,16 @@ void Game::update(double deltaTime) {
     double mouseX, mouseY;
     glfwGetCursorPos(window->getGLWindow(), &mouseX, &mouseY);
     camera.update(deltaTime, (float)mouseX, (float)mouseY);
+
+    renderer->update(deltaTime);
 }
 
 void Game::render(double deltaTime) {
     renderer->render(deltaTime);
+}
+
+void Game::imgui(double deltaTime) {
+    renderer->imgui(deltaTime);
 }
 
 Camera &Game::getCamera() {

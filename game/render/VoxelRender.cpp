@@ -41,6 +41,10 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
     raycastShaderID = rayShader->getHandle();
 }
 
+void VoxelRender::update(double deltaTime) {
+    frontVoxel = octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500.0f);
+}
+
 void VoxelRender::render(double deltaTime) {
     glUseProgram(raycastShaderID);
 
@@ -48,8 +52,7 @@ void VoxelRender::render(double deltaTime) {
     glUniform2f(3, camera.getYaw(), camera.getPitch());
     glUniform2f(4, (float)window->width, (float)window->height);
 
-    const glm::ivec3 vec = octree.castNode(camera.getDirection(), camera.getPosition());
-    glUniform3i(5, vec.x, vec.y, vec.z);
+    glUniform3i(5, frontVoxel.x, frontVoxel.y, frontVoxel.z);
 
     glDispatchCompute((GLuint)(window->width), (GLuint)(window->height), 1);
 
@@ -58,6 +61,16 @@ void VoxelRender::render(double deltaTime) {
     shader.bind();
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     shader.unbind();
+}
+
+void VoxelRender::imgui(double deltaTime) {
+    /// TODO
+    ImGui::Begin("Info window");
+    ImGui::SetWindowSize(ImVec2(200, 100));
+    ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
+    ImGui::End();
+    ImGui::Render();
+    ///
 }
 
 void VoxelRender::createWorld() {

@@ -195,7 +195,7 @@ int Octree::findVoxel(const glm::ivec3& voxelPos) {
     return -1;
 }
 
-glm::ivec3 Octree::debugCast(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance) {
+glm::ivec3 Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance) {
     HitPoint result;
     result.debug = false;
     result.hit = false;

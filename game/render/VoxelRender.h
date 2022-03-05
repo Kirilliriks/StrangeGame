@@ -20,7 +20,9 @@ public:
     VoxelRender(Game *game);
     void createWorld();
     void updateWorld();
+    void update(double deltaTime);
     void render(double deltaTime);
+    void imgui(double deltaTime);
 
     GLuint genTexture();
 private:
@@ -36,11 +38,11 @@ private:
     GLuint windowBuffer;
 
     GLuint worldBufferID;
-    GLuint textureWindowID;
 
     Octree octree;
 
     RaycastShader *rayShader;
+    glm::ivec3 frontVoxel;
 };
 
 

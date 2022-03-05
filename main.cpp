@@ -29,12 +29,9 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glColor4f(0, 0, 0, 0);
 
-        game->update(deltaTime);
-        ImGui::Begin("Hello");
-        ImGui::Text("Hello, world %d", 123);
-        ImGui::End();
-        ImGui::Render();
-        game->render(deltaTime);
+        game->update(deltaTime); //Update logic + physics
+        game->render(deltaTime); //Render voxels
+        game->imgui(deltaTime);  //Render develop GUI
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(glWindow);

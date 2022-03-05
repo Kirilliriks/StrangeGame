@@ -17,6 +17,7 @@ public:
     Game(Window *window);
     void update(double deltaTime);
     void render(double deltaTime);
+    void imgui(double deltaTime);
 
     Camera& getCamera();
     Window *getWindow();
