@@ -12,11 +12,18 @@ class Octree {
 public:
     struct DebugCast {
         glm::ivec3 voxelPos;
-        glm::ivec3 initPos;
-        glm::ivec3 nextNodePos;
+        glm::ivec3 lastStepPos;
+        glm::ivec3 preLastStepPos;
         glm::ivec3 nodePos;
         int nodeSize;
         float distance;
+
+        bool depth;
+
+        glm::vec3 voxelFloatPos;
+        int passedNodes;
+
+        glm::ivec3 step;
     };
 
     Octree();

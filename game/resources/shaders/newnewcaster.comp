@@ -38,9 +38,9 @@ layout(location=6) uniform ivec3 debug_node_pos;
 
 layout(location=7) uniform int debug_node_size;
 
-layout(location=8) uniform ivec3 debug_init_pos;
+layout(location=8) uniform ivec3 debug_last_step;
 
-layout(location=9) uniform ivec3 debug_next_node_pos;
+layout(location=9) uniform ivec3 debug_pre_last_step;
 
 layout(location=10) uniform ivec3 observer_pos;
 
@@ -195,50 +195,58 @@ void debugCast(in vec3 rayDirection, in float maxDistance, inout HitPoint result
     // угол по X то 1 / 0.1 = 10 значит через расстояние = 10 луч пересечётся с осью Y
     const vec3 rayStepSize = abs(1.0f / rayDirection);
 
-    vec3 rayLenght;
+    vec3 rayLength;
     ivec3 voxelPos = ivec3(start_position);
     ivec3 step = ivec3(sign(rayDirection));
     int nodeSize = nodes[0].halfSize * 2;
 
-    if (rayDirection.x < 0) {
-        rayLenght.x = (start_position.x - float(voxelPos.x)) * rayStepSize.x;
-    } else {
-        rayLenght.x = (float(voxelPos.x + 1) - start_position.x) * rayStepSize.x;
-    }
+//    if (rayDirection.x < 0) {
+//        rayLength.x = (start_position.x - float(voxelPos.x)) * rayStepSize.x;
+//    } else {
+//        rayLength.x = (float(voxelPos.x + 1) - start_position.x) * rayStepSize.x;
+//    }
+//
+//    if (rayDirection.y < 0) {
+//        rayLength.y = (start_position.y - float(voxelPos.y)) * rayStepSize.y;
+//    } else {
+//        rayLength.y = (float(voxelPos.y + 1) - start_position.y) * rayStepSize.y;
+//    }
+//
+//    if (rayDirection.z < 0) {
+//        rayLength.z = (start_position.z - float(voxelPos.z)) * rayStepSize.z;
+//    } else {
+//        rayLength.z = (float(voxelPos.z + 1) - start_position.z) * rayStepSize.z;
+//    }
 
-    if (rayDirection.y < 0) {
-        rayLenght.y = (start_position.y - float(voxelPos.y)) * rayStepSize.y;
-    } else {
-        rayLenght.y = (float(voxelPos.y + 1) - start_position.y) * rayStepSize.y;
-    }
-
-    if (rayDirection.z < 0) {
-        rayLenght.z = (start_position.z - float(voxelPos.z)) * rayStepSize.z;
-    } else {
-        rayLenght.z = (float(voxelPos.z + 1) - start_position.z) * rayStepSize.z;
-    }
+    rayLength = (step * (voxelPos - start_position) + (step * 0.5f) + 0.5f) * rayStepSize;
 
     const int maxSize = nodeSize;
-    while(result.distance < maxDistance) {
-        if (rayLenght.x < rayLenght.y) {
-            if (rayLenght.x < rayLenght.z) {
+    bvec3 mask;
+    int iter = 0;
+    while(iter++ < 200) {
+//        mask = lessThanEqual(rayLength.xyz, min(rayLength.yzx, rayLength.zxy));
+//        rayLength += vec3(mask) * rayStepSize;
+//        voxelPos += ivec3(vec3(mask)) * step;
+
+        if (rayLength.x < rayLength.y) {
+            if (rayLength.x < rayLength.z) {
                 voxelPos.x += step.x;
-                result.distance = rayLenght.x;
-                rayLenght.x += rayStepSize.x;
+                result.distance = rayLength.x;
+                rayLength.x += rayStepSize.x;
             } else {
                 voxelPos.z += step.z;
-                result.distance = rayLenght.z;
-                rayLenght.z += rayStepSize.z;
+                result.distance = rayLength.z;
+                rayLength.z += rayStepSize.z;
             }
         } else {
-            if (rayLenght.y < rayLenght.z) {
+            if (rayLength.y < rayLength.z) {
                 voxelPos.y += step.y;
-                result.distance = rayLenght.y;
-                rayLenght.y += rayStepSize.y;
+                result.distance = rayLength.y;
+                rayLength.y += rayStepSize.y;
             } else {
                 voxelPos.z += step.z;
-                result.distance = rayLenght.z;
-                rayLenght.z += rayStepSize.z;
+                result.distance = rayLength.z;
+                rayLength.z += rayStepSize.z;
             }
         }
 
@@ -273,37 +281,27 @@ void debugCast(in vec3 rayDirection, in float maxDistance, inout HitPoint result
             findVoxel(voxelPos, result);
         }
 
-        if (debug_next_node_pos == voxelPos) {
-            result.hit = true;
-            result.color.g = 0;
-            result.color.b = 1;
-            result.color.r = 1;
-            return;
-        }
-        if (debug_init_pos == voxelPos) {
-            result.hit = true;
-            result.color.g = 1;
-            result.color.b = 0;
-            result.color.r = 0;
-            return;
-        }
-
         if (debug_pos_cast == voxelPos) {
             result.hit = true;
-            result.color.g = 0;
+            result.color.g = 1.0f;
             result.color.b = 0;
             result.color.r = 1.0f;
             return;
         }
-
+//        if (debug_last_step == voxelPos) {
+//            result.hit = true;
+//            result.color.g = 1;
+//            result.color.b = 0;
+//            result.color.r = 0;
+//            return;
+//        }
         if (observer_pos == voxelPos) {
             result.hit = true;
-            result.color.g = 1;
-            result.color.b = 1;
-            result.color.r = 0;
+            result.color.g = 0;
+            result.color.b = 0;
+            result.color.r = 1;
             return;
         }
-
 
         if (result.hit) {
             break;

@@ -44,6 +44,7 @@ private:
     RaycastShader *rayShader;
     Octree::DebugCast debugCast;
     glm::ivec3 frontVoxel;
+    glm::ivec3 correctVoxel;
 };
 
 

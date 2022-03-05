@@ -33,3 +33,5 @@
         rayLength += vec3(mask) * rayStepSize;
         voxelPos += ivec3(vec3(mask)) * step;
     }
+
+// Где то прочитал что использование ivec3 и других подобных чисел, затратно для вычислений на GPU, как нибудь проверить

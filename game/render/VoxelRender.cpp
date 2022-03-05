@@ -44,6 +44,7 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
 void VoxelRender::update(double deltaTime) {
     debugCast = octree.castNode(camera.getDirection(), camera.getPosition());
     frontVoxel = debugCast.voxelPos;
+    correctVoxel = octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500.0f);
 }
 
 void VoxelRender::render(double deltaTime) {
@@ -56,9 +57,9 @@ void VoxelRender::render(double deltaTime) {
     glUniform3i(5, frontVoxel.x, frontVoxel.y, frontVoxel.z);
     glUniform3i(6, debugCast.nodePos.x, debugCast.nodePos.y, debugCast.nodePos.z);
     glUniform1i(7, debugCast.nodeSize);
-    glUniform3i(8, debugCast.initPos.x, debugCast.initPos.y, debugCast.initPos.z);
-    glUniform3i(9, debugCast.nextNodePos.x, debugCast.nextNodePos.y, debugCast.nextNodePos.z);
-    glUniform3i(10, 56, 40, 56);
+    glUniform3i(8, debugCast.lastStepPos.x, debugCast.lastStepPos.y, debugCast.lastStepPos.z);
+    glUniform3i(9, debugCast.preLastStepPos.x, debugCast.preLastStepPos.y, debugCast.preLastStepPos.z);
+    glUniform3i(10, correctVoxel.x, correctVoxel.y, correctVoxel.z);
 
     glDispatchCompute((GLuint)(window->width), (GLuint)(window->height), 1);
 
@@ -73,20 +74,25 @@ void VoxelRender::imgui(double deltaTime) {
     static glm::ivec3 lastPos = glm::ivec3(0, 0, 0);
     /// TODO
     ImGui::Begin("Info window");
-    ImGui::SetWindowSize(ImVec2(250, 150));
+    ImGui::SetWindowSize(ImVec2(300, 300));
     ImGui::Text("Cam x=%d y=%d z=%d", (int)camera.getX(), (int)camera.getY(), (int)camera.getZ());
-    ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
+    ImGui::Text("VoxelTry x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
+    ImGui::Text("VoxelCorrect x=%d y=%d z=%d", correctVoxel.x, correctVoxel.y, correctVoxel.z);
+    ImGui::Text("VoxelFloat x=%f y=%f z=%f", debugCast.voxelFloatPos.x, debugCast.voxelFloatPos.y, debugCast.voxelFloatPos.z);
     if (frontVoxel.x != -1 || frontVoxel.y != -1 || frontVoxel.z != -1) {
         lastPos = frontVoxel;
     }
-    ImGui::Text("Last x=%d y=%d z=%d", lastPos.x, lastPos.y, lastPos.z);
-    ImGui::Text("Init x=%d y=%d z=%d", debugCast.initPos.x, debugCast.initPos.y, debugCast.initPos.z);
-    ImGui::Text("NextNode x=%d y=%d z=%d", debugCast.nextNodePos.x, debugCast.nextNodePos.y, debugCast.nextNodePos.z);
+    ImGui::Text("LastStepPos x=%d y=%d z=%d", debugCast.lastStepPos.x, debugCast.lastStepPos.y, debugCast.lastStepPos.z);
+    ImGui::Text("PreLastStepPos x=%d y=%d z=%d", debugCast.preLastStepPos.x, debugCast.preLastStepPos.y, debugCast.preLastStepPos.z);
+    ImGui::Text("NodePos x=%d y=%d z=%d", debugCast.nodePos.x, debugCast.nodePos.y, debugCast.nodePos.z);
     ImGui::Text("Distance = %f", debugCast.distance);
     ImGui::Text("NodeSize = %d", debugCast.nodeSize);
+    ImGui::Text("Depth = %d", debugCast.depth);
+    ImGui::Text("PassedNodes = %d", debugCast.passedNodes);
+    ImGui::Text("Step x=%d y=%d z=%d", debugCast.step.x, debugCast.step.y, debugCast.step.z);
     ImGui::End();
     ImGui::Render();
-    ///
+    ///w
 }
 
 void VoxelRender::createWorld() {
@@ -96,7 +102,7 @@ void VoxelRender::createWorld() {
     int seed = rand(rng);
     for (int z = 0; z <= worldSize; z++) {
         for (int x = 0; x <= worldSize; x++) {
-            float per = glm::simplex(glm::vec3(x / 32.0f, z / 32.0f, seed));
+            float per = glm::simplex(glm::vec3(x / 32.0f, z / 32.0f, 21));
             per = (per + 1) / 2;
             int y = (int)(per * (float)32);
             if (y < 0 || y >= worldSize) continue;
