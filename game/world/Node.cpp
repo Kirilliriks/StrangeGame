@@ -16,6 +16,18 @@ bool Node::isEmpty() {
     return sub == -1;
 }
 
+// Little help struct, TODO delete
+//enum nodeIndex {
+//    DOWN_LEFT_FRONT = 0, //000
+//    DOWN_LEFT_BACK = 1,  //001
+//    DOWN_RIGHT_FRONT = 2,//010
+//    DOWN_RIGHT_BACK = 3, //011
+//    UPPER_LEFT_FRONT = 4,  //100
+//    UPPER_LEFT_BACK = 5,   //101
+//    UPPER_RIGHT_FRONT = 6, //110
+//    UPPER_RIGHT_BACK = 7   //111
+//};
+
 void Node::divide(std::vector<Node> &nodes) {
     sub = nodes.size();
     for (int i = 0; i < 8; i++) {
@@ -58,15 +70,3 @@ int Node::getSubNodeIndex(const glm::ivec3& vec) {
 int Node::getSubNodeIndex(int subIndex) {
     return sub + subIndex;
 }
-
-// Little help struct, TODO delete
-//enum nodeIndex {
-//    DOWN_LEFT_FRONT = 0, //000
-//    DOWN_LEFT_BACK = 1,  //001
-//    DOWN_RIGHT_FRONT = 2,//010
-//    DOWN_RIGHT_BACK = 3, //011
-//    UPPER_LEFT_FRONT = 4,  //100
-//    UPPER_LEFT_BACK = 5,   //101
-//    UPPER_RIGHT_FRONT = 6, //110
-//    UPPER_RIGHT_BACK = 7   //111
-//};

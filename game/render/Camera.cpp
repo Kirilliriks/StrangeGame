@@ -16,7 +16,7 @@ Camera::Camera(Window *window) {
     direction = glm::vec3(0, 0, 1);
     yaw = 0;
     pitch = 0;
-    position = glm::vec3(32, 25, -30);
+    position = glm::vec3(18, 28, 18);
 }
 
 void Camera::update(double deltaTime, float mouseX, float mouseY) {
@@ -33,6 +33,10 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
     title.append(std::to_string(direction.y));
     title.append(" DirZ ");
     title.append(std::to_string(direction.z));
+    title.append(" YAW ");
+    title.append(std::to_string(yaw));
+    title.append(" PITCH ");
+    title.append(std::to_string(pitch));
     glfwSetWindowTitle(window->getGLWindow(), title.c_str());
     glm::vec3 movement = glm::vec3(0.0f, 0.0f, 0.0f);
 

@@ -85,6 +85,7 @@ void VoxelRender::imgui(double deltaTime) {
     ImGui::Text("LastStepPos x=%d y=%d z=%d", debugCast.lastStepPos.x, debugCast.lastStepPos.y, debugCast.lastStepPos.z);
     ImGui::Text("PreLastStepPos x=%d y=%d z=%d", debugCast.preLastStepPos.x, debugCast.preLastStepPos.y, debugCast.preLastStepPos.z);
     ImGui::Text("NodePos x=%d y=%d z=%d", debugCast.nodePos.x, debugCast.nodePos.y, debugCast.nodePos.z);
+    ImGui::Text("SubVector x=%d y=%d z=%d", debugCast.subVector.x, debugCast.subVector.y, debugCast.subVector.z);
     ImGui::Text("Distance = %f", debugCast.distance);
     ImGui::Text("NodeSize = %d", debugCast.nodeSize);
     ImGui::Text("Depth = %d", debugCast.depth);
@@ -100,12 +101,12 @@ void VoxelRender::createWorld() {
     std::mt19937 rng(dev());
     std::uniform_int_distribution<int> rand(-1024,1024);
     int seed = rand(rng);
-    for (int z = 0; z <= worldSize; z++) {
-        for (int x = 0; x <= worldSize; x++) {
+    for (int z = 0; z < worldSize; z++) {
+        for (int x = 0; x < worldSize; x++) {
             float per = glm::simplex(glm::vec3(x / 32.0f, z / 32.0f, 21));
             per = (per + 1) / 2;
             int y = (int)(per * (float)32);
-            if (y < 0 || y >= worldSize) continue;
+            if (y < 0 || y > worldSize) continue;
 
             for (int i = 0; i <= y; i++) {
                 octree.setVoxel(glm::ivec3(x, i, z), glm::vec4(per, per, per, 1.0f));
