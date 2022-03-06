@@ -42,9 +42,9 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
 }
 
 void VoxelRender::update(double deltaTime) {
-    debugCast = octree.castNode(camera.getDirection(), camera.getPosition());
+    debugCast = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
     frontVoxel = debugCast.voxelPos;
-    correctVoxel = octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500.0f);
+    correctVoxel = octree.castNode(camera.getDirection(), camera.getPosition()).voxelPos;
 }
 
 void VoxelRender::render(double deltaTime) {
