@@ -87,7 +87,26 @@ glm::ivec3 getSubVector(const glm::ivec3& vec, const Node& node) {
     return subVector;
 }
 
-int getSubIndex(glm::ivec3 vec, const Node& node) {
+int getSubIndexFromSubVector(const glm::ivec3& vec) {
+    int subIndex = 0;
+
+    if (vec.x < 0) return -1;
+    if (vec.y < 0) return -2;
+    if (vec.z < 0) return -3;
+
+
+    if (vec.x > 1) return -4;
+    if (vec.y > 1) return -5;
+    if (vec.z > 1) return -6;
+
+    subIndex |= vec.x == 1 ? 2 : 0;
+    subIndex |= vec.y == 1 ? 4 : 0;
+    subIndex |= vec.z == 1 ? 1 : 0;
+
+    return subIndex;
+}
+
+int getSubIndexFromVector(const glm::ivec3& vec, const Node& node) {
     int subIndex = 0;
 
     const glm::ivec3 pos = glm::ivec3(node.position);
@@ -111,7 +130,7 @@ int getSubIndex(glm::ivec3 vec, const Node& node) {
 int getSubIndex(glm::ivec3 vec, const Node& node, const HitPoint& result) {
     int subIndex = 0;
 
-    //vec += glm::ivec3(-1, -1, -1);
+    vec += glm::ivec3(-1, -1, -1);
     const glm::ivec3 pos = glm::ivec3(node.position);
     if (vec.x < pos.x) return -1;
     if (vec.y < pos.y) return -2;
@@ -184,43 +203,31 @@ bool move_next(const Layer& layer, const glm::ivec3& step, glm::vec3 &rayLength,
     bool out = true;
     if (rayLength.x < rayLength.y) {
         if (rayLength.x < rayLength.z) {
-//            const int tmp = layer.subVector.x + step.x;
-//            if (tmp > 1 || tmp < 0) out = false;
-
+            if (step.x < 0) {
+                result.step.x = -1;
+            }
             result.distance = rayLength.x;
             rayLength.x += layer.step.x;
-            if (layer.step.x < 0) {
-                result.step.x--;
-            }
         } else {
-//            const int tmp = layer.subVector.z + step.z;
-//            if (tmp > 1 || tmp < 0) out = false;
-
+            if (step.z < 0) {
+                result.step.z = -1;
+            }
             result.distance = rayLength.z;
             rayLength.z += layer.step.z;
-            if (layer.step.z < 0) {
-                result.step.z--;
-            }
         }
     } else {
         if (rayLength.y < rayLength.z) {
-//            const int tmp = layer.subVector.y + step.y;
-//            if (tmp > 1 || tmp < 0) out = false;
-
+            if (step.y < 0) {
+                result.step.y = -1;
+            }
             result.distance = rayLength.y;
             rayLength.y += layer.step.y;
-            if (layer.step.y < 0) {
-                result.step.y--;
-            }
         } else {
-//            const int tmp = layer.subVector.z + step.z;
-//            if (tmp > 1 || tmp < 0) out = false;
-
+            if (step.z < 0) {
+                result.step.z = -1;
+            }
             result.distance = rayLength.z;
             rayLength.z += layer.step.z;
-            if (layer.step.z < 0) {
-                result.step.z--;
-            }
         }
     }
     return out;
@@ -237,7 +244,7 @@ int Octree::findVoxel(const glm::ivec3& voxelPos) {
             return 2;
         }
 
-        const int subIndex = getSubIndex(voxelPos, currentNode);
+        const int subIndex = getSubIndexFromVector(voxelPos, currentNode);
         if (subIndex < 0) return -1;
 
         index = currentNode.sub + subIndex;
@@ -259,6 +266,7 @@ glm::ivec3 Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& 
     glm::ivec3 voxelPos = glm::ivec3(start_position);
     glm::ivec3 step = glm::ivec3(glm::sign(rayDirection));
 
+    //glm::vec3 t_max = ((cell_pos_i + ray.dir) * float(cell_size) - position) / ray.direction;
     if (rayDirection.x < 0) {
         rayLength.x = (start_position.x - float(voxelPos.x)) * rayStepSize.x;
     } else {
@@ -307,6 +315,9 @@ glm::ivec3 Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& 
     return glm::ivec3(-1, -1, -1);
 }
 
+
+// Попоробовать использовать всё таки subVector, если при вычислениях находить локальную для ноды start_position то делением start_position на node_size легко найдём subVector
+// Вычислил на листочке AB, всё ок, формула простая, текущая позиция луча (start_pos - node_pos) / node_size даёт наб sub_coord от 0 до 1 ИЗИ
 Octree::DebugCast Octree::castNode(const glm::vec3& rayDirection, const glm::vec3& start_position) {
     HitPoint result;
     result.debug = false;
@@ -341,10 +352,7 @@ Octree::DebugCast Octree::castNode(const glm::vec3& rayDirection, const glm::vec
 
     bool first = true;
     int iter = -1;
-
     while (iter++ < 300 && index != -1) {
-        debugCast.nodeSize = currentNode.halfSize * 2;
-        debugCast.nodePos = glm::ivec3(currentNode.position);
 
         currentNode = nodes[index];
         currentLayer = layers[currentDepth];
@@ -372,6 +380,8 @@ Octree::DebugCast Octree::castNode(const glm::vec3& rayDirection, const glm::vec
             newLayer.step = glm::abs(glm::vec3(currentNode.halfSize) / rayDirection); // Use currentNode.halfsize e.t.c subnode have halfsize = halsize / 2;
             newLayer.nodeIndex = index;
 
+            debugCast.nodeSize = currentNode.halfSize;
+            debugCast.nodePos = glm::ivec3(nextNode.position);
 
             debugCast.passedNodes++;
 
@@ -390,7 +400,7 @@ Octree::DebugCast Octree::castNode(const glm::vec3& rayDirection, const glm::vec
                     move_next(currentLayer, step, rayLength, result);
                 }
                 debugCast.preLastStepPos = voxelPos;
-                debugCast.lastStepPos = voxelPos = start_position + rayDirection * (result.distance + 0.000001f); // Calculate current voxelPosition
+                debugCast.lastStepPos = voxelPos = start_position + rayDirection * (result.distance); // Calculate current voxelPosition
                 debugCast.voxelFloatPos = voxelPos;
                 debugCast.step = result.step;
 
