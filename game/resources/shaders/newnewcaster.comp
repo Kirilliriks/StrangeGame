@@ -295,13 +295,13 @@ void debugCast(in vec3 rayDirection, in float maxDistance, inout HitPoint result
 //            result.color.r = 0;
 //            return;
 //        }
-        if (observer_pos == voxelPos) {
-            result.hit = true;
-            result.color.g = 0;
-            result.color.b = 0;
-            result.color.r = 1;
-            return;
-        }
+//        if (observer_pos == voxelPos) {
+//            result.hit = true;
+//            result.color.g = 0;
+//            result.color.b = 0;
+//            result.color.r = 1;
+//            return;
+//        }
 
         if (result.hit) {
             break;
