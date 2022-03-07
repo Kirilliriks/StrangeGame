@@ -42,8 +42,8 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
 }
 
 void VoxelRender::update(double deltaTime) {
-    voxelInfo = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
-    frontVoxel = voxelInfo.voxelPos;
+    //voxelInfo = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
+    //frontVoxel = voxelInfo.voxelPos;
 }
 
 void VoxelRender::render(double deltaTime) {
@@ -54,6 +54,8 @@ void VoxelRender::render(double deltaTime) {
     glUniform2f(4, (float)window->width, (float)window->height);
 
     glUniform3i(5, frontVoxel.x, frontVoxel.y, frontVoxel.z);
+    glUniform1i(6, octree.getSize());
+    glUniform1i(7, octree.height);
     glDispatchCompute((GLuint)(window->width), (GLuint)(window->height), 1);
 
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -91,13 +93,14 @@ void VoxelRender::createWorld() {
     int seed = rand(rng);
     for (int z = 0; z < worldSize; z++) {
         for (int x = 0; x < worldSize; x++) {
-            float per = glm::simplex(glm::vec3(x / 32.0f, z / 32.0f, 21));
+            float per = glm::perlin(glm::vec3((float)x / (float)32, (float)z / (float)32, seed));
             per = (per + 1) / 2;
-            int y = (int)(per * (float)32);
-            if (y < 0 || y > worldSize) continue;
+            int y = (int)(per * (float)octree.height);
+            if (y < 0 || y >= octree.height) continue;
 
             for (int i = 0; i <= y; i++) {
-                octree.setVoxel(glm::ivec3(x, i, z), glm::vec4(per, per, per, 1.0f));
+                const float yf = (float) i / (float) octree.height;
+                octree.setVoxel(glm::ivec3(x, i, z), glm::vec4(yf, yf, per, 1.0f));
             }
         }
     }
@@ -111,8 +114,8 @@ void VoxelRender::updateWorld() {
     glGenBuffers(1, &worldBufferID);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, worldBufferID);
     glBufferData(GL_SHADER_STORAGE_BUFFER,
-                 octree.nodesCount() * sizeof(Node),
-                 octree.getData(), GL_STATIC_DRAW);
+                 octree.getSize() * octree.height * octree.getSize() * sizeof(glm::vec4),
+                 octree.getVData(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, worldBufferID);
 }
 

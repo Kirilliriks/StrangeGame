@@ -9,9 +9,11 @@
 
 Octree::Octree() {
     maxDepth = 6;
-    size = 1 << maxDepth; // std::pow(2, maxDepth);
+    size = 512; // std::pow(2, maxDepth);
+    height = 128;
 
-    nodes.emplace_back(size, glm::ivec3(0, 0, 0));
+    //nodes.emplace_back(size, glm::ivec3(0, 0, 0));
+    voxels.resize(size * size * height);
 }
 
 int Octree::getSize() {
@@ -22,7 +24,11 @@ void Octree::setVoxel(const glm::ivec3& vec, glm::vec4 color) {
     setVoxel(0, 0, vec, color);
 }
 
-void Octree::setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 color) {
+void Octree::setVoxel(int index, int depth, const glm::ivec3& vec, const glm::vec4& color) {
+    static int zSize = height * size;
+    voxels[vec.x + vec.y * height + vec.z * zSize] = color;
+
+    return;
     Node currentNode = nodes.at(index);
 
     if (depth == maxDepth) { // If in voxel depth
@@ -43,6 +49,10 @@ void Octree::setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 col
 
 Node *Octree::getData() {
     return nodes.data();
+}
+
+glm::vec4 *Octree::getVData() {
+    return voxels.data();
 }
 
 int Octree::nodesCount() {

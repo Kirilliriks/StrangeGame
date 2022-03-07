@@ -25,15 +25,19 @@ public:
     void setVoxel(const glm::ivec3& vec, glm::vec4 color);
 
     Node *getData();
+    glm::vec4 *getVData();
     int nodesCount();
 
     VoxelInfo raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position);
+
+    int height;
 private:
-    void setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 color);
+    void setVoxel(int index, int depth, const glm::ivec3& vec, const glm::vec4& color);
 
     std::vector<Node> nodes;
+    std::vector<glm::vec4> voxels;
     int maxDepth;
-    int size; // in voxels
+    int size;
 };
 
 

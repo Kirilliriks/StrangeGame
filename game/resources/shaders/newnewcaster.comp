@@ -1,25 +1,9 @@
-#version 430
+#version 460
 
 layout(local_size_x = 1,local_size_y = 1,local_size_z = 1) in;
 
-struct Node {
-    ivec4 position;
-    vec4 color;
-    int halfSize;
-    int sub;
-};
-
 layout(std430, binding=4) readonly buffer Octree_data {
-    Node nodes[];
-};
-
-struct HitPoint {
-    float distance;
-    bool hit;
-    vec3 color;
-
-    bool debug;
-    ivec3 debugPos;
+    vec4 voxels[];
 };
 
 layout(rgba32f) uniform image2D img_output;
@@ -32,191 +16,29 @@ layout(location=4) uniform vec2 window_size;
 
 layout(location=5) uniform ivec3 fron_voxel_pos;
 
-bool nodeIsLeaf(in Node node) {
-    return node.color.a != -1.0f;
-}
+layout(location=6) uniform int size;
 
-ivec3 getSubVector(in ivec3 vec, in Node node) {
-    ivec3 subVector = ivec3(0, 0, 0);
+layout(location=7) uniform int height;
 
-    const ivec3 pos = node.position.xyz;
-    if (vec.x < pos.x) return ivec3(-1, -1, -1);
-    if (vec.y < pos.y) return ivec3(-1, -1, -1);
-    if (vec.z < pos.z) return ivec3(-1, -1, -1);
-
-    const int halfSize = node.halfSize;
-    const int size = halfSize * 2;
-    if (vec.x > pos.x + size) return ivec3(-1, -1, -1);
-    if (vec.y > pos.y + size) return ivec3(-1, -1, -1);
-    if (vec.z > pos.z + size) return ivec3(-1, -1, -1);
-
-    subVector.x = vec.x >= pos.x + halfSize? 1 : 0;
-    subVector.y = vec.y >= pos.y + halfSize? 1 : 0;
-    subVector.z = vec.z >= pos.z + halfSize? 1 : 0;
-
-    return subVector;
-}
-
-int getSubIndex(in ivec3 vec, in Node node) {
-    int subIndex = 0;
-
-    const ivec3 pos = node.position.xyz;
-    if (vec.x < pos.x) return -1;
-    if (vec.y < pos.y) return -2;
-    if (vec.z < pos.z) return -3;
-
-    const int halfSize = node.halfSize;
-    const int size = halfSize * 2;
-    if (vec.x > pos.x + size) return -4;
-    if (vec.y > pos.y + size) return -5;
-    if (vec.z > pos.z + size) return -6;
-
-    subIndex |= vec.x >= pos.x + halfSize? 2 : 0;
-    subIndex |= vec.y >= pos.y + halfSize? 4 : 0;
-    subIndex |= vec.z >= pos.z + halfSize? 1 : 0;
-
-    return subIndex;
-}
-
-bool findVoxel(in ivec3 voxelPos, inout HitPoint result) {
-    int index = 0;
-    while(index != -1) {
-        const Node currentNode = nodes[index];
-        if (currentNode.sub == -1) {
-            if (nodeIsLeaf(currentNode)) {
-                result.hit = true;
-                result.color = currentNode.color.rgb;
-                return true;
-            }
-            return true;
-        }
-
-        const int subIndex = getSubIndex(voxelPos, currentNode);
-        if (subIndex < 0) return false;
-
-        index = currentNode.sub + subIndex;
-    }
-    return false;
-}
-
-void debugCast(in vec3 rayDirection, in float maxDistance, inout HitPoint result) {
-    result.hit = false;
-    result.distance = 0.0f;
-
+vec4 debugCast(in vec3 rayDirection) {
     const vec3 rayStepSize = abs(1.0f / rayDirection);
     const ivec3 step = ivec3(sign(rayDirection));
-    const int maxSize = nodes[0].halfSize * 2;
+    const int zSize = height * size;
 
     ivec3 voxelPos = ivec3(start_position);
     bvec3 mask;
     vec3 rayLength = (step * (voxelPos - start_position) + (step * 0.5f) + 0.5f) * rayStepSize;
     int iter = 0;
-    while(iter++ < 200) {
+    while(iter++ < 256) {
         mask = lessThanEqual(rayLength.xyz, min(rayLength.yzx, rayLength.zxy));
         rayLength += vec3(mask) * rayStepSize;
         voxelPos += ivec3(vec3(mask)) * step;
+        if (voxelPos.x >= size || voxelPos.y >= height || voxelPos.z >= size || voxelPos.x < 0 || voxelPos.y < 0 || voxelPos.z < 0 ) return vec4(0, 0, 0, 0);
 
-        findVoxel(voxelPos, result);
-        if (result.hit) {
-            break;
-        }
-        if (fron_voxel_pos == voxelPos) {
-            result.hit = true;
-            result.color.g = 0;
-            result.color.b = 0;
-            result.color.r = 1;
-            return;
-        }
+        const vec4 color = voxels[voxelPos.x + voxelPos.y * height + voxelPos.z * zSize];
+        if (color.a == 1.0f) return color;
     }
-}
-
-struct Layer {
-    int nodeIndex;
-    int halfSize;
-    vec3 position;
-    ivec3 subVec;
-    vec3 rayLength;
-
-    float distance;
-};
-
-Layer calculateLayer(inout Layer layer, in const ivec3 dir, in const vec3 rayStepSizeSingle) {
-
-    layer.subVec = min(ivec3(layer.position) / layer.halfSize, 1);
-    layer.rayLength = (vec3(layer.subVec + dir) * float(layer.halfSize) - layer.position) * rayStepSizeSingle;
-    layer.distance = 0.0f;
-    return layer;
-}
-
-void moveLayer(inout Layer currentLayer, in const ivec3 step, in const vec3 rayStepSize) {
-    const bvec3 mask = lessThanEqual(currentLayer.rayLength.xyz, min(currentLayer.rayLength.yzx, currentLayer.rayLength.zxy));
-    currentLayer.distance = length(vec3(mask) * currentLayer.rayLength);
-    currentLayer.rayLength += vec3(mask) * rayStepSize;
-    currentLayer.subVec += ivec3(vec3(mask)) * step;
-}
-
-int getSubIndexFromSubVector(in const ivec3 vec) {
-    if (vec.x < 0 ||
-        vec.x > 1 ||
-        vec.y < 0 ||
-        vec.y > 1 ||
-        vec.z < 0 ||
-        vec.z > 1) return -1;
-    return vec.z + (vec.x<<1) + (vec.y<<2);
-}
-
-void castRay(in const vec3 rayDirection, out HitPoint result) {
-    const vec3 rayStepSizeSingle = 1.0f / rayDirection;
-    const ivec3 step = ivec3(sign(rayDirection));
-    const ivec3 dir = max(step, 0);
-
-    const int maxDepth = 6;
-    Layer layers[7];
-    Layer currentLayer;
-    Node currentNode = nodes[0];
-    currentLayer.nodeIndex = 0;
-    currentLayer.halfSize = currentNode.halfSize;
-    currentLayer.position = start_position;
-    layers[maxDepth] = calculateLayer(currentLayer, dir, rayStepSizeSingle);
-
-    int currentDepth = maxDepth;
-    //float realDistance = 0.0f;
-
-    int iter = 0;
-    vec3 rayStepSize = vec3(currentLayer.halfSize) * abs(rayStepSizeSingle);
-    int subIndex;
-    Node subNode;
-    while (iter++ < 200) {
-        currentLayer = layers[currentDepth];
-        currentNode = nodes[currentLayer.nodeIndex];
-
-        subIndex = getSubIndexFromSubVector(currentLayer.subVec);
-        if (subIndex < 0 && currentDepth + 1 <= maxDepth) {
-            currentDepth++;
-            rayStepSize *= 2; // Auto goto moveLayer
-        } else if (currentNode.sub != -1) {
-            subIndex = currentNode.sub + subIndex;
-            subNode = nodes[subIndex];
-            if (subNode.color.a != -1.0f) {
-                result.color = vec3(subNode.color);
-                return;
-            } else if (currentDepth != 1) { // If currentDepth == 1 this node have voxel neighbour,
-                currentDepth--;
-                rayStepSize *= 0.5f;
-
-                // Start subRaycast
-                Layer layer;
-                layer.nodeIndex = subIndex;
-                layer.halfSize = subNode.halfSize;
-                layer.position = currentLayer.position + currentLayer.distance * rayDirection - vec3(currentLayer.halfSize * currentLayer.subVec);
-                layer.distance = 0.0f;
-                layers[currentDepth] = calculateLayer(layer, dir, rayStepSizeSingle);
-                //realDistance += currentLayer.distance;
-                continue;
-            }
-        }
-        moveLayer(layers[currentDepth], step, rayStepSize);
-    }
+    return vec4(0, 0, 0, 0);
 }
 
 vec3 rotate(const in vec3 v, const in vec3 axis, float theta) {
@@ -225,25 +47,9 @@ vec3 rotate(const in vec3 v, const in vec3 axis, float theta) {
 }
 
 void main() {
-    const ivec2 pixel_coord = ivec2(gl_GlobalInvocationID.xy );
-    const ivec2 screen_offset = ivec2(window_size.x / 2, window_size.y / 2);
-    const vec3 camera_origin = vec3(0, 0, window_size.x);
-    const ivec3 screen_coord = ivec3(pixel_coord - screen_offset, 0);
-
-    // Ray calculation
-    const float sinX = sin(camera_angles.x);
-    const float cosX = cos(camera_angles.x);
-    const float sinY = sin(-camera_angles.y);
-    const float cosY = cos(-camera_angles.y);
-
-    vec3 rayDir = normalize(screen_coord + camera_origin);
+    const ivec2 pixel_coord = ivec2(gl_GlobalInvocationID.xy);
+    vec3 rayDir = normalize(ivec3(pixel_coord - ivec2(window_size.x / 2, window_size.y / 2), window_size.x));
     rayDir = rotate(rayDir, vec3(1, 0, 0), camera_angles.y);
     rayDir = rotate(rayDir, vec3(0, 1, 0), camera_angles.x);
-    const float maxDist = 500.0f;
-
-    HitPoint result;
-    //castRay(rayDir, result);
-    debugCast(rayDir, maxDist, result);
-
-    imageStore(img_output, pixel_coord, vec4(result.color, 1.0));
+    imageStore(img_output, pixel_coord, debugCast(rayDir));
 }
