@@ -42,9 +42,8 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
 }
 
 void VoxelRender::update(double deltaTime) {
-    debugCast = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
-    frontVoxel = debugCast.voxelPos;
-    correctVoxel = octree.castNode(camera.getDirection(), camera.getPosition()).voxelPos;
+    voxelInfo = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
+    frontVoxel = voxelInfo.voxelPos;
 }
 
 void VoxelRender::render(double deltaTime) {
@@ -55,12 +54,6 @@ void VoxelRender::render(double deltaTime) {
     glUniform2f(4, (float)window->width, (float)window->height);
 
     glUniform3i(5, frontVoxel.x, frontVoxel.y, frontVoxel.z);
-    glUniform3i(6, debugCast.nodePos.x, debugCast.nodePos.y, debugCast.nodePos.z);
-    glUniform1i(7, debugCast.nodeSize);
-    glUniform3i(8, debugCast.lastStepPos.x, debugCast.lastStepPos.y, debugCast.lastStepPos.z);
-    glUniform3i(9, debugCast.preLastStepPos.x, debugCast.preLastStepPos.y, debugCast.preLastStepPos.z);
-    glUniform3i(10, correctVoxel.x, correctVoxel.y, correctVoxel.z);
-
     glDispatchCompute((GLuint)(window->width), (GLuint)(window->height), 1);
 
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -74,23 +67,18 @@ void VoxelRender::imgui(double deltaTime) {
     static glm::ivec3 lastPos = glm::ivec3(0, 0, 0);
     /// TODO
     ImGui::Begin("Info window");
-    ImGui::SetWindowSize(ImVec2(300, 300));
+    ImGui::SetWindowSize(ImVec2(300, 250));
     ImGui::Text("Cam x=%d y=%d z=%d", (int)camera.getX(), (int)camera.getY(), (int)camera.getZ());
     ImGui::Text("VoxelTry x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
     ImGui::Text("VoxelCorrect x=%d y=%d z=%d", correctVoxel.x, correctVoxel.y, correctVoxel.z);
-    ImGui::Text("VoxelFloat x=%f y=%f z=%f", debugCast.voxelFloatPos.x, debugCast.voxelFloatPos.y, debugCast.voxelFloatPos.z);
     if (frontVoxel.x != -1 || frontVoxel.y != -1 || frontVoxel.z != -1) {
         lastPos = frontVoxel;
     }
-    ImGui::Text("LastStepPos x=%d y=%d z=%d", debugCast.lastStepPos.x, debugCast.lastStepPos.y, debugCast.lastStepPos.z);
-    ImGui::Text("PreLastStepPos x=%d y=%d z=%d", debugCast.preLastStepPos.x, debugCast.preLastStepPos.y, debugCast.preLastStepPos.z);
-    ImGui::Text("NodePos x=%d y=%d z=%d", debugCast.nodePos.x, debugCast.nodePos.y, debugCast.nodePos.z);
-    ImGui::Text("SubVector x=%d y=%d z=%d", debugCast.subVector.x, debugCast.subVector.y, debugCast.subVector.z);
-    ImGui::Text("Distance = %f", debugCast.distance);
-    ImGui::Text("NodeSize = %d", debugCast.nodeSize);
-    ImGui::Text("Depth = %d", debugCast.depth);
-    ImGui::Text("PassedNodes = %d", debugCast.passedNodes);
-    ImGui::Text("Step x=%d y=%d z=%d", debugCast.step.x, debugCast.step.y, debugCast.step.z);
+    ImGui::Text("NodePos x=%d y=%d z=%d", voxelInfo.nodePos.x, voxelInfo.nodePos.y, voxelInfo.nodePos.z);
+    ImGui::Text("SubVector x=%d y=%d z=%d", voxelInfo.subVector.x, voxelInfo.subVector.y, voxelInfo.subVector.z);
+    ImGui::Text("Distance = %f", voxelInfo.distance);
+    ImGui::Text("NodeSize = %d", voxelInfo.nodeSize);
+    ImGui::Text("Step x=%d y=%d z=%d", voxelInfo.step.x, voxelInfo.step.y, voxelInfo.step.z);
     ImGui::End();
     ImGui::Render();
     ///w

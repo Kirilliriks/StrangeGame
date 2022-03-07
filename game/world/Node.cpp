@@ -16,6 +16,7 @@ bool Node::isEmpty() {
     return sub == -1;
 }
 
+//011
 // Little help struct, TODO delete
 //enum nodeIndex {
 //    DOWN_LEFT_FRONT = 0, //000
