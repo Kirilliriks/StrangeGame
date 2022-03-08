@@ -12,33 +12,12 @@ class Octree {
 public:
     struct DebugCast {
         glm::ivec3 voxelPos;
-        glm::ivec3 lastStepPos;
-        glm::ivec3 preLastStepPos;
-        glm::ivec3 nodePos;
-        int nodeSize;
-        float distance;
-
-        bool depth;
-
-        glm::vec3 voxelFloatPos;
-        int passedNodes;
-
-        glm::ivec3 step;
-
-        glm::ivec3 subVector;
+        int iterations;
+        int iterationsF;
     };
 
     struct HitPoint {
         float distance;
-        glm::ivec3 step;
-        glm::ivec3 dir;
-        glm::vec3 rayDirection;
-        glm::vec3 rayStepSize;
-        DebugCast debugCast;
-
-        int iter;
-
-        bool found;
     };
 
     Octree();
@@ -49,8 +28,10 @@ public:
     int nodesCount();
 
     DebugCast raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position);
+    glm::ivec4 voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance);
 private:
     void setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 color);
+    int findVoxel(const glm::ivec3 &voxelPos);
 
     std::vector<Node> nodes;
     int maxDepth;

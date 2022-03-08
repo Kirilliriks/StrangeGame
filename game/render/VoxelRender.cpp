@@ -43,7 +43,9 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
 
 void VoxelRender::update(double deltaTime) {
     debugCast = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
-    frontVoxel = debugCast.voxelPos;
+    const glm::ivec4 v = octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
+    frontVoxel = glm::vec3(v);
+    debugCast.iterationsF = v.w;
 }
 
 void VoxelRender::render(double deltaTime) {
@@ -70,6 +72,8 @@ void VoxelRender::imgui(double deltaTime) {
     ImGui::SetWindowSize(ImVec2(200, 100));
     ImGui::Text("Cam x=%d y=%d z=%d", (int)camera.getX(), (int)camera.getY(), (int)camera.getZ());
     ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
+    ImGui::Text("Iterations SVO %d", debugCast.iterations);
+    ImGui::Text("Iterations FORW %d", debugCast.iterationsF);
     ImGui::End();
     ImGui::Render();
     ///w

@@ -101,7 +101,7 @@ bool findVoxel(in ivec3 voxelPos, inout HitPoint result) {
     return false;
 }
 
-void debugCast(in vec3 rayDirection, in float maxDistance, inout HitPoint result) {
+vec4 debugCast(in vec3 rayDirection, in float maxDistance, inout HitPoint result) {
     result.hit = false;
     result.distance = 0.0f;
 
@@ -120,8 +120,8 @@ void debugCast(in vec3 rayDirection, in float maxDistance, inout HitPoint result
         rayLength += vec3(mask) * rayStepSize;
         voxelPos += ivec3(vec3(mask)) * step;
 
-        if (!result.hit) {
-            findVoxel(voxelPos, result);
+        if (findVoxel(voxelPos, result) && result.hit) {
+            return vec4(100.0f / iter, 100.0f / iter, 100.0f / iter, 1.0f);
         }
 
         if (front_voxel == voxelPos) {
@@ -129,13 +129,10 @@ void debugCast(in vec3 rayDirection, in float maxDistance, inout HitPoint result
             result.color.g = 1.0f;
             result.color.b = 0;
             result.color.r = 1.0f;
-            return;
-        }
-
-        if (result.hit) {
-            break;
+            return vec4(result.color, 1.0f);
         }
     }
+    return vec4(result.color, 1.0f);
 }
 
 int getSubIndexFromSubVector(in const ivec3 vec) {
@@ -197,7 +194,7 @@ vec4 castRay(in vec3 rayDirection) {
     vec3 rayStepSize = vec3(currentLayer.halfSize) * abs(rayStepSizeSingle);
     float realDistance = 0.0f;
     int iter = 0;
-    while (iter++ < 500) {
+    while (iter++ < 200) {
         currentLayer = layers[currentDepth];
         currentNode = nodes[currentLayer.nodeIndex];
     
@@ -209,7 +206,7 @@ vec4 castRay(in vec3 rayDirection) {
         } else if (currentNode.sub != -1) {
             const Node subNode = nodes[currentNode.sub + subIndex];
             if (subNode.color.a != -1.0f) {
-                return subNode.color;
+                return vec4(10.0f / iter, 10.0f / iter, 10.0f / iter, 1.0f);
             } else if (currentDepth != 0) { // If currentDepth == 1 this node have voxel neighbour,
                 currentDepth--;
                 rayStepSize *= 0.5f;
@@ -244,5 +241,6 @@ void main() {
     rayDir = rotate(rayDir, vec3(1, 0, 0), camera_angles.y);
     rayDir = rotate(rayDir, vec3(0, 1, 0), camera_angles.x);
 
+    HitPoint result;
     imageStore(img_output, pixel_coord, castRay(rayDir));
 }
