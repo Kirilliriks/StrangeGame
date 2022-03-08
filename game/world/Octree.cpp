@@ -4,9 +4,6 @@
 
 #include "Octree.h"
 
-#include <iostream>
-#include <cmath>
-
 Octree::Octree() {
     maxDepth = 8;
     size = 1 << maxDepth; // std::pow(2, maxDepth);

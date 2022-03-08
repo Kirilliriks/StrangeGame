@@ -53,14 +53,16 @@ void VoxelRender::render(double deltaTime) {
 
     glUniform3f(2, camera.getX(), camera.getY(), camera.getZ());
     glUniform2f(3, camera.getYaw(), camera.getPitch());
-    glUniform2f(4, (float)window->width, (float)window->height);
+    glUniform2f(4, window->width, window->height);
     glUniform3i(5, frontVoxel.x, frontVoxel.y, frontVoxel.z);
 
-    glDispatchCompute((GLuint)(window->width), (GLuint)(window->height), 1);
+    glDispatchCompute(window->width, window->height, 1);
 
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
     shader.bind();
+    glUniform3f(2, camera.getX(), camera.getY(), camera.getZ());
+    glUniform2f(3, camera.getYaw(), camera.getPitch());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     shader.unbind();
 }
