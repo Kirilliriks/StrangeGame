@@ -11,8 +11,6 @@
 class Octree {
 public:
     struct DebugCast {
-        bool test;
-
         glm::ivec3 voxelPos;
         glm::ivec3 lastStepPos;
         glm::ivec3 preLastStepPos;
@@ -50,17 +48,13 @@ public:
     Node *getData();
     int nodesCount();
 
-    DebugCast castNode(const glm::vec3& rayDirection, const glm::vec3& start_position);
-    glm::ivec3 voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance);
     DebugCast raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position);
-    void recurseCast(HitPoint &result, const glm::vec3& position, const int &halfSize, const Node &currentNode);
 private:
     void setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 color);
 
     std::vector<Node> nodes;
-    int maxDepth; //
-    int size; // in voxels
-    int findVoxel(const glm::ivec3 &voxelPos);
+    int maxDepth;
+    int size;
 };
 
 
