@@ -101,7 +101,8 @@ bool findVoxel(in ivec3 voxelPos, inout HitPoint result) {
     return false;
 }
 
-vec4 debugCast(in vec3 rayDirection, in float maxDistance, inout HitPoint result) {
+vec4 debugCast(in vec3 rayDirection) {
+    HitPoint result;
     result.hit = false;
     result.distance = 0.0f;
 
@@ -115,7 +116,7 @@ vec4 debugCast(in vec3 rayDirection, in float maxDistance, inout HitPoint result
     const int maxSize = nodeSize;
     bvec3 mask;
     int iter = 0;
-    while(iter++ < 200) {
+    while(iter++ < 500) {
         mask = lessThanEqual(rayLength.xyz, min(rayLength.yzx, rayLength.zxy));
         rayLength += vec3(mask) * rayStepSize;
         voxelPos += ivec3(vec3(mask)) * step;
@@ -180,9 +181,9 @@ vec4 castRay(in vec3 rayDirection) {
     const vec3 rayStepSizeSingle = 1.0f / rayDirection;
     const ivec3 step = ivec3(sign(rayDirection));
     const ivec3 dir = max(step, 0);
-    const int maxDepth = 6;
+    const int maxDepth = 8;
 
-    Layer layers[6];
+    Layer layers[8];
     int currentDepth = maxDepth - 1;
     Layer currentLayer;
     Node currentNode = nodes[0];

@@ -8,7 +8,7 @@
 #include <cmath>
 
 Octree::Octree() {
-    maxDepth = 6;
+    maxDepth = 8;
     size = 1 << maxDepth; // std::pow(2, maxDepth);
 
     nodes.emplace_back(size, glm::ivec3(0, 0, 0));
