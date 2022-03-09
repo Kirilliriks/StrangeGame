@@ -10,8 +10,8 @@
 #include <iostream>
 
 Window::Window() {
-    width = 320;
-    height = 200;
+    width = 640;
+    height = 400;
 
     if(!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
@@ -39,7 +39,7 @@ Window::Window() {
     }
 
     glfwMakeContextCurrent(glWindow);
-    glfwSwapInterval(0); // Vsync
+    glfwSwapInterval(1); // Vsync
     glfwShowWindow(glWindow);
 
     glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

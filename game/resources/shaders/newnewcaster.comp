@@ -184,7 +184,7 @@ vec4 castRay(in vec3 rayDirection) {
     vec3 rayStepSize = vec3(halfSize) * abs(rayStepSizeSingle);
 
     int iter = 0;
-    while (iter++ < 200) {
+    while (iter++ < 500) {
         currentLayer = layers[currentDepth];
         currentNode = nodes[currentLayer.nodeIndex];
 
@@ -197,7 +197,7 @@ vec4 castRay(in vec3 rayDirection) {
         } else if (currentNode.sub != -1) {
             const Node subNode = nodes[currentNode.sub + subIndex];
             if (subNode.color.a != -1.0f) {
-                return vec4(10.0f / iter, 10.0f / iter, 10.0f / iter, 1.0f);
+                return subNode.color;//vec4(10.0f / iter, 10.0f / iter, 10.0f / iter, 1.0f);
             }
             if (currentDepth != 0) { // If currentDepth == 0 this node empty and have voxel neighbour
                 currentDepth--;
