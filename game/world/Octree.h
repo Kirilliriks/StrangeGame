@@ -27,6 +27,7 @@ public:
     Node *getData();
     int nodesCount();
 
+    DebugCast castDRay(const glm::vec3& rayDirection, const glm::vec3& start_position);
     DebugCast raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position);
     glm::ivec4 voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance);
 private:

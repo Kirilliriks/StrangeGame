@@ -2,8 +2,7 @@
 
 precision highp float;
 
-layout(local_size_x = 8, local_size_y = 8) in;
-int currentLOCID = int(gl_LocalInvocationIndex);
+layout(local_size_x = 1, local_size_y = 1) in;
 
 shared struct Layer {
     vec3 position;
@@ -11,7 +10,7 @@ shared struct Layer {
     ivec3 subVec;
     vec3 rayLength;
     float distance;
-} layers[64][8];
+} layers[8];
 
 struct Node {
     ivec4 position;
@@ -39,6 +38,8 @@ layout(location=4) uniform vec2 window_size;
 
 layout(location=5) uniform ivec3 front_voxel;
 
+layout(location=6) uniform ivec3 debug_voxel;
+
 int getSubIndexFromSubVector(in const ivec3 vec) {
     int subIndex = 0;
 
@@ -65,6 +66,69 @@ void moveLayer(inout Layer currentLayer, in const ivec3 step, in const vec3 rayS
     currentLayer.subVec += ivec3(mask) * step;
 }
 
+vec4 castDRay(in vec3 rayDirection) {
+    const vec3 rayStepSizeSingle = 1.0f / rayDirection;
+    const ivec3 step = ivec3(sign(rayDirection));
+    const ivec3 dir = max(step, 0);
+    const int maxDepth = 8;
+
+    float lastDistance = 0.0f;
+    float distance = 0.0f;
+    int currentDepth = maxDepth - 1;
+
+    Node currentNode = nodes[0];
+    int halfSize = currentNode.halfSize;
+    vec3 rayStepSize = vec3(halfSize) * abs(rayStepSizeSingle);
+
+    vec2 nodeStack[8];
+    nodeStack[currentDepth].x = 0; // NodeID
+    nodeStack[currentDepth].y = 0; // lastDist =)
+    Layer currentLayer;
+    currentLayer.position = start_position;
+    currentLayer = calculateLayer(currentLayer, dir, rayStepSizeSingle, halfSize);
+
+    int iter = 0;
+    while (iter++ < 500) {
+        const int subIndex = getSubIndexFromSubVector(currentLayer.subVec);
+        if (subIndex < 0) {
+            if (currentDepth == maxDepth) return vec4(0, 0, 0, 0);
+            Layer newLayer;
+
+            currentDepth++;
+            rayStepSize *= 2;
+            halfSize *= 2;
+
+            currentNode = nodes[int(nodeStack[currentDepth].x)];
+            newLayer.position = start_position + nodeStack[currentDepth].y * rayDirection - vec3(currentNode.position);
+            currentLayer = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
+        } else if (currentNode.sub != -1) {
+            const int nodeIndex = currentNode.sub + subIndex;
+            const Node subNode = nodes[nodeIndex];
+            if (subNode.color.a != -1.0f) {
+                return subNode.color;//vec4(10.0f / iter, 10.0f / iter, 10.0f / iter, 1.0f);
+            }
+            if (currentDepth != 0) { // If currentDepth == 0 this node empty and have voxel neighbour
+                // Start subRaycast
+                Layer newLayer;
+
+                currentDepth--;
+                rayStepSize *= 0.5f;
+                halfSize /= 2;
+
+                nodeStack[currentDepth].y += nodeStack[currentDepth + 1].y;
+                nodeStack[currentDepth + 1].y += currentLayer.distance;
+                nodeStack[currentDepth].x = nodeIndex;
+                currentNode = subNode;
+                newLayer.position = start_position + nodeStack[currentDepth].y * rayDirection - vec3(currentNode.position);
+                currentLayer = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
+                continue;
+            }
+        }
+        moveLayer(currentLayer, step, rayStepSize);
+    }
+    return vec4(0, 0, 0, 0);
+}
+
 vec4 castRay(in vec3 rayDirection) {
     const vec3 rayStepSizeSingle = 1.0f / rayDirection;
     const ivec3 step = ivec3(sign(rayDirection));
@@ -78,16 +142,16 @@ vec4 castRay(in vec3 rayDirection) {
     currentLayer.position = start_position;
 
     int halfSize = currentNode.halfSize;
-    layers[currentLOCID][currentDepth] = calculateLayer(currentLayer, dir, rayStepSizeSingle, halfSize);
+    layers[currentDepth] = calculateLayer(currentLayer, dir, rayStepSizeSingle, halfSize);
     vec3 rayStepSize = vec3(halfSize) * abs(rayStepSizeSingle);
 
     int iter = 0;
 
-    int nodeStack[8];
-    nodeStack[0] = 0;
+    vec2 nodeStack[8];
+    nodeStack[currentDepth].y = 0.0f;
     // TODO может просто хранить лишь индексы нод и отказаться от стека лееров, ведь их легче просто каждый раз вычислять
     while (iter++ < 500) {
-        currentLayer = layers[currentLOCID][currentDepth];
+        currentLayer = layers[currentDepth];
         currentNode = nodes[currentLayer.nodeIndex];
 
         const int subIndex = getSubIndexFromSubVector(currentLayer.subVec);
@@ -99,22 +163,30 @@ vec4 castRay(in vec3 rayDirection) {
         } else if (currentNode.sub != -1) {
             const Node subNode = nodes[currentNode.sub + subIndex];
             if (subNode.color.a != -1.0f) {
+                if (debug_voxel == ivec3(subNode.position)) {
+                    return vec4(1, 0, 0, 1);
+                } else if (front_voxel == ivec3(subNode.position)) {
+                    return vec4(1, 1, 0, 1);
+                }
                 return subNode.color;//vec4(10.0f / iter, 10.0f / iter, 10.0f / iter, 1.0f);
             }
             if (currentDepth != 0) { // If currentDepth == 0 this node empty and have voxel neighbour
+                // Start subRaycast
+                Layer newLayer;
+
                 currentDepth--;
                 rayStepSize *= 0.5f;
                 halfSize /= 2;
 
-                // Start subRaycast
-                Layer newLayer;
+                nodeStack[currentDepth].y = nodeStack[currentDepth + 1].y + currentLayer.distance;
+
                 newLayer.nodeIndex = currentNode.sub + subIndex;
-                newLayer.position = currentLayer.position + currentLayer.distance * rayDirection - vec3(halfSize * 2 * currentLayer.subVec);
-                layers[currentLOCID][currentDepth] = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
+                newLayer.position = currentLayer.position + currentLayer.distance * rayDirection - vec3(halfSize * 2 * currentLayer.subVec);//new method start_position + nodeStack[currentDepth].y * rayDirection - vec3(subNode.position);
+                layers[currentDepth] = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
                 continue;
             }
         }
-        moveLayer(layers[currentLOCID][currentDepth], step, rayStepSize);
+        moveLayer(layers[currentDepth], step, rayStepSize);
     }
     return vec4(0, 0, 0, 0);
 }
@@ -133,8 +205,6 @@ void main() {
     rotate(rayDir, vec3(0, 1, 0), camera_angles.x);
 
     HitPoint result;
-    barrier();
-    memoryBarrierShared();
     imageStore(img_output, pixel_coord, castRay(rayDir));
 }
 

@@ -26,7 +26,7 @@ void Octree::setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 col
         currentNode.setVoxel(color);
         nodes[index] = currentNode;
         return;
-    } // else go deeper, AND INCREMENT DEPTH!!!
+    } // else go deeper
 
     if (currentNode.isEmpty()) {
         currentNode.divide(nodes);
@@ -165,6 +165,99 @@ Layer calculateLayer(Layer &layer, const glm::ivec3& dir, const glm::vec3& raySt
     layer.distance = 0.0f;
     layer.rayLength = (glm::vec3(layer.subVec + dir) * float(layer.halfSize) - layer.position) * rayStepSizeSingle;
     return layer;
+}
+
+Layer calculateLayerD(Layer &layer, const glm::ivec3 &dir, const glm::vec3 &rayStepSizeSingle, const int halfSize) {
+    layer.subVec = glm::ivec3(layer.position) / halfSize;
+    layer.rayLength = (glm::vec3(layer.subVec + dir) * float(halfSize) - layer.position) * rayStepSizeSingle;
+    layer.distance = 0.0f;
+    return layer;
+}
+
+Octree::DebugCast Octree::castDRay(const glm::vec3& rayDirection, const glm::vec3& start_position) {
+    DebugCast debugCast;
+    debugCast.voxelPos = glm::ivec3(-1, -21, -1);
+
+    const glm::vec3 rayStepSizeSingle = 1.0f / rayDirection;
+    const glm::ivec3 step = glm::ivec3(glm::sign(rayDirection));
+    const glm::ivec3 dir = glm::max(step, 0);
+
+    int currentDepth = maxDepth - 1;
+
+    Node currentNode = nodes[0];
+    int halfSize = currentNode.halfSize;
+    glm::vec3 rayStepSize = glm::vec3(halfSize) * glm::abs(rayStepSizeSingle);
+
+    glm::vec2 nodeStack[8];
+    nodeStack[currentDepth].x = 0; // NodeID
+    nodeStack[currentDepth].y = 0; // lastDist =)
+    Layer currentLayer;
+    currentLayer.position = start_position;
+    currentLayer = calculateLayerD(currentLayer, dir, rayStepSizeSingle, halfSize);
+
+    int iter = 0;
+    while (iter++ < 500) {
+        const int subIndex = getSubIndexFromSubVector(currentLayer.subVec);
+        if (subIndex < 0) {
+            if (currentDepth == maxDepth) {
+                debugCast.voxelPos = glm::ivec3(-21, -21, -1);
+                return debugCast;
+            }
+            Layer newLayer;
+
+            currentDepth++;
+            rayStepSize *= 2;
+            halfSize *= 2;
+
+            currentNode = nodes[int(nodeStack[currentDepth].x)];
+            newLayer.position = start_position + nodeStack[currentDepth].y * rayDirection - glm::vec3(currentNode.position);
+            currentLayer = calculateLayerD(newLayer, dir, rayStepSizeSingle, halfSize);
+        } else if (currentNode.sub != -1) {
+            const int nodeIndex = currentNode.sub + subIndex;
+            const Node subNode = nodes[nodeIndex];
+            if (subNode.color.a != -1.0f) {
+                debugCast.voxelPos = glm::vec3(subNode.position);
+                return debugCast;//vec4(10.0f / iter, 10.0f / iter, 10.0f / iter, 1.0f);
+            }
+            if (currentDepth != 0) { // If currentDepth == 0 this node empty and have voxel neighbour
+                // Start subRaycast
+                Layer newLayer;
+
+                currentDepth--;
+                rayStepSize *= 0.5f;
+                halfSize /= 2;
+
+                nodeStack[currentDepth].y = nodeStack[currentDepth + 1].y + currentLayer.distance;
+                nodeStack[currentDepth].x = nodeIndex;
+                currentNode = subNode;
+                newLayer.position = start_position + nodeStack[currentDepth].y * rayDirection - glm::vec3(currentNode.position);
+                currentLayer = calculateLayerD(newLayer, dir, rayStepSizeSingle, halfSize);
+                continue;
+            }
+        }
+        if (currentLayer.rayLength.x < currentLayer.rayLength.y) {
+            if (currentLayer.rayLength.x < currentLayer.rayLength.z) {
+                currentLayer.distance = currentLayer.rayLength.x;
+                currentLayer.rayLength.x += rayStepSize.x;
+                currentLayer.subVec.x += step.x;
+            } else {
+                currentLayer.distance = currentLayer.rayLength.z;
+                currentLayer.rayLength.z += rayStepSize.z;
+                currentLayer.subVec.z += step.z;
+            }
+        } else {
+            if (currentLayer.rayLength.y < currentLayer.rayLength.z) {
+                currentLayer.distance = currentLayer.rayLength.y;
+                currentLayer.rayLength.y += rayStepSize.y;
+                currentLayer.subVec.y += step.y;
+            } else {
+                currentLayer.distance = currentLayer.rayLength.z;
+                currentLayer.rayLength.z += rayStepSize.z;
+                currentLayer.subVec.z += step.z;
+            }
+        }
+    }
+    return debugCast;
 }
 
 Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position) {

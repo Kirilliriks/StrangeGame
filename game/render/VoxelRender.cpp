@@ -42,7 +42,7 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
 }
 
 void VoxelRender::update(double deltaTime) {
-    debugCast = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
+    debugCast = octree.castDRay(camera.getDirection(), camera.getPosition());
     const glm::ivec4 v = octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
     frontVoxel = glm::vec3(v);
     debugCast.iterationsF = v.w;
@@ -55,8 +55,9 @@ void VoxelRender::render(double deltaTime) {
     glUniform2f(3, camera.getYaw(), camera.getPitch());
     glUniform2f(4, window->width, window->height);
     glUniform3i(5, frontVoxel.x, frontVoxel.y, frontVoxel.z);
+    glUniform3i(6, debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
 
-    glDispatchCompute(window->width / groupSize, window->height / groupSize, 1);
+    glDispatchCompute(window->width, window->height, 1);
 
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -71,9 +72,11 @@ void VoxelRender::imgui(double deltaTime) {
     static glm::ivec3 lastPos = glm::ivec3(0, 0, 0);
     /// TODO
     ImGui::Begin("Info window");
-    ImGui::SetWindowSize(ImVec2(200, 100));
+    ImGui::SetWindowCollapsed(false);
+    ImGui::SetWindowSize(ImVec2(200, 150));
     ImGui::Text("Cam x=%d y=%d z=%d", (int)camera.getX(), (int)camera.getY(), (int)camera.getZ());
     ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
+    ImGui::Text("Try x=%d y=%d z=%d", debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
     ImGui::Text("Iterations SVO %d", debugCast.iterations);
     ImGui::Text("Iterations FORW %d", debugCast.iterationsF);
     ImGui::End();
