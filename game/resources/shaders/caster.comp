@@ -16,8 +16,12 @@ layout(std430, binding=4) readonly buffer Octree_data {
 };
 
 struct HitPoint {
+    float distance;
     bool hit;
     vec3 color;
+
+    bool debug;
+    ivec3 debugPos;
 };
 
 layout(rgba32f) uniform image2D img_output;
@@ -100,6 +104,7 @@ bool findVoxel(in ivec3 voxelPos, inout HitPoint result) {
 vec4 debugCast(in vec3 rayDirection) {
     HitPoint result;
     result.hit = false;
+    result.distance = 0.0f;
 
     const vec3 rayStepSize = abs(1.0f / rayDirection);
     vec3 rayLength;
@@ -143,27 +148,25 @@ int getSubIndexFromSubVector(in const ivec3 vec) {
     return subIndex;
 }
 
-// TODO Как выяснилось лучше вычислять элементы если возможно чем хранить промежуточный результат вычисления (на удивление)
-// TODO Я просто добавил shared и оно полетело, видимо у Shader'ов проблемы с выделением памяти =(
-shared struct Layer {
+struct Layer {
     int nodeIndex;
     vec3 position;
     ivec3 subVec;
     vec3 rayLength;
     float distance;
-} layers[8];
+};
 
 Layer calculateLayer(inout Layer layer, in const ivec3 dir, in const vec3 rayStepSizeSingle, in const int halfSize) {
-    layer.subVec = clamp(ivec3(layer.position) / halfSize, 0, 1);
+    layer.subVec = min(ivec3(layer.position) / halfSize, 1);
     layer.rayLength = (vec3(layer.subVec + dir) * float(halfSize) - layer.position) * rayStepSizeSingle;
     layer.distance = 0.0f;
     return layer;
 }
 
 void moveLayer(inout Layer currentLayer, in const ivec3 step, in const vec3 rayStepSize) {
-    const vec3 mask = vec3(lessThanEqual(currentLayer.rayLength.xyz, min(currentLayer.rayLength.yzx, currentLayer.rayLength.zxy)));
-    currentLayer.distance = length(mask * currentLayer.rayLength);
-    currentLayer.rayLength += mask * rayStepSize;
+    const bvec3 mask = lessThanEqual(currentLayer.rayLength.xyz, min(currentLayer.rayLength.yzx, currentLayer.rayLength.zxy));
+    currentLayer.distance = length(vec3(mask) * currentLayer.rayLength);
+    currentLayer.rayLength += vec3(mask) * rayStepSize;
     currentLayer.subVec += ivec3(mask) * step;
 }
 
@@ -173,6 +176,7 @@ vec4 castRay(in vec3 rayDirection) {
     const ivec3 dir = max(step, 0);
     const int maxDepth = 8;
 
+    Layer layers[8];
     int currentDepth = maxDepth - 1;
     Layer currentLayer;
     Node currentNode = nodes[0];
@@ -199,7 +203,7 @@ vec4 castRay(in vec3 rayDirection) {
             if (subNode.color.a != -1.0f) {
                 return vec4(10.0f / iter, 10.0f / iter, 10.0f / iter, 1.0f);
             }
-            if (currentDepth != 0) { // If currentDepth == 0 this node empty and have voxel neighbour
+            if (currentDepth != 0) { // If currentDepth == 1 this node have voxel neighbour,
                 currentDepth--;
                 rayStepSize *= 0.5f;
                 halfSize /= 2;
@@ -212,14 +216,15 @@ vec4 castRay(in vec3 rayDirection) {
                 continue;
             }
         }
+
         moveLayer(layers[currentDepth], step, rayStepSize);
     }
     return vec4(0, 0, 0, 0);
 }
 
-void rotate(inout vec3 v, const in vec3 axis, float theta) {
+vec3 rotate(const in vec3 v, const in vec3 axis, float theta) {
     const float cos_theta = cos(theta);
-    v = (v * cos_theta) + (cross(axis, v) * sin(theta)) + (axis * dot(axis, v)) * (1 - cos_theta);
+    return (v * cos_theta) + (cross(axis, v) * sin(theta)) + (axis * dot(axis, v)) * (1 - cos_theta);
 }
 
 void main() {
@@ -227,8 +232,8 @@ void main() {
     const ivec3 screen_coord = ivec3(pixel_coord - ivec2(window_size.x / 2, window_size.y / 2), window_size.x);
 
     vec3 rayDir = normalize(screen_coord);
-    rotate(rayDir, vec3(1, 0, 0), camera_angles.y);
-    rotate(rayDir, vec3(0, 1, 0), camera_angles.x);
+    rayDir = rotate(rayDir, vec3(1, 0, 0), camera_angles.y);
+    rayDir = rotate(rayDir, vec3(0, 1, 0), camera_angles.x);
 
     HitPoint result;
     imageStore(img_output, pixel_coord, castRay(rayDir));
