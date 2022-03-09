@@ -38,12 +38,15 @@ private:
     GLuint windowBuffer;
 
     GLuint worldBufferID;
+    GLuint layersBufferID;
 
     Octree octree;
 
     RaycastShader *rayShader;
     Octree::DebugCast debugCast;
     glm::ivec3 frontVoxel;
+
+    int groupSize = 8;
 };
 
 

@@ -2,7 +2,16 @@
 
 precision highp float;
 
-layout(local_size_x = 1, local_size_y = 1) in;
+layout(local_size_x = 8, local_size_y = 8) in;
+int currentLOCID = int(gl_LocalInvocationIndex);
+
+shared struct Layer {
+    vec3 position;
+    int nodeIndex;
+    ivec3 subVec;
+    vec3 rayLength;
+    float distance;
+} layers[64][8];
 
 struct Node {
     ivec4 position;
@@ -11,13 +20,13 @@ struct Node {
     int sub;
 };
 
-layout(std430, binding=4) readonly buffer Octree_data {
-    Node nodes[];
-};
-
 struct HitPoint {
     bool hit;
     vec3 color;
+};
+
+layout(std430, binding=4) readonly buffer Octree_data {
+    Node nodes[];
 };
 
 layout(rgba32f) uniform image2D img_output;
@@ -30,6 +39,107 @@ layout(location=4) uniform vec2 window_size;
 
 layout(location=5) uniform ivec3 front_voxel;
 
+int getSubIndexFromSubVector(in const ivec3 vec) {
+    int subIndex = 0;
+
+    if (min(vec.x, min(vec.y, vec.z)) < 0 || max(vec.x, max(vec.y, vec.z)) > 1) return -1;
+
+    subIndex |= (vec.x >= 1 ? 2 : 0);
+    subIndex |= (vec.y >= 1 ? 4 : 0);
+    subIndex |= (vec.z >= 1 ? 1 : 0);
+
+    return subIndex;
+}
+
+Layer calculateLayer(inout Layer layer, in const ivec3 dir, in const vec3 rayStepSizeSingle, in const int halfSize) {
+    layer.subVec = clamp(ivec3(layer.position) / halfSize, 0, 1);
+    layer.rayLength = (vec3(layer.subVec + dir) * float(halfSize) - layer.position) * rayStepSizeSingle;
+    layer.distance = 0.0f;
+    return layer;
+}
+
+void moveLayer(inout Layer currentLayer, in const ivec3 step, in const vec3 rayStepSize) {
+    const vec3 mask = vec3(lessThanEqual(currentLayer.rayLength.xyz, min(currentLayer.rayLength.yzx, currentLayer.rayLength.zxy)));
+    currentLayer.distance = length(mask * currentLayer.rayLength);
+    currentLayer.rayLength += mask * rayStepSize;
+    currentLayer.subVec += ivec3(mask) * step;
+}
+
+vec4 castRay(in vec3 rayDirection) {
+    const vec3 rayStepSizeSingle = 1.0f / rayDirection;
+    const ivec3 step = ivec3(sign(rayDirection));
+    const ivec3 dir = max(step, 0);
+    const int maxDepth = 8;
+
+    int currentDepth = maxDepth - 1;
+    Layer currentLayer;
+    Node currentNode = nodes[0];
+    currentLayer.nodeIndex = 0;
+    currentLayer.position = start_position;
+
+    int halfSize = currentNode.halfSize;
+    layers[currentLOCID][currentDepth] = calculateLayer(currentLayer, dir, rayStepSizeSingle, halfSize);
+    vec3 rayStepSize = vec3(halfSize) * abs(rayStepSizeSingle);
+
+    int iter = 0;
+
+    int nodeStack[8];
+    nodeStack[0] = 0;
+    // TODO может просто хранить лишь индексы нод и отказаться от стека лееров, ведь их легче просто каждый раз вычислять
+    while (iter++ < 500) {
+        currentLayer = layers[currentLOCID][currentDepth];
+        currentNode = nodes[currentLayer.nodeIndex];
+
+        const int subIndex = getSubIndexFromSubVector(currentLayer.subVec);
+        if (subIndex < 0) {
+            if (currentDepth == maxDepth) return vec4(0, 0, 0, 0);
+            currentDepth++;
+            rayStepSize *= 2;
+            halfSize *= 2;
+        } else if (currentNode.sub != -1) {
+            const Node subNode = nodes[currentNode.sub + subIndex];
+            if (subNode.color.a != -1.0f) {
+                return subNode.color;//vec4(10.0f / iter, 10.0f / iter, 10.0f / iter, 1.0f);
+            }
+            if (currentDepth != 0) { // If currentDepth == 0 this node empty and have voxel neighbour
+                currentDepth--;
+                rayStepSize *= 0.5f;
+                halfSize /= 2;
+
+                // Start subRaycast
+                Layer newLayer;
+                newLayer.nodeIndex = currentNode.sub + subIndex;
+                newLayer.position = currentLayer.position + currentLayer.distance * rayDirection - vec3(halfSize * 2 * currentLayer.subVec);
+                layers[currentLOCID][currentDepth] = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
+                continue;
+            }
+        }
+        moveLayer(layers[currentLOCID][currentDepth], step, rayStepSize);
+    }
+    return vec4(0, 0, 0, 0);
+}
+
+void rotate(inout vec3 v, const in vec3 axis, float theta) {
+    const float cos_theta = cos(theta);
+    v = (v * cos_theta) + (cross(axis, v) * sin(theta)) + (axis * dot(axis, v)) * (1 - cos_theta);
+}
+
+void main() {
+    const ivec2 pixel_coord = ivec2(gl_GlobalInvocationID.xy);
+    const ivec3 screen_coord = ivec3(pixel_coord - ivec2(window_size.x / 2, window_size.y / 2), window_size.x);
+
+    vec3 rayDir = normalize(screen_coord);
+    rotate(rayDir, vec3(1, 0, 0), camera_angles.y);
+    rotate(rayDir, vec3(0, 1, 0), camera_angles.x);
+
+    HitPoint result;
+    barrier();
+    memoryBarrierShared();
+    imageStore(img_output, pixel_coord, castRay(rayDir));
+}
+
+
+/*
 bool nodeIsLeaf(in Node node) {
     return node.color.a != -1.0f;
 }
@@ -130,106 +240,4 @@ vec4 debugCast(in vec3 rayDirection) {
     }
     return vec4(result.color, 1.0f);
 }
-
-int getSubIndexFromSubVector(in const ivec3 vec) {
-    int subIndex = 0;
-
-    if (min(vec.x, min(vec.y, vec.z)) < 0 || max(vec.x, max(vec.y, vec.z)) > 1) return -1;
-
-    subIndex |= (vec.x >= 1 ? 2 : 0);
-    subIndex |= (vec.y >= 1 ? 4 : 0);
-    subIndex |= (vec.z >= 1 ? 1 : 0);
-
-    return subIndex;
-}
-
-// TODO Как выяснилось лучше вычислять элементы если возможно чем хранить промежуточный результат вычисления (на удивление)
-// TODO Я просто добавил shared и оно полетело, видимо у Shader'ов проблемы с выделением памяти =(
-shared struct Layer {
-    int nodeIndex;
-    vec3 position;
-    ivec3 subVec;
-    vec3 rayLength;
-    float distance;
-} layers[8];
-
-Layer calculateLayer(inout Layer layer, in const ivec3 dir, in const vec3 rayStepSizeSingle, in const int halfSize) {
-    layer.subVec = clamp(ivec3(layer.position) / halfSize, 0, 1);
-    layer.rayLength = (vec3(layer.subVec + dir) * float(halfSize) - layer.position) * rayStepSizeSingle;
-    layer.distance = 0.0f;
-    return layer;
-}
-
-void moveLayer(inout Layer currentLayer, in const ivec3 step, in const vec3 rayStepSize) {
-    const vec3 mask = vec3(lessThanEqual(currentLayer.rayLength.xyz, min(currentLayer.rayLength.yzx, currentLayer.rayLength.zxy)));
-    currentLayer.distance = length(mask * currentLayer.rayLength);
-    currentLayer.rayLength += mask * rayStepSize;
-    currentLayer.subVec += ivec3(mask) * step;
-}
-
-vec4 castRay(in vec3 rayDirection) {
-    const vec3 rayStepSizeSingle = 1.0f / rayDirection;
-    const ivec3 step = ivec3(sign(rayDirection));
-    const ivec3 dir = max(step, 0);
-    const int maxDepth = 8;
-
-    int currentDepth = maxDepth - 1;
-    Layer currentLayer;
-    Node currentNode = nodes[0];
-    currentLayer.nodeIndex = 0;
-    currentLayer.position = start_position;
-
-    int halfSize = currentNode.halfSize;
-    layers[currentDepth] = calculateLayer(currentLayer, dir, rayStepSizeSingle, halfSize);
-    vec3 rayStepSize = vec3(halfSize) * abs(rayStepSizeSingle);
-
-    int iter = 0;
-    while (iter++ < 500) {
-        currentLayer = layers[currentDepth];
-        currentNode = nodes[currentLayer.nodeIndex];
-
-        const int subIndex = getSubIndexFromSubVector(currentLayer.subVec);
-        if (subIndex < 0) {
-            if (currentDepth == maxDepth) return vec4(0, 0, 0, 0);
-            currentDepth++;
-            rayStepSize *= 2;
-            halfSize *= 2;
-        } else if (currentNode.sub != -1) {
-            const Node subNode = nodes[currentNode.sub + subIndex];
-            if (subNode.color.a != -1.0f) {
-                return subNode.color;//vec4(10.0f / iter, 10.0f / iter, 10.0f / iter, 1.0f);
-            }
-            if (currentDepth != 0) { // If currentDepth == 0 this node empty and have voxel neighbour
-                currentDepth--;
-                rayStepSize *= 0.5f;
-                halfSize /= 2;
-
-                // Start subRaycast
-                Layer newLayer;
-                newLayer.nodeIndex = currentNode.sub + subIndex;
-                newLayer.position = currentLayer.position + currentLayer.distance * rayDirection - vec3(halfSize * 2 * currentLayer.subVec);
-                layers[currentDepth] = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
-                continue;
-            }
-        }
-        moveLayer(layers[currentDepth], step, rayStepSize);
-    }
-    return vec4(0, 0, 0, 0);
-}
-
-void rotate(inout vec3 v, const in vec3 axis, float theta) {
-    const float cos_theta = cos(theta);
-    v = (v * cos_theta) + (cross(axis, v) * sin(theta)) + (axis * dot(axis, v)) * (1 - cos_theta);
-}
-
-void main() {
-    const ivec2 pixel_coord = ivec2(gl_GlobalInvocationID.xy);
-    const ivec3 screen_coord = ivec3(pixel_coord - ivec2(window_size.x / 2, window_size.y / 2), window_size.x);
-
-    vec3 rayDir = normalize(screen_coord);
-    rotate(rayDir, vec3(1, 0, 0), camera_angles.y);
-    rotate(rayDir, vec3(0, 1, 0), camera_angles.x);
-
-    HitPoint result;
-    imageStore(img_output, pixel_coord, castRay(rayDir));
-}
+*/

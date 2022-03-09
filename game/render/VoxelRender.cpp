@@ -56,7 +56,7 @@ void VoxelRender::render(double deltaTime) {
     glUniform2f(4, window->width, window->height);
     glUniform3i(5, frontVoxel.x, frontVoxel.y, frontVoxel.z);
 
-    glDispatchCompute(window->width, window->height, 1);
+    glDispatchCompute(window->width / groupSize, window->height / groupSize, 1);
 
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -84,7 +84,7 @@ void VoxelRender::imgui(double deltaTime) {
 void VoxelRender::createWorld() {
     std::random_device dev;
     std::mt19937 rng(dev());
-    std::uniform_int_distribution<int> rand(-1024,1024);
+    std::uniform_int_distribution<int> rand(0,100);
     int seed = rand(rng);
     for (int z = 0; z < worldSize; z++) {
         for (int x = 0; x < worldSize; x++) {
