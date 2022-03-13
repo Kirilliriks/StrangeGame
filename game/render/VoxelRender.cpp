@@ -77,7 +77,7 @@ void VoxelRender::imgui(double deltaTime) {
     ImGui::Text("Cam x=%d y=%d z=%d", (int)camera.getX(), (int)camera.getY(), (int)camera.getZ());
     ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
     ImGui::Text("Try x=%d y=%d z=%d", debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
-    ImGui::Text("Iterations SVO %d", debugCast.iterations);
+    ImGui::Text("Error SVO %d", debugCast.iterations);
     ImGui::Text("Iterations FORW %d", debugCast.iterationsF);
     ImGui::End();
     ImGui::Render();
