@@ -3,8 +3,6 @@
 //
 #include "Node.h"
 
-#include <iostream>
-
 Node::Node(int size, glm::ivec3 position) {
     this->halfSize = size / 2;
     this->position = glm::vec4(position, 0.0f);

@@ -38,7 +38,6 @@ private:
     GLuint windowBuffer;
 
     GLuint worldBufferID;
-    GLuint layersBufferID;
 
     Octree octree;
 
