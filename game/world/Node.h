@@ -7,7 +7,6 @@
 
 #include <vector>
 #include "glm/glm.hpp"
-#include "../utils/Color.h"
 
 struct Node {
     Node(int size, glm::ivec3 position);
