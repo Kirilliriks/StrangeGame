@@ -10,7 +10,7 @@
 #include "imgui_impl_glfw.h"
 
 int main() {
-    Window *window = new Window();
+    auto window = new Window();
 
     GLFWwindow *glWindow = window->getGLWindow();
     Game *game = new Game(window);
