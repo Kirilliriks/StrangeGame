@@ -2,7 +2,7 @@
 
 precision highp float;
 
-layout(local_size_x = 1, local_size_y = 1) in;
+layout(local_size_x = 8, local_size_y = 8) in;
 
 shared struct Layer {
     vec3 position;
@@ -10,7 +10,9 @@ shared struct Layer {
     ivec3 subVec;
     vec3 rayLength;
     float distance;
-} layers[8];
+} layers[8][64];
+
+uint localID = gl_LocalInvocationID.x  + gl_LocalInvocationID.y * 8;
 
 struct Node {
     ivec4 position;
@@ -77,13 +79,13 @@ vec4 castRay(in vec3 rayDirection) {
     currentLayer.position = start_position;
 
     int halfSize = currentNode.halfSize;
-    layers[currentDepth] = calculateLayer(currentLayer, dir, rayStepSizeSingle, halfSize);
+    layers[currentDepth][localID] = calculateLayer(currentLayer, dir, rayStepSizeSingle, halfSize);
     vec3 rayStepSize = vec3(halfSize) * abs(rayStepSizeSingle);
 
     int iter = 0;
 
     while (iter++ < 500) {
-        currentLayer = layers[currentDepth];
+        currentLayer = layers[currentDepth][localID];
         currentNode = nodes[currentLayer.nodeIndex];
 
         const int subIndex = getSubIndexFromSubVector(currentLayer.subVec);
@@ -96,9 +98,10 @@ vec4 castRay(in vec3 rayDirection) {
             const int subNodexIndex = currentNode.sub + subIndex;
             currentNode = nodes[subNodexIndex];
             if (currentNode.color.a != -1.0f) {
-                if (debug_voxel == ivec3(currentNode.position)) {
-                    return vec4(1, 0, 0, 1);
-                } else if (front_voxel == ivec3(currentNode.position)) {
+                //if (debug_voxel == ivec3(currentNode.position)) {
+                //    return vec4(1, 0, 0, 1);
+                //} else
+                if (front_voxel == ivec3(currentNode.position)) {
                     return vec4(1, 1, 0, 1);
                 }
                 return currentNode.color;//vec4(10.0f / iter, 10.0f / iter, 10.0f / iter, 1.0f);
@@ -113,11 +116,11 @@ vec4 castRay(in vec3 rayDirection) {
 
                 newLayer.nodeIndex = subNodexIndex;
                 newLayer.position = currentLayer.position + currentLayer.distance * rayDirection - vec3(halfSize * 2 * currentLayer.subVec);
-                layers[currentDepth] = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
+                layers[currentDepth][localID] = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
                 continue;
             }
         }
-        moveLayer(layers[currentDepth], step, rayStepSize);
+        moveLayer(layers[currentDepth][localID], step, rayStepSize);
     }
     return vec4(0, 0, 0, 0);
 }
@@ -204,11 +207,11 @@ vec4 debugCast(in vec3 rayDirection) {
         rayLength += vec3(mask) * rayStepSize;
         voxelPos += ivec3(vec3(mask)) * step;
 
-        if (debug_voxel == ivec3(voxelPos)) {
-            return vec4(1, 0, 0, 1);
-        } else if (front_voxel == ivec3(voxelPos)) {
-            return vec4(1, 1, 0, 1);
-        }
+//        if (debug_voxel == ivec3(voxelPos)) {
+//            return vec4(1, 0, 0, 1);
+//        } else if (front_voxel == ivec3(voxelPos)) {
+//            return vec4(1, 1, 0, 1);
+//        }
 
         if (findVoxel(voxelPos, color)) {
             return vec4(color, 1.0f);
@@ -230,7 +233,7 @@ void main() {
     rotate(rayDir, vec3(1, 0, 0), camera_angles.y);
     rotate(rayDir, vec3(0, 1, 0), camera_angles.x);
 
-    imageStore(img_output, pixel_coord, debugCast(rayDir));
+    imageStore(img_output, pixel_coord, castRay(rayDir));
 }
 
 

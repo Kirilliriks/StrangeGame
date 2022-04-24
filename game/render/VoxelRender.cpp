@@ -57,7 +57,7 @@ void VoxelRender::render(double deltaTime) {
     glUniform3i(5, frontVoxel.x, frontVoxel.y, frontVoxel.z);
     glUniform3i(6, debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
 
-    glDispatchCompute(window->width, window->height, 1);
+    glDispatchCompute(window->width / 8, window->height / 8, 1);
 
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 

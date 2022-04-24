@@ -10,8 +10,8 @@
 #include <iostream>
 
 Window::Window() {
-    width = 320;
-    height = 200;
+    width = 1280;
+    height = 800;
 
     if(!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
