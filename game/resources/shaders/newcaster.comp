@@ -30,8 +30,6 @@ layout(location=3) uniform vec2 camera_angles;
 layout(location=4) uniform vec2 window_size;
 
 int getSubIndex(in ivec3 vec, in ivec4 pos, in int halfSize) {
-    int subIndex = 0;
-
     if (vec.x < pos.x) return -1;
     if (vec.y < pos.y) return -2;
     if (vec.z < pos.z) return -3;
@@ -41,6 +39,7 @@ int getSubIndex(in ivec3 vec, in ivec4 pos, in int halfSize) {
     if (vec.y > pos.y + size) return -5;
     if (vec.z > pos.z + size) return -6;
 
+    int subIndex = 0;
     subIndex |= vec.x >= pos.x + halfSize? 2 : 0;
     subIndex |= vec.y >= pos.y + halfSize? 4 : 0;
     subIndex |= vec.z >= pos.z + halfSize? 1 : 0;
