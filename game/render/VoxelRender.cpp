@@ -42,10 +42,9 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
 }
 
 void VoxelRender::update(double deltaTime) {
-    debugCast = octree.castDRay(camera.getDirection(), camera.getPosition());
-    const glm::ivec4 v = octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
+    debugCast = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
+    const glm::ivec3 v = debugCast.voxelPos;//octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
     frontVoxel = glm::vec3(v);
-    debugCast.iterationsF = v.w;
 }
 
 void VoxelRender::render(double deltaTime) {
@@ -54,7 +53,7 @@ void VoxelRender::render(double deltaTime) {
     glUniform3f(2, camera.getX(), camera.getY(), camera.getZ());
     glUniform2f(3, camera.getYaw(), camera.getPitch());
     glUniform2f(4, window->width, window->height);
-    glUniform3i(5, frontVoxel.x, frontVoxel.y, frontVoxel.z);
+    glUniform3i(5, debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
     glUniform3i(6, debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
 
     glDispatchCompute(window->width / 8, window->height / 8, 1);
@@ -62,8 +61,6 @@ void VoxelRender::render(double deltaTime) {
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
     shader.bind();
-    glUniform3f(2, camera.getX(), camera.getY(), camera.getZ());
-    glUniform2f(3, camera.getYaw(), camera.getPitch());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     shader.unbind();
 }

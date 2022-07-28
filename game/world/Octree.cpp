@@ -132,21 +132,12 @@ glm::ivec4 Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& 
 }
 
 int getSubIndexFromSubVector(const glm::ivec3& vec) {
+    if (glm::min(vec.x, glm::min(vec.y, vec.z)) < 0 || glm::max(vec.x, glm::max(vec.y, vec.z)) > 1) return -1;
+
     int subIndex = 0;
-
-    if (vec.x < 0) return -1;
-    if (vec.y < 0) return -2;
-    if (vec.z < 0) return -3;
-
-
-    if (vec.x > 1) return -4;
-    if (vec.y > 1) return -5;
-    if (vec.z > 1) return -6;
-
     subIndex |= (vec.x >= 1 ? 2 : 0);
     subIndex |= (vec.y >= 1 ? 4 : 0);
     subIndex |= (vec.z >= 1 ? 1 : 0);
-
     return subIndex;
 }
 
@@ -164,6 +155,13 @@ Layer calculateLayer(Layer &layer, const glm::ivec3& dir, const glm::vec3& raySt
     layer.subVec = glm::ivec3(layer.position) / layer.halfSize;
     layer.distance = 0.0f;
     layer.rayLength = (glm::vec3(layer.subVec + dir) * float(layer.halfSize) - layer.position) * rayStepSizeSingle;
+    return layer;
+}
+
+Layer calculateLayer(Layer &layer, const glm::ivec3& dir, const glm::vec3& rayStepSizeSingle, const int halfSize) {
+    layer.subVec = glm::clamp(glm::ivec3(layer.position) / halfSize, 0, 1);
+    layer.rayLength = (glm::vec3(layer.subVec + dir) * float(halfSize) - layer.position) * rayStepSizeSingle;
+    layer.distance = 0.0f;
     return layer;
 }
 
@@ -278,18 +276,19 @@ Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm:
     const glm::ivec3 dir = glm::max(step, 0);
 
     Layer layers[maxDepth + 1];
+
+    int currentDepth = maxDepth - 1;
     Layer currentLayer;
     Node currentNode = nodes[0];
     currentLayer.nodeIndex = 0;
-    currentLayer.halfSize = currentNode.halfSize;
     currentLayer.position = start_position;
-    currentLayer.distance = 0.0f;
-    layers[maxDepth] = calculateLayer(currentLayer, dir, rayStepSizeSingle);
 
-    int currentDepth = maxDepth;
+    int halfSize = currentNode.halfSize;
+    glm::vec3 rayStepSize = glm::vec3(halfSize) * glm::abs(rayStepSizeSingle);
+
+    layers[currentDepth] = calculateLayer(currentLayer, dir, rayStepSizeSingle, halfSize);
+
     float realDistance = 0.0f;
-
-    glm::vec3 rayStepSize = glm::vec3(currentLayer.halfSize) * glm::abs(rayStepSizeSingle);
     while (iter++ < 500) {
         currentLayer = layers[currentDepth];
         currentNode = nodes[currentLayer.nodeIndex];
@@ -297,25 +296,33 @@ Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm:
         const int subIndex = getSubIndexFromSubVector(currentLayer.subVec);
         if (subIndex < 0) {
             currentDepth++;
-            if (currentDepth > maxDepth) return debugCast;
+            if (currentDepth == maxDepth) return debugCast;
+
             rayStepSize *= 2;
+            halfSize *= 2;
         } else if (currentNode.sub != -1) {
-            const Node subNode = nodes[currentNode.sub + subIndex];
-            if (subNode.color.a != -1.0f) {
-                debugCast.voxelPos = glm::ivec3(subNode.position);
+            const int subNodexIndex = currentNode.sub + subIndex;
+            currentNode = nodes[subNodexIndex];
+
+            if (currentNode.color.a != -1.0f) {
+                debugCast.voxelPos = glm::ivec3(currentNode.position);
                 debugCast.iterations = iter;
                 return debugCast;
-            } else if (currentDepth != 1) { // If currentDepth == 1 this node have voxel neighbour,
-                currentDepth--;
-                rayStepSize *= 0.5f;
+            }
 
+            if (currentDepth != 0) { // If currentDepth == 0 this node empty and have voxel neighbour
                 // Start subRaycast
                 Layer newLayer;
-                newLayer.nodeIndex = currentNode.sub + subIndex;
-                newLayer.halfSize = subNode.halfSize;
-                newLayer.position = currentLayer.position + currentLayer.distance * rayDirection - glm::vec3(currentLayer.halfSize * currentLayer.subVec);
-                newLayer.distance = 0.0f;
-                layers[currentDepth] = calculateLayer(newLayer, dir, rayStepSizeSingle);
+
+                currentDepth--;
+                rayStepSize /= 2;
+
+                newLayer.nodeIndex = subNodexIndex;
+                newLayer.position = currentLayer.position + currentLayer.distance * rayDirection - glm::vec3(halfSize * currentLayer.subVec);
+
+                halfSize /= 2;
+
+                layers[currentDepth] = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
 
                 realDistance += currentLayer.distance;
                 continue;
