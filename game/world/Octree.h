@@ -14,6 +14,7 @@ public:
         glm::ivec3 voxelPos;
         int iterations;
         int iterationsF;
+        float distance;
     };
 
     struct HitPoint {

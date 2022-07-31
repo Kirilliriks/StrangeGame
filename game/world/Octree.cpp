@@ -307,6 +307,12 @@ Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm:
             if (currentNode.color.a != -1.0f) {
                 debugCast.voxelPos = glm::ivec3(currentNode.position);
                 debugCast.iterations = iter;
+
+                for (Layer layer : layers) {
+                    realDistance += layer.distance;
+                }
+                debugCast.distance = realDistance;
+
                 return debugCast;
             }
 
@@ -323,8 +329,6 @@ Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm:
                 halfSize /= 2;
 
                 layers[currentDepth] = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
-
-                realDistance += currentLayer.distance;
                 continue;
             }
         }
