@@ -308,9 +308,10 @@ Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm:
                 debugCast.voxelPos = glm::ivec3(currentNode.position);
                 debugCast.iterations = iter;
 
-                for (Layer layer : layers) {
+                for (const Layer& layer : layers) {
                     realDistance += layer.distance;
                 }
+
                 debugCast.distance = realDistance;
 
                 return debugCast;
