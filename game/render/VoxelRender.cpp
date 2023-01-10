@@ -76,6 +76,7 @@ void VoxelRender::imgui(double deltaTime) {
     ImGui::Text("Try x=%d y=%d z=%d", debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
     ImGui::Text("Error SVO %d", debugCast.iterations);
     ImGui::Text("Iterations FORW %d", debugCast.iterationsF);
+    ImGui::Text("Distance %f", debugCast.distance);
     ImGui::End();
     ImGui::Render();
     ///w
