@@ -11,6 +11,7 @@ include_directories(glfw/include)
 include_directories(glm)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -Wextra -std=c++14")
+set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static -lpthread")
 
 set(SOURCE_FILES main.cpp dependency/glad/glad.c)
 add_executable(StrangeGame ${SOURCE_FILES})

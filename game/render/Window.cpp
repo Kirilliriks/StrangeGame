@@ -11,7 +11,7 @@
 
 Window::Window() {
     width = 1280;
-    height = 720;
+    height = 1024;
 
     if(!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
