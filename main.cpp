@@ -32,6 +32,7 @@ int main() {
         game->update(deltaTime); //Update logic + physics
         game->render(deltaTime); //Render voxels
         game->imgui(deltaTime);  //Render develop GUI
+        ImGui::Render();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(glWindow);

@@ -32,6 +32,7 @@ private:
     float pitch;
 
     float speed = 60;
+    bool focused = true;
 };
 
 

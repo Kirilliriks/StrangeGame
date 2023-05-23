@@ -8,8 +8,6 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <string>
-
 Camera::Camera(Window *window) {
     this->window = window;
 
@@ -20,24 +18,6 @@ Camera::Camera(Window *window) {
 }
 
 void Camera::update(double deltaTime, float mouseX, float mouseY) {
-    std::string title;
-    title.append("X ");
-    title.append(std::to_string(position.x));
-    title.append(" y ");
-    title.append(std::to_string(position.y));
-    title.append(" Z ");
-    title.append(std::to_string(position.z));
-    title.append(" DirX ");
-    title.append(std::to_string(direction.x));
-    title.append(" DirY ");
-    title.append(std::to_string(direction.y));
-    title.append(" DirZ ");
-    title.append(std::to_string(direction.z));
-    title.append(" YAW ");
-    title.append(std::to_string(yaw));
-    title.append(" PITCH ");
-    title.append(std::to_string(pitch));
-    glfwSetWindowTitle(window->getGLWindow(), title.c_str());
     glm::vec3 movement = glm::vec3(0.0f, 0.0f, 0.0f);
 
     glm::vec3 movementVector = direction;
@@ -74,12 +54,25 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
         exit(0);
     }
 
+    state = glfwGetKey(glWindow, GLFW_KEY_ENTER);
+    if (state == GLFW_PRESS) {
+        focused = !focused;
+
+        if (focused) {
+            glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        } else {
+            glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+    }
+
     position += glm::vec3(movement.x * deltaTime, movement.y * deltaTime, movement.z * deltaTime);
 
-    yaw = (mouseX - (float)window->width / 2.0f) * 0.005f;
-    pitch = (mouseY - (float)window->height / 2.0f) * 0.005f;
+    if (focused) {
+        yaw = (mouseX - (float) window->width / 2.0f) * 0.005f;
+        pitch = (mouseY - (float) window->height / 2.0f) * 0.005f;
 
-    direction = getDirection();
+        direction = getDirection();
+    }
 }
 
 float Camera::getYaw() {

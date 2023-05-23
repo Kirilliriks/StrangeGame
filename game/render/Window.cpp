@@ -63,6 +63,9 @@ Window::Window() {
     glDepthFunc(GL_LESS);
 
     glClearColor(0, 0, 0, 0);
+
+    const std::string title("Avox");
+    glfwSetWindowTitle(glWindow, title.c_str());
 }
 
 GLFWwindow *Window::getGLWindow() {

@@ -60,23 +60,6 @@ void VoxelRender::render(double deltaTime) {
     shader.unbind();
 }
 
-void VoxelRender::imgui(double deltaTime) {
-    Camera camera = world->getCamera();
-    Octree::DebugCast debugCast = world->getDebugCast();
-    glm::ivec3 frontVoxel = world->getFrontVoxel();
-
-    ImGui::Begin("Info window");
-    ImGui::SetWindowCollapsed(false);
-    ImGui::SetWindowSize(ImVec2(200, 150));
-    ImGui::Text("Cam x=%d y=%d z=%d", (int)camera.getX(), (int)camera.getY(), (int)camera.getZ());
-    ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
-    ImGui::Text("Try x=%d y=%d z=%d", debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
-    ImGui::Text("Distance %f", debugCast.distance);
-    ImGui::End();
-    ImGui::Render();
-    ///w
-}
-
 void VoxelRender::updateWorld() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, worldBufferID);
     glBufferData(GL_SHADER_STORAGE_BUFFER,

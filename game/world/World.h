@@ -18,6 +18,7 @@ public:
     ~World() = default;
 
     void update(double deltaTime);
+    void imgui(double deltaTime);
     void setVoxel(const glm::ivec3& vec, const glm::vec4& color);
     void createWorld();
 

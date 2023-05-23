@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_subdirectory(glfw)
 add_subdirectory(game)
+add_subdirectory(testing)
 
 include_directories(dependency/glad/)
 include_directories(glfw/include)
@@ -24,4 +25,3 @@ file(GLOB IMGUI_SOURCES ${IMGUI_PATH}/*.cpp ${IMGUI_PATH}/*.h)
 add_library("ImGui" STATIC ${IMGUI_SOURCES})
 target_include_directories("ImGui" PUBLIC ${IMGUI_PATH})
 target_link_libraries(StrangeGame ImGui)
-

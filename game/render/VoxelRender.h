@@ -24,7 +24,6 @@ public:
 
     void updateWorld();
     void render(double deltaTime);
-    void imgui(double deltaTime);
 
     GLuint genTexture();
 private:

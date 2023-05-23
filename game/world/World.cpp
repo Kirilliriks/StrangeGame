@@ -5,6 +5,9 @@
 #include "World.h"
 #include <random>
 #include "glm/gtc/noise.hpp"
+#include "imgui.h"
+
+static float editColor[] = {0, 0, 0};
 
 World::World(Game *game) : game(game), camera(game->getWindow()) {
 
@@ -21,9 +24,21 @@ void World::update(double deltaTime) {
 
     int state = glfwGetMouseButton(game->getWindow()->getGLWindow(), GLFW_MOUSE_BUTTON_LEFT);
     if (state == GLFW_PRESS) {
-        octree.setVoxel(v, glm::vec4(255, 0, 0, 255));
+        octree.setVoxel(v, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
         game->getRenderer()->updateWorld();
     }
+}
+
+void World::imgui(double deltaTime) {
+    ImGui::Begin("Info window");
+    ImGui::SetWindowCollapsed(false);
+    ImGui::Text("Cam x=%d y=%d z=%d", (int)camera.getX(), (int)camera.getY(), (int)camera.getZ());
+    ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
+    ImGui::Text("Try x=%d y=%d z=%d", debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
+    ImGui::Text("Distance %f", debugCast.distance);
+
+    ImGui::ColorPicker3("Choose voxel color", editColor);
+    ImGui::End();
 }
 
 void World::setVoxel(const glm::ivec3 &vec, const glm::vec4& color) {

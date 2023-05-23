@@ -19,7 +19,7 @@ void Game::render(double deltaTime) {
 }
 
 void Game::imgui(double deltaTime) {
-    renderer->imgui(deltaTime);
+    world->imgui(deltaTime);
 }
 
 Window *Game::getWindow() {
