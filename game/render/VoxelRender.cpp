@@ -13,9 +13,8 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
     this->game = game;
     window = game->getWindow();
 
-    worldSize = octree.getSize();
-    shader = Shader(R"(D:\StrangeGame\game\resources\shaders\vertex.glsl)",
-                    R"(D:\StrangeGame\game\resources\shaders\fragment.glsl)");
+    shader = Shader(R"(..\game\resources\shaders\vertex.glsl)",
+                    R"(..\game\resources\shaders\fragment.glsl)");
 
     // Create window object(Quad)
     glGenVertexArrays(1, &windowArrayID);
@@ -36,15 +35,23 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
     glEnableVertexAttribArray(posPtr);
 
     genTexture(); // WINDOW TEXTURE
+    glGenBuffers(1, &worldBufferID);
 
-    rayShader = new RaycastShader(R"(D:\StrangeGame\game\resources\shaders\newnewcaster.comp)");
+    rayShader = new RaycastShader(R"(..\game\resources\shaders\newnewcaster.comp)");
     raycastShaderID = rayShader->getHandle();
 }
 
 void VoxelRender::update(double deltaTime) {
-    debugCast = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
+    debugCast = world.getOctree().raycastVoxel(camera.getDirection(), camera.getPosition());
     const glm::ivec3 v = debugCast.voxelPos;//octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
     frontVoxel = glm::vec3(v);
+
+    GLFWwindow * glWindow = window->getGLWindow();
+    int state = glfwGetMouseButton(glWindow, GLFW_MOUSE_BUTTON_LEFT);
+    if (state == GLFW_PRESS) {
+        world.getOctree().setVoxel(v, glm::vec4(255, 0, 0, 255));
+        updateWorld();
+    }
 }
 
 void VoxelRender::render(double deltaTime) {
@@ -74,8 +81,6 @@ void VoxelRender::imgui(double deltaTime) {
     ImGui::Text("Cam x=%d y=%d z=%d", (int)camera.getX(), (int)camera.getY(), (int)camera.getZ());
     ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
     ImGui::Text("Try x=%d y=%d z=%d", debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
-    ImGui::Text("Error SVO %d", debugCast.iterations);
-    ImGui::Text("Iterations FORW %d", debugCast.iterationsF);
     ImGui::Text("Distance %f", debugCast.distance);
     ImGui::End();
     ImGui::Render();
@@ -86,7 +91,8 @@ void VoxelRender::createWorld() {
     std::random_device dev;
     std::mt19937 rng(dev());
     std::uniform_int_distribution<int> rand(0,100);
-    int seed = rand(rng);
+    const int seed = rand(rng);
+    const int worldSize = world.getOctree().getSize();
     for (int z = 0; z < worldSize; z++) {
         for (int x = 0; x < worldSize; x++) {
             float per = glm::simplex(glm::vec3(x / 32.0f, z / 32.0f, 21));
@@ -95,22 +101,21 @@ void VoxelRender::createWorld() {
             if (y < 0 || y > worldSize) continue;
 
             for (int i = 0; i <= y; i++) {
-                octree.setVoxel(glm::ivec3(x, i, z), glm::vec4(per, per, per, 1.0f));
+                world.setVoxel(glm::ivec3(x, i, z), glm::vec4(per, per, per, 1.0f));
             }
         }
     }
 
     updateWorld();
 
-    std::cout << "Generation end, nodes count: " << octree.nodesCount() << std::endl;
+    std::cout << "Generation end, nodes count: " << world.getOctree().nodesCount() << std::endl;
 }
 
 void VoxelRender::updateWorld() {
-    glGenBuffers(1, &worldBufferID);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, worldBufferID);
     glBufferData(GL_SHADER_STORAGE_BUFFER,
-                 octree.nodesCount() * sizeof(Node),
-                 octree.getData(), GL_STATIC_DRAW);
+                 world.getOctree().nodesCount() * sizeof(Node),
+                 world.getOctree().getData(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, worldBufferID);
 }
 

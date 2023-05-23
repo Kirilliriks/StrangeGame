@@ -43,7 +43,7 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
     glm::vec3 movementVector = direction;
 
     // Keys management
-    GLFWwindow * glWindow = window->getGLWindow();
+    GLFWwindow *glWindow = window->getGLWindow();
     int state = glfwGetKey(glWindow, GLFW_KEY_W);
     if (state == GLFW_PRESS) {
         movement = speed * movementVector;

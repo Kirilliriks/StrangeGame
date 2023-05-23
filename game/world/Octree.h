@@ -17,13 +17,9 @@ public:
         float distance;
     };
 
-    struct HitPoint {
-        float distance;
-    };
-
     Octree();
     int getSize();
-    void setVoxel(const glm::ivec3& vec, glm::vec4 color);
+    void setVoxel(const glm::ivec3& vec, const glm::vec4& color);
 
     Node *getData();
     int nodesCount();
@@ -32,7 +28,7 @@ public:
     DebugCast raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position);
     glm::ivec4 voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance);
 private:
-    void setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 color);
+    void setVoxel(int index, int depth, const glm::ivec3& vec, const glm::vec4& color);
     int findVoxel(const glm::ivec3 &voxelPos);
 
     std::vector<Node> nodes;

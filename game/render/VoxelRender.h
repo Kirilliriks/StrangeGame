@@ -13,6 +13,7 @@
 #include "Camera.h"
 #include "shaders/RaycastShader.h"
 #include "../world/Octree.h"
+#include "../world/World.h"
 
 class Game;
 class VoxelRender {
@@ -30,7 +31,6 @@ private:
     Camera &camera;
     Window *window;
 
-    int worldSize;
     GLuint raycastShaderID;
     Shader shader;
 
@@ -39,7 +39,7 @@ private:
 
     GLuint worldBufferID;
 
-    Octree octree;
+    World world;
 
     RaycastShader *rayShader;
     Octree::DebugCast debugCast;

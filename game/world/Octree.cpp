@@ -15,11 +15,11 @@ int Octree::getSize() {
     return size;
 }
 
-void Octree::setVoxel(const glm::ivec3& vec, glm::vec4 color) {
+void Octree::setVoxel(const glm::ivec3& vec, const glm::vec4& color) {
     setVoxel(0, 0, vec, color);
 }
 
-void Octree::setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 color) {
+void Octree::setVoxel(int index, int depth, const glm::ivec3& vec, const glm::vec4& color) {
     Node currentNode = nodes.at(index);
 
     if (depth == maxDepth) { // If in voxel depth
@@ -32,10 +32,9 @@ void Octree::setVoxel(int index, int depth, const glm::ivec3& vec, glm::vec4 col
         currentNode.divide(nodes);
         nodes[index] = currentNode;
     }
-    depth++;
 
     const int nextIndex = currentNode.getSubNodeIndex(vec);
-    setVoxel(nextIndex, depth, vec, color);
+    setVoxel(nextIndex, ++depth, vec, color);
 }
 
 Node *Octree::getData() {
