@@ -20,6 +20,7 @@ public:
     Octree();
     int getSize();
     void setVoxel(const glm::ivec3& vec, const glm::vec4& color);
+    void removeVoxel(const glm::ivec3& vec);
 
     Node *getData();
     int nodesCount();
@@ -29,6 +30,7 @@ public:
     glm::ivec4 voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance);
 private:
     void setVoxel(int index, int depth, const glm::ivec3& vec, const glm::vec4& color);
+    void removeVoxel(int index, int depth, const glm::ivec3& vec);
     int findVoxel(const glm::ivec3 &voxelPos);
 
     std::vector<Node> nodes;

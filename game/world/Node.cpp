@@ -58,7 +58,6 @@ int Node::getSubIndex(const glm::ivec3& vec) {
 
 void Node::setVoxel(glm::vec4 color) {
     this->color = color;
-    this->color.a = 1.0f;
 }
 
 int Node::getSubNodeIndex(const glm::ivec3& vec) {

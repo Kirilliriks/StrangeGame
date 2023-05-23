@@ -37,6 +37,27 @@ void Octree::setVoxel(int index, int depth, const glm::ivec3& vec, const glm::ve
     setVoxel(nextIndex, ++depth, vec, color);
 }
 
+void Octree::removeVoxel(const glm::ivec3 &vec) {
+    removeVoxel(0, 0, vec);
+}
+
+void Octree::removeVoxel(int index, int depth, const glm::ivec3 &vec) {
+    Node currentNode = nodes.at(index);
+
+    if (depth == maxDepth) { // If in voxel depth
+        currentNode.setVoxel(glm::vec4(0, 0, 0, -1));
+        nodes[index] = currentNode;
+        return;
+    } // else go deeper
+
+    if (currentNode.isEmpty()) { // Hasn't voxel
+        return;
+    }
+
+    const int nextIndex = currentNode.getSubNodeIndex(vec);
+    removeVoxel(nextIndex, ++depth, vec);
+}
+
 Node *Octree::getData() {
     return nodes.data();
 }

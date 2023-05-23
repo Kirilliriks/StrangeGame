@@ -27,6 +27,12 @@ void World::update(double deltaTime) {
         octree.setVoxel(v, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
         game->getRenderer()->updateWorld();
     }
+
+    state = glfwGetMouseButton(game->getWindow()->getGLWindow(), GLFW_MOUSE_BUTTON_RIGHT);
+    if (state == GLFW_PRESS) {
+        octree.removeVoxel(v);
+        game->getRenderer()->updateWorld();
+    }
 }
 
 void World::imgui(double deltaTime) {
