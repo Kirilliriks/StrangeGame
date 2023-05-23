@@ -4,12 +4,10 @@
 
 #include "VoxelRender.h"
 
-#include <random>
-#include "glm/gtc/noise.hpp"
 #include "shaders/RaycastShader.h"
 #include "imgui.h"
 
-VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
+VoxelRender::VoxelRender(Game *game) : world(game->getWorld()) {
     this->game = game;
     window = game->getWindow();
 
@@ -20,8 +18,8 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
     glGenVertexArrays(1, &windowArrayID);
     glBindVertexArray(windowArrayID);
 
-    glGenBuffers(1, &windowBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, windowBuffer);
+    glGenBuffers(1, &windowBufferID);
+    glBindBuffer(GL_ARRAY_BUFFER, windowBufferID);
     float data[] = {
             -1.0f, -1.0f,
             -1.0f, 1.0f,
@@ -41,21 +39,11 @@ VoxelRender::VoxelRender(Game *game) : camera(game->getCamera()) {
     raycastShaderID = rayShader->getHandle();
 }
 
-void VoxelRender::update(double deltaTime) {
-    debugCast = world.getOctree().raycastVoxel(camera.getDirection(), camera.getPosition());
-    const glm::ivec3 v = debugCast.voxelPos;//octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
-    frontVoxel = glm::vec3(v);
-
-    GLFWwindow * glWindow = window->getGLWindow();
-    int state = glfwGetMouseButton(glWindow, GLFW_MOUSE_BUTTON_LEFT);
-    if (state == GLFW_PRESS) {
-        world.getOctree().setVoxel(v, glm::vec4(255, 0, 0, 255));
-        updateWorld();
-    }
-}
-
 void VoxelRender::render(double deltaTime) {
     glUseProgram(raycastShaderID);
+
+    Camera camera = world->getCamera();
+    Octree::DebugCast debugCast = world->getDebugCast();
 
     glUniform3f(2, camera.getX(), camera.getY(), camera.getZ());
     glUniform2f(3, camera.getYaw(), camera.getPitch());
@@ -63,7 +51,7 @@ void VoxelRender::render(double deltaTime) {
     glUniform3i(5, debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
     glUniform3i(6, debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
 
-    glDispatchCompute(window->width / 8, window->height / 8, 1);
+    glDispatchCompute(window->width / groupSize, window->height / groupSize, 1);
 
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -73,8 +61,10 @@ void VoxelRender::render(double deltaTime) {
 }
 
 void VoxelRender::imgui(double deltaTime) {
-    static glm::ivec3 lastPos = glm::ivec3(0, 0, 0);
-    /// TODO
+    Camera camera = world->getCamera();
+    Octree::DebugCast debugCast = world->getDebugCast();
+    glm::ivec3 frontVoxel = world->getFrontVoxel();
+
     ImGui::Begin("Info window");
     ImGui::SetWindowCollapsed(false);
     ImGui::SetWindowSize(ImVec2(200, 150));
@@ -87,35 +77,11 @@ void VoxelRender::imgui(double deltaTime) {
     ///w
 }
 
-void VoxelRender::createWorld() {
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<int> rand(0,100);
-    const int seed = rand(rng);
-    const int worldSize = world.getOctree().getSize();
-    for (int z = 0; z < worldSize; z++) {
-        for (int x = 0; x < worldSize; x++) {
-            float per = glm::simplex(glm::vec3(x / 32.0f, z / 32.0f, 21));
-            per = (per + 1) / 2;
-            int y = (int)(per * (float)32);
-            if (y < 0 || y > worldSize) continue;
-
-            for (int i = 0; i <= y; i++) {
-                world.setVoxel(glm::ivec3(x, i, z), glm::vec4(per, per, per, 1.0f));
-            }
-        }
-    }
-
-    updateWorld();
-
-    std::cout << "Generation end, nodes count: " << world.getOctree().nodesCount() << std::endl;
-}
-
 void VoxelRender::updateWorld() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, worldBufferID);
     glBufferData(GL_SHADER_STORAGE_BUFFER,
-                 world.getOctree().nodesCount() * sizeof(Node),
-                 world.getOctree().getData(), GL_STATIC_DRAW);
+                 world->getOctree().nodesCount() * sizeof(Node),
+                 world->getOctree().getData(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, worldBufferID);
 }
 

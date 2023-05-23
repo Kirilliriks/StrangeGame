@@ -16,34 +16,30 @@
 #include "../world/World.h"
 
 class Game;
+class World;
 class VoxelRender {
 public:
     VoxelRender(Game *game);
-    void createWorld();
+    ~VoxelRender() = default;
+
     void updateWorld();
-    void update(double deltaTime);
     void render(double deltaTime);
     void imgui(double deltaTime);
 
     GLuint genTexture();
 private:
     Game *game;
-    Camera &camera;
+    World *world;
     Window *window;
 
     GLuint raycastShaderID;
     Shader shader;
 
     GLuint windowArrayID;
-    GLuint windowBuffer;
-
+    GLuint windowBufferID;
     GLuint worldBufferID;
 
-    World world;
-
     RaycastShader *rayShader;
-    Octree::DebugCast debugCast;
-    glm::ivec3 frontVoxel;
 
     int groupSize = 8;
 };

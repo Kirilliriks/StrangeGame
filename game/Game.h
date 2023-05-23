@@ -6,12 +6,13 @@
 #define GAME_GAME_H
 
 #include <glad.h>
-#include "GLFW/glfw3.h"
 #include "render/VoxelRender.h"
 #include "render/Camera.h"
 #include "render/Window.h"
+#include "world/World.h"
 
 class VoxelRender;
+class World;
 class Game {
 public:
     Game(Window *window);
@@ -19,13 +20,13 @@ public:
     void render(double deltaTime);
     void imgui(double deltaTime);
 
-    Camera& getCamera();
     Window *getWindow();
+    World *getWorld();
+    VoxelRender *getRenderer();
 private:
-    VoxelRender *renderer;
     Window *window;
-
-    Camera camera;
+    World *world;
+    VoxelRender *renderer;
 };
 
 

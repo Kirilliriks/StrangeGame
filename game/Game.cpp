@@ -3,19 +3,15 @@
 //
 #include "Game.h"
 
-Game::Game(Window *window) : camera(window) {
-    this->window = window;
-
+Game::Game(Window *window) : window(window) {
+    world = new World(this);
     renderer = new VoxelRender(this);
-    renderer->createWorld();
+    world->createWorld();
+    renderer->updateWorld();
 }
 
 void Game::update(double deltaTime) {
-    double mouseX, mouseY;
-    glfwGetCursorPos(window->getGLWindow(), &mouseX, &mouseY);
-    camera.update(deltaTime, (float)mouseX, (float)mouseY);
-
-    renderer->update(deltaTime);
+    world->update(deltaTime);
 }
 
 void Game::render(double deltaTime) {
@@ -26,10 +22,14 @@ void Game::imgui(double deltaTime) {
     renderer->imgui(deltaTime);
 }
 
-Camera &Game::getCamera() {
-    return camera;
-}
-
 Window *Game::getWindow() {
     return window;
+}
+
+World *Game::getWorld() {
+    return world;
+}
+
+VoxelRender *Game::getRenderer() {
+    return renderer;
 }
