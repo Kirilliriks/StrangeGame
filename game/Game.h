@@ -8,6 +8,7 @@
 #include <glad.h>
 #include "render/VoxelRender.h"
 #include "render/Camera.h"
+#include "utils/Input.h"
 #include "render/Window.h"
 #include "world/World.h"
 
@@ -23,8 +24,11 @@ public:
     Window *getWindow();
     World *getWorld();
     VoxelRender *getRenderer();
+
+    static bool focused;
 private:
     Window *window;
+    Input *input;
     World *world;
     VoxelRender *renderer;
 };

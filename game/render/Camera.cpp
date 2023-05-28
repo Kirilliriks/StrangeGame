@@ -7,6 +7,9 @@
 #include <cmath>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include "../utils/Input.h"
+#include "../Game.h"
+#include "imgui.h"
 
 Camera::Camera(Window *window) {
     this->window = window;
@@ -24,54 +27,60 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
 
     // Keys management
     GLFWwindow *glWindow = window->getGLWindow();
-    int state = glfwGetKey(glWindow, GLFW_KEY_W);
-    if (state == GLFW_PRESS) {
-        movement = speed * movementVector;
-    }
 
-    state = glfwGetKey(glWindow, GLFW_KEY_S);
-    if (state == GLFW_PRESS) {
-        movement = -speed * movementVector;
-    }
-
-    state = glfwGetKey(glWindow, GLFW_KEY_A);
-    if (state == GLFW_PRESS) {
-        movement = speed * glm::normalize(glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f)));
-    }
-
-    state = glfwGetKey(glWindow, GLFW_KEY_D);
-    if (state == GLFW_PRESS) {
-        movement = speed * glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), direction));
-    }
-
-    state = glfwGetKey(glWindow, GLFW_KEY_SPACE);
-    if (state == GLFW_PRESS) {
-        position.y += speed * deltaTime;
-    }
-
-    state = glfwGetKey(glWindow, GLFW_KEY_ESCAPE);
-    if (state == GLFW_PRESS) {
-        exit(0);
-    }
-
-    state = glfwGetKey(glWindow, GLFW_KEY_ENTER);
-    if (state == GLFW_PRESS) {
-        focused = !focused;
-
-        if (focused) {
-            glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        } else {
-            glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    if (Game::focused) {
+        int state = glfwGetKey(glWindow, GLFW_KEY_W);
+        if (state == GLFW_PRESS) {
+            movement = speed * movementVector;
         }
-    }
 
-    position += glm::vec3(movement.x * deltaTime, movement.y * deltaTime, movement.z * deltaTime);
+        state = glfwGetKey(glWindow, GLFW_KEY_S);
+        if (state == GLFW_PRESS) {
+            movement = -speed * movementVector;
+        }
 
-    if (focused) {
+        state = glfwGetKey(glWindow, GLFW_KEY_A);
+        if (state == GLFW_PRESS) {
+            movement = speed * glm::normalize(glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f)));
+        }
+
+        state = glfwGetKey(glWindow, GLFW_KEY_D);
+        if (state == GLFW_PRESS) {
+            movement = speed * glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), direction));
+        }
+
+        state = glfwGetKey(glWindow, GLFW_KEY_SPACE);
+        if (state == GLFW_PRESS) {
+            position.y += speed * deltaTime;
+        }
+
+        state = glfwGetKey(glWindow, GLFW_KEY_ESCAPE);
+        if (state == GLFW_PRESS) {
+            exit(0);
+        }
+
+        position += glm::vec3(movement.x * deltaTime, movement.y * deltaTime, movement.z * deltaTime);
+
         yaw = (mouseX - (float) window->width / 2.0f) * 0.005f;
         pitch = (mouseY - (float) window->height / 2.0f) * 0.005f;
 
         direction = getDirection();
+    }
+
+    if (Input::enter.pressed) {
+        Game::focused = !Game::focused;
+
+        if (Game::focused) {
+            ImGuiIO& io = ImGui::GetIO();
+            io.ConfigFlags |= ImGuiConfigFlags_NoMouse;            // Disable Mouse
+            io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard; // Disable Keyboard
+            glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        } else {
+            ImGuiIO& io = ImGui::GetIO();
+            io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;            // Enable Mouse
+            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard
+            glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
     }
 }
 

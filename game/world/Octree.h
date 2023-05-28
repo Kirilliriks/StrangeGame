@@ -12,6 +12,7 @@ class Octree {
 public:
     struct DebugCast {
         glm::ivec3 voxelPos;
+        glm::ivec3 preVoxelPos;
         int iterations;
         int iterationsF;
         float distance;
@@ -27,7 +28,7 @@ public:
 
     DebugCast castDRay(const glm::vec3& rayDirection, const glm::vec3& start_position);
     DebugCast raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position);
-    glm::ivec4 voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance);
+    DebugCast voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance);
 private:
     void setVoxel(int index, int depth, const glm::ivec3& vec, const glm::vec4& color);
     void removeVoxel(int index, int depth, const glm::ivec3& vec);

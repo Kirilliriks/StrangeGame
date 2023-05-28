@@ -106,7 +106,12 @@ int Octree::findVoxel(const glm::ivec3& voxelPos) {
     return -1;
 }
 
-glm::ivec4 Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance) {
+Octree::DebugCast Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance) {
+    DebugCast debugCast;
+    debugCast.distance = 0;
+    debugCast.iterations = 0;
+    debugCast.voxelPos = glm::ivec3(-1);
+
     float distance = 0.0f;
 
     const glm::vec3 rayStepSize = glm::abs(glm::vec3(1.0f) / rayDirection);
@@ -121,6 +126,7 @@ glm::ivec4 Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& 
     int iter = 0;
     while(distance < maxDistance) {
         iter++;
+        debugCast.preVoxelPos = glm::ivec3(voxelPos);
         if (rayLength.x < rayLength.y) {
             if (rayLength.x < rayLength.z) {
                 voxelPos.x += step.x;
@@ -144,11 +150,14 @@ glm::ivec4 Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& 
         }
 
         if (findVoxel(glm::ivec3(voxelPos)) == 1) {
-            voxelPos.w = iter;
-            return voxelPos;
+            debugCast.iterations = iter;
+            debugCast.distance = distance;
+            debugCast.voxelPos = glm::ivec3(voxelPos);
+            return debugCast;
         }
     }
-    return glm::ivec4(-1, -1, -1, 0);
+
+    return debugCast;
 }
 
 int getSubIndexFromSubVector(const glm::ivec3& vec) {

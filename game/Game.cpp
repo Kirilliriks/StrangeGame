@@ -3,7 +3,10 @@
 //
 #include "Game.h"
 
+bool Game::focused = true;
+
 Game::Game(Window *window) : window(window) {
+    input = new Input(window->getGLWindow());
     world = new World(this);
     renderer = new VoxelRender(this);
     world->createWorld();

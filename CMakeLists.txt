@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 project(StrangeGame)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 23)
 
 add_subdirectory(glfw)
 add_subdirectory(game)
@@ -11,7 +11,7 @@ include_directories(dependency/glad/)
 include_directories(glfw/include)
 include_directories(glm)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -Wextra -std=c++14")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -Wextra -std=c++23")
 set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static -lpthread")
 
 set(SOURCE_FILES main.cpp dependency/glad/glad.c)

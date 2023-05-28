@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <glad.h>
 #include "glm/glm.hpp"
 #include "GLFW/glfw3.h"
@@ -29,14 +27,16 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glColor4f(0, 0, 0, 0);
 
+        Input::tick();
+        glfwPollEvents();
         game->update(deltaTime); //Update logic + physics
+
         game->render(deltaTime); //Render voxels
         game->imgui(deltaTime);  //Render develop GUI
         ImGui::Render();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(glWindow);
-        glfwPollEvents();
     }
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

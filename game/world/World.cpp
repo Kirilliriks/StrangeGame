@@ -18,13 +18,17 @@ void World::update(double deltaTime) {
     glfwGetCursorPos(game->getWindow()->getGLWindow(), &mouseX, &mouseY);
     camera.update(deltaTime, (float)mouseX, (float)mouseY);
 
-    debugCast = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
+    debugCast = octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 100);
     const glm::ivec3 v = debugCast.voxelPos;//octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
     frontVoxel = glm::vec3(v);
 
+    if (!Game::focused) {
+        return;
+    }
+
     int state = glfwGetMouseButton(game->getWindow()->getGLWindow(), GLFW_MOUSE_BUTTON_LEFT);
     if (state == GLFW_PRESS) {
-        octree.setVoxel(v, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
+        octree.setVoxel(debugCast.preVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
         game->getRenderer()->updateWorld();
     }
 
