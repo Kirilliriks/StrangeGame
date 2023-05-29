@@ -26,14 +26,12 @@ void World::update(double deltaTime) {
         return;
     }
 
-    int state = glfwGetMouseButton(game->getWindow()->getGLWindow(), GLFW_MOUSE_BUTTON_LEFT);
-    if (state == GLFW_PRESS) {
+    if (Input::leftClick.pressed || (Input::leftClick.down && Input::leftShift.down)) {
         octree.setVoxel(debugCast.preVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
         game->getRenderer()->updateWorld();
     }
 
-    state = glfwGetMouseButton(game->getWindow()->getGLWindow(), GLFW_MOUSE_BUTTON_RIGHT);
-    if (state == GLFW_PRESS) {
+    if (Input::rightClick.pressed || (Input::rightClick.down && Input::leftShift.down)) {
         octree.removeVoxel(v);
         game->getRenderer()->updateWorld();
     }

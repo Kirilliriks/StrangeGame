@@ -1550,7 +1550,7 @@ extern template struct DOCTEST_INTERFACE_DECL IsNaN<long double>;
             DOCTEST_FORBIT_EXPRESSION(Expression_lhs, ^=)
             DOCTEST_FORBIT_EXPRESSION(Expression_lhs, |=)
             // these 2 are unfortunate because they should be allowed - they have higher precedence over the comparisons, but the
-            // ExpressionDecomposer class uses the left shift operator to capture the left operand of the binary expression...
+            // ExpressionDecomposer class uses the left leftShift operator to capture the left operand of the binary expression...
             DOCTEST_FORBIT_EXPRESSION(Expression_lhs, <<)
             DOCTEST_FORBIT_EXPRESSION(Expression_lhs, >>)
         };
@@ -2381,7 +2381,7 @@ int registerExceptionTranslator(String (*)(T)) {
 #ifndef DOCTEST_CONFIG_SUPER_FAST_ASSERTS
 
 #define DOCTEST_ASSERT_IMPLEMENT_2(assert_type, ...)                                               \
-    DOCTEST_CLANG_SUPPRESS_WARNING_WITH_PUSH("-Woverloaded-shift-op-parentheses")                  \
+    DOCTEST_CLANG_SUPPRESS_WARNING_WITH_PUSH("-Woverloaded-leftShift-op-parentheses")                  \
     /* NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) */                                  \
     doctest::detail::ResultBuilder DOCTEST_RB(doctest::assertType::assert_type, __FILE__,          \
                                                __LINE__, #__VA_ARGS__);                            \
@@ -2420,7 +2420,7 @@ int registerExceptionTranslator(String (*)(T)) {
 #define DOCTEST_ASSERT_IMPLEMENT_2 DOCTEST_ASSERT_IMPLEMENT_1
 
 #define DOCTEST_ASSERT_IMPLEMENT_1(assert_type, ...)                                               \
-    DOCTEST_CLANG_SUPPRESS_WARNING_WITH_PUSH("-Woverloaded-shift-op-parentheses")                  \
+    DOCTEST_CLANG_SUPPRESS_WARNING_WITH_PUSH("-Woverloaded-leftShift-op-parentheses")                  \
     doctest::detail::decomp_assert(                                                                \
             doctest::assertType::assert_type, __FILE__, __LINE__, #__VA_ARGS__,                    \
             doctest::detail::ExpressionDecomposer(doctest::assertType::assert_type)                \

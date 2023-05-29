@@ -376,9 +376,5 @@ void main() {
     rotate(rayDir, vec3(1, 0, 0), camera_angles.y);
     rotate(rayDir, vec3(0, 1, 0), camera_angles.x);
 
-    if (pixel_coord.x > 1280 / 2) {
-        imageStore(img_output, pixel_coord, castRay(rayDir));
-    } else {
-        imageStore(img_output, pixel_coord, castRay(rayDir));
-    }
+    imageStore(img_output, pixel_coord, castRay(rayDir));
 }

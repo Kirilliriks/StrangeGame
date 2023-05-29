@@ -4,8 +4,6 @@
 
 #include "Camera.h"
 
-#include <cmath>
-
 #include <glm/gtc/matrix_transform.hpp>
 #include "../utils/Input.h"
 #include "../Game.h"
@@ -67,7 +65,7 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
         direction = getDirection();
     }
 
-    if (Input::enter.pressed) {
+    if (Input::tab.pressed) {
         Game::focused = !Game::focused;
 
         if (Game::focused) {
