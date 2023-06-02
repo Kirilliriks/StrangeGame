@@ -4,13 +4,19 @@
 
 layout(local_size_x = 8, local_size_y = 8) in;
 
-shared struct Layer {
+struct Layer {
     vec3 position;
     int nodeIndex;
     ivec3 subVec;
     vec3 rayLength;
     float distance;
-} layers[maxDepth][64];
+};
+
+struct Batch {
+    Layer layers[maxDepth];
+};
+
+shared Batch batchs[64];
 
 uint localID = gl_LocalInvocationID.x  + gl_LocalInvocationID.y * 8;
 
@@ -55,7 +61,13 @@ int getSubIndexFromSubVector(in const ivec3 vec) {
 }
 
 Layer calculateLayer(inout Layer layer, in const ivec3 dir, in const vec3 rayStepSizeSingle, in const int halfSize) {
-    layer.subVec = clamp(ivec3(layer.position) / halfSize, 0, 1);
+    ivec3 vecc = ivec3(layer.position) / halfSize;
+    if (min(vecc.x, min(vecc.y, vecc.z)) < -1 || max(vecc.x, max(vecc.y, vecc.z)) > 2) {
+        layer.subVec = ivec3(-1, -1, -1);
+    } else {
+        layer.subVec = clamp(vecc, 0, 1);
+    }
+
     layer.rayLength = (vec3(layer.subVec + dir) * float(halfSize) - layer.position) * rayStepSizeSingle;
     layer.distance = 0.0f;
     return layer;
@@ -82,17 +94,17 @@ vec4 castRay(in vec3 rayDirection) {
     int halfSize = currentNode.halfSize;
     vec3 rayStepSize = vec3(halfSize) * abs(rayStepSizeSingle);
 
-    layers[currentDepth][localID] = calculateLayer(currentLayer, dir, rayStepSizeSingle, halfSize);
+    Layer layers[] = batchs[localID].layers;
+    layers[currentDepth] = calculateLayer(currentLayer, dir, rayStepSizeSingle, halfSize);
 
     int iter = 0;
     while (iter++ < 500) {
-        currentLayer = layers[currentDepth][localID];
+        currentLayer = layers[currentDepth];
         currentNode = nodes[currentLayer.nodeIndex];
 
         const int subIndex = getSubIndexFromSubVector(currentLayer.subVec);
         if (subIndex < 0) {
-            currentDepth++;
-            if (currentDepth == maxDepth) return vec4(0, 0, 0, 0);
+            if (++currentDepth == maxDepth) return vec4(0, 0, 0, 0);
 
             rayStepSize *= 2;
             halfSize *= 2;
@@ -111,7 +123,6 @@ vec4 castRay(in vec3 rayDirection) {
                 // Start subRaycast
                 Layer newLayer;
 
-                currentDepth--;
                 rayStepSize /= 2;
 
                 newLayer.nodeIndex = subNodexIndex;
@@ -119,11 +130,11 @@ vec4 castRay(in vec3 rayDirection) {
 
                 halfSize /= 2;
 
-                layers[currentDepth][localID] = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
+                layers[--currentDepth] = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
                 continue;
             }
         }
-        moveLayer(layers[currentDepth][localID], step, rayStepSize);
+        moveLayer(layers[currentDepth], step, rayStepSize);
     }
     return vec4(0, 0, 0, 0);
 }
@@ -235,7 +246,7 @@ vec4 castTESTRay(in vec3 rayDirection) {
             currentDepth = maxDepth - 1;
 
             currentLayer.nodeIndex = 0;
-            currentLayer.position = start_position + rayDirection * distance;
+            currentLayer.position = start_position + rayDirection * (distance + 0.00f / 8.0f);
 
             halfSize = currentNode.halfSize;
             rayStepSize = vec3(halfSize) * abs(rayStepSizeSingle);
@@ -269,7 +280,7 @@ vec4 castTESTRay(in vec3 rayDirection) {
                 continue;
             }
         }
-        
+
         moveLayer(currentLayer, step, rayStepSize);
         distance += currentLayer.distance;
     }
@@ -327,7 +338,7 @@ bool findVoxel(in ivec3 voxelPos, out vec3 color) {
     while(index != -1) {
         const Node currentNode = nodes[index];
         if (currentNode.sub == -1) {
-            if (nodeIsLeaf(currentNode)) {
+            if (currentNode.color.a != -1.0f) {
                 color = currentNode.color.rgb;
                 return true;
             }
@@ -376,5 +387,5 @@ void main() {
     rotate(rayDir, vec3(1, 0, 0), camera_angles.y);
     rotate(rayDir, vec3(0, 1, 0), camera_angles.x);
 
-    imageStore(img_output, pixel_coord, castRay(rayDir));
+    imageStore(img_output, pixel_coord, castTESTRay(rayDir));
 }
