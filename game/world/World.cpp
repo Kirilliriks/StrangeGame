@@ -28,12 +28,12 @@ void World::update(double deltaTime) {
 
     if (Input::leftClick.pressed || (Input::leftClick.down && Input::leftShift.down)) {
         octree.setVoxel(debugCast.preVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
-        game->getRenderer()->updateWorld();
+        //game->getRenderer()->updateWorld();
     }
 
     if (Input::rightClick.pressed || (Input::rightClick.down && Input::leftShift.down)) {
         octree.removeVoxel(v);
-        game->getRenderer()->updateWorld();
+        //game->getRenderer()->updateWorld();
     }
 }
 
@@ -41,6 +41,7 @@ void World::imgui(double deltaTime) {
     ImGui::Begin("Info window");
     ImGui::SetWindowCollapsed(false);
     ImGui::Text("Cam x=%d y=%d z=%d", (int)camera.getX(), (int)camera.getY(), (int)camera.getZ());
+    ImGui::Text("Cam yaw=%d pitch=%d", (int)camera.getYaw(), (int)camera.getPitch());
     ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
     ImGui::Text("Try x=%d y=%d z=%d", debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
     ImGui::Text("Distance %f", debugCast.distance);

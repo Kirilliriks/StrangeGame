@@ -8,7 +8,7 @@
 #include <iostream>
 #include "glad.h"
 
-class RaycastShader {
+class RaycastShader { // TODO make extend Shader
 public:
     RaycastShader(const std::string& shader);
     GLuint getHandle();

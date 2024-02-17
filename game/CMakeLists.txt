@@ -19,4 +19,10 @@ add_library(
         render/polygon/PolygonRender.cpp
         render/polygon/PolygonRender.hpp
         render/polygon/PolygonRender.hpp
+        render/polygon/mesh/Mesh.cpp
+        render/polygon/mesh/Mesh.hpp
+        render/polygon/mesh/MeshBuilder.cpp
+        render/polygon/mesh/MeshBuilder.hpp
+        render/polygon/object/Object.cpp
+        render/polygon/object/Object.hpp
 )

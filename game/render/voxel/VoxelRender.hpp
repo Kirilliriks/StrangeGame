@@ -14,14 +14,14 @@ class Game;
 class World;
 class VoxelRender {
 public:
-    VoxelRender(Game *game);
+    explicit VoxelRender(Game *game);
     ~VoxelRender() = default;
 
-    void updateWorld();
-    void render(double deltaTime);
-
-    GLuint genTexture();
+    void updateWorld() const;
+    void render(double deltaTime) const;
 private:
+    void genTexture();
+
     Game *game;
     World *world;
     Window *window;
@@ -29,9 +29,10 @@ private:
     GLuint raycastShaderID;
     Shader shader;
 
-    GLuint windowArrayID;
-    GLuint windowBufferID;
-    GLuint worldBufferID;
+    GLuint windowArrayID{};
+    GLuint windowBufferID{};
+    GLuint worldBufferID{};
+    GLuint textureID{};
 
     RaycastShader *rayShader;
 

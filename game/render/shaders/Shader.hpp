@@ -6,26 +6,30 @@
 #define STRANGEGAME_SHADER_H
 
 #include <iostream>
+#include "glm/glm.hpp"
+
 #include "glad.h"
 
 class Shader {
 public:
+    static std::string loadShaderFromFile(const std::string& path);
+    static GLint createShader(const std::string& shader, GLuint shaderPtr);
+
+    static const char* defaultVertexShader;
+    static const char* defaultFragmentShader;
+
     Shader();
     Shader(const std::string& vertexName, const std::string& fragmentName);
 
-    GLint getUniformLocation(const std::string& uniform_name) const;
-    GLint getAttribLocation(const std::string& attrib_name) const;
+    GLint getUniformLocation(const std::string& name) const;
+    GLint getAttribLocation(const std::string& name) const;
+
+    void uniformMatrix(const std::string& name, glm::mat4 matrix) const;
 
     void bind() const;
     void unbind() const;
 
     GLint initializeShader(const std::string& vertex, const std::string& fragment);
-
-    static std::string loadShaderFromFile(const std::string& path);
-    static GLint createShader(const std::string& shader, GLuint shaderPtr);
-public:
-    static const char* defaultVertexShader;
-    static const char* defaultFragmentShader;
 private:
     GLuint vertexShader;
     GLuint fragmentShader;

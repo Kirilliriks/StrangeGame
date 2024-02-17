@@ -5,6 +5,7 @@
 #ifndef GAME_GAME_H
 #define GAME_GAME_H
 
+#include "render/polygon/PolygonRender.hpp"
 #include "render/voxel/VoxelRender.hpp"
 #include "utils/Input.hpp"
 
@@ -27,6 +28,7 @@ private:
     Input *input;
     World *world;
     VoxelRender *renderer;
+    PolygonRender *polygonRenderer;
 };
 
 

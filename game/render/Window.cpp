@@ -49,6 +49,7 @@ Window::Window() {
     glfwSwapInterval(1); // Vsync
     glfwShowWindow(glWindow);
 
+    glfwSetWindowSize(glWindow, width, height);
     glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
@@ -64,11 +65,15 @@ Window::Window() {
     ImGui_ImplGlfw_InitForOpenGL(glWindow, true);
     ImGui_ImplOpenGL3_Init("#version 430");
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_DOUBLEBUFFER);
-    glDepthFunc(GL_LESS);
+    glClearColor(0, 0, 0, 1.0f);
 
-    glClearColor(0, 0, 0, 0);
+    //glEnable(GL_DOUBLEBUFFER);
+    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_CULL_FACE);
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glDepthFunc(GL_LESS);
+    glViewport(0, 0, width, height);
 
     const std::string title("Avox");
     glfwSetWindowTitle(glWindow, title.c_str());

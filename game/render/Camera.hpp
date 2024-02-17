@@ -11,26 +11,39 @@
 
 class Camera {
 public:
-    Camera(Window *window);
+    explicit Camera(Window *window);
 
     void update(double deltaTime, float mouseX, float mouseY);
-    float getYaw();
-    float getPitch();
-    float getX();
-    float getY();
-    float getZ();
+    float getYaw() const;
+    float getPitch() const;
+    float getX() const;
+    float getY() const;
+    float getZ() const;
+
+    void updateVectors();
+    void updateMatrix();
 
     glm::vec3 getPosition();
-    glm::vec3 getDirection();
+    glm::vec3 getDirection() const;
+
+    glm::mat4 getProjection() const;
+    glm::mat4 getView() const;
+    glm::mat4 getMatrixMultiply() const;
 private:
     Window *window;
+
+    glm::vec3 front;
+    glm::vec3 up;
+    glm::vec3 right;
+    glm::mat4 rotation;
 
     glm::vec3 direction;
     glm::vec3 position;
     float yaw;
     float pitch;
+    float fov;
 
-    float speed = 60;
+    float speed;
 };
 
 

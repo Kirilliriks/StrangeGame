@@ -15,13 +15,16 @@ Camera::Camera(Window *window) {
     direction = glm::vec3(0, 0, 1);
     yaw = 0;
     pitch = 0;
-    position = glm::vec3(18, 10, 18);
+    position = glm::vec3(0, 0, 1);
+    fov = 75;
+    speed = 30;
+
+    rotation = glm::mat4(1.0f);
+    updateVectors();
 }
 
 void Camera::update(double deltaTime, float mouseX, float mouseY) {
-    glm::vec3 movement = glm::vec3(0.0f, 0.0f, 0.0f);
-
-    glm::vec3 movementVector = direction;
+    auto movement = glm::vec3(0.0f, 0.0f, 0.0f);
 
     // Keys management
     GLFWwindow *glWindow = window->getGLWindow();
@@ -29,12 +32,12 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
     if (Game::focused) {
         int state = glfwGetKey(glWindow, GLFW_KEY_W);
         if (state == GLFW_PRESS) {
-            movement = speed * movementVector;
+            movement = -speed * direction;
         }
 
         state = glfwGetKey(glWindow, GLFW_KEY_S);
         if (state == GLFW_PRESS) {
-            movement = -speed * movementVector;
+            movement = speed * direction;
         }
 
         state = glfwGetKey(glWindow, GLFW_KEY_A);
@@ -52,6 +55,11 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
             position.y += speed * deltaTime;
         }
 
+        state = glfwGetKey(glWindow, GLFW_KEY_LEFT_SHIFT);
+        if (state == GLFW_PRESS) {
+            position.y -= speed * deltaTime;
+        }
+
         state = glfwGetKey(glWindow, GLFW_KEY_ESCAPE);
         if (state == GLFW_PRESS) {
             exit(0);
@@ -59,10 +67,12 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
 
         position += glm::vec3(movement.x * deltaTime, movement.y * deltaTime, movement.z * deltaTime);
 
-        yaw = (mouseX - (float) window->width / 2.0f) * 0.005f;
-        pitch = (mouseY - (float) window->height / 2.0f) * 0.005f;
+        //yaw = (mouseX - (float) window->width / 2.0f) * 0.0005f;
+        //pitch = (mouseY - (float) window->height / 2.0f) * 0.0005f;
 
         direction = getDirection();
+
+        updateMatrix();
     }
 
     if (Input::tab.pressed) {
@@ -82,33 +92,61 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
     }
 }
 
-float Camera::getYaw() {
+float Camera::getYaw() const {
     return yaw;
 }
 
-float Camera::getPitch() {
+float Camera::getPitch() const {
     return pitch;
 }
 
-float Camera::getX() {
+float Camera::getX() const {
     return position.x;
 }
 
-float Camera::getY() {
+float Camera::getY() const {
     return position.y;
 }
 
-float Camera::getZ() {
+float Camera::getZ() const {
     return position.z;
+}
+
+void Camera::updateVectors() {
+    front = glm::vec3(rotation * glm::vec4(0, 0, -1, 1));
+    right = glm::vec3(rotation * glm::vec4(1, 0, 0, 1));
+    up = glm::vec3(rotation * glm::vec4(0, 1, 0, 1));
+}
+
+void Camera::updateMatrix() {
+    rotation = glm::mat4(1.0f);
+    rotation = glm::rotate(rotation, 0.0f, glm::vec3(0, 0, 1));
+    rotation = glm::rotate(rotation, glm::degrees(yaw), glm::vec3(0, 1, 0));
+    rotation = glm::rotate(rotation, glm::degrees(pitch), glm::vec3(1, 0, 0));
+
+    updateVectors();
 }
 
 glm::vec3 Camera::getPosition() {
     return position;
 }
 
-glm::vec3 Camera::getDirection() {
-    glm::mat4 rota(1.0f);
-    glm::mat4 ry = glm::rotate(rota, glm::degrees(yaw), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 rx = glm::rotate(rota, glm::degrees(pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+glm::vec3 Camera::getDirection() const {
+    const glm::mat4 rota(1.0f);
+    const glm::mat4 ry = glm::rotate(rota, glm::degrees(yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+    const glm::mat4 rx = glm::rotate(rota, glm::degrees(pitch), glm::vec3(1.0f, 0.0f, 0.0f));
     return glm::vec3(ry * rx * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+}
+
+glm::mat4 Camera::getProjection() const {
+    const float aspect = (float) window->width / (float) window->height;
+    return glm::perspective(glm::radians(fov), aspect, 0.01f, 10000.0f);
+}
+
+glm::mat4 Camera::getView() const {
+    return glm::lookAt(position, position + front, up);
+}
+
+glm::mat4 Camera::getMatrixMultiply() const {
+    return getProjection() * getView();
 }

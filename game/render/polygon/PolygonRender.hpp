@@ -4,8 +4,12 @@
 
 #ifndef POLYGONRENDER_H
 #define POLYGONRENDER_H
+#include <vector>
 
+#include "../shaders/Shader.hpp"
+#include "object/Object.hpp"
 
+class Mesh;
 class Game;
 class PolygonRender {
 public:
@@ -13,7 +17,12 @@ public:
     ~PolygonRender() = default;
 
     void updateWorld();
-    void render(double deltaTime);
+    void render(double deltaTime) const;
+private:
+    Game &game;
+    Shader shader;
+
+    std::vector<Mesh> objects;
 };
 
 
