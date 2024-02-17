@@ -77,3 +77,7 @@ Window::Window() {
 GLFWwindow* Window::getGLWindow() const {
     return glWindow;
 }
+
+void Window::setTitle(const std::string& title) const {
+    glfwSetWindowTitle(glWindow, title.c_str());
+}

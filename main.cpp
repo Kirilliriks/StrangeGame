@@ -13,6 +13,8 @@ int main() {
     GLFWwindow *glWindow = window->getGLWindow();
 
     double lastFrame = 0;
+    double previousFrame = 0;
+    int frames = 0;
     while(glfwWindowShouldClose(glWindow) == GL_FALSE) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -21,6 +23,13 @@ int main() {
         const double currentFrame = glfwGetTime();
         const double deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        frames++;
+        if (currentFrame - previousFrame >= 1.0) {
+            window->setTitle(std::to_string(frames));
+            frames = 0;
+            previousFrame = currentFrame;
+        }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
