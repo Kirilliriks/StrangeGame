@@ -7,12 +7,11 @@
 #include "imgui_impl_glfw.h"
 
 int main() {
-    auto window = new Window();
+    const auto window = new Window();
+    const Game *game = new Game(window);
 
     GLFWwindow *glWindow = window->getGLWindow();
-    Game *game = new Game(window);
 
-    double deltaTime;
     double lastFrame = 0;
     while(glfwWindowShouldClose(glWindow) == GL_FALSE) {
         ImGui_ImplOpenGL3_NewFrame();
@@ -20,7 +19,7 @@ int main() {
         ImGui::NewFrame();
 
         const double currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
+        const double deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
