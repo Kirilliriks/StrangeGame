@@ -4,7 +4,9 @@
 
 #include "VoxelRender.h"
 
-#include "shaders/RaycastShader.h"
+#include <glad.h>
+
+#include "../shaders/RaycastShader.h"
 
 VoxelRender::VoxelRender(Game *game) : world(game->getWorld()) {
     this->game = game;

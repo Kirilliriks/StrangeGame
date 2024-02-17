@@ -5,9 +5,7 @@
 #ifndef GAME_GAME_H
 #define GAME_GAME_H
 
-#include <glad.h>
-#include "render/VoxelRender.h"
-#include "render/Camera.h"
+#include "render/voxel/VoxelRender.h"
 #include "utils/Input.h"
 #include "render/Window.h"
 #include "world/World.h"

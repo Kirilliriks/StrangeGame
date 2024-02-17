@@ -6,7 +6,7 @@ include_directories(../imgui/)
 add_library(
         Game ../dependency/glad/glad.c Game.cpp
         render/shaders/Shader.cpp render/shaders/Shader.h
-        render/VoxelRender.cpp render/VoxelRender.h
+        render/voxel/VoxelRender.cpp render/voxel/VoxelRender.h
         render/Camera.cpp render/Camera.h
         render/Window.cpp render/Window.h
         utils/Input.h

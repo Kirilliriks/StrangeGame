@@ -6,14 +6,10 @@
 #define STRANGEGAME_VOXELRENDER_H
 #define GLFW_INCLUDE_NONE
 
-#include <vector>
-#include "GLFW/glfw3.h"
-#include "shaders/Shader.h"
-#include "../Game.h"
-#include "Camera.h"
-#include "shaders/RaycastShader.h"
-#include "../world/Octree.h"
-#include "../world/World.h"
+#include "../shaders/Shader.h"
+#include "../../Game.h"
+#include "../shaders/RaycastShader.h"
+#include "../../world/World.h"
 
 class Game;
 class World;
