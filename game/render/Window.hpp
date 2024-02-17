@@ -5,7 +5,6 @@
 #ifndef STRANGEGAME_WINDOW_H
 #define STRANGEGAME_WINDOW_H
 
-#include <glad.h>
 #include "../../glfw/include/GLFW/glfw3.h"
 
 class Window {

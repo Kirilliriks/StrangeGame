@@ -6,10 +6,9 @@
 #define STRANGEGAME_VOXELRENDER_H
 #define GLFW_INCLUDE_NONE
 
-#include "../shaders/Shader.h"
-#include "../../Game.h"
-#include "../shaders/RaycastShader.h"
-#include "../../world/World.h"
+#include "../shaders/Shader.hpp"
+#include "../shaders/RaycastShader.hpp"
+#include "../../world/World.hpp"
 
 class Game;
 class World;

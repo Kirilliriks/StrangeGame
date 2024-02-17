@@ -1,7 +1,7 @@
 //
 // Created by KirilliriK on 02.03.2022.
 //
-#include "Node.h"
+#include "Node.hpp"
 
 Node::Node(int size, glm::ivec3 position) {
     this->halfSize = size / 2;

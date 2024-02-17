@@ -9,7 +9,6 @@
 #include "glm/glm.hpp"
 #include "imgui_impl_glfw.h"
 #include <unordered_map>
-#include <iostream>
 #include <string>
 
 class Input {

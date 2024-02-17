@@ -2,7 +2,7 @@
 // Created by KirilliriK on 28.05.2023.
 //
 
-#include "Input.h"
+#include "Input.hpp"
 
 glm::vec3 Input::mousePos = glm::vec3(0, 0, 0);
 glm::vec3 Input::lastMousePos = glm::vec3(0, 0, 0);

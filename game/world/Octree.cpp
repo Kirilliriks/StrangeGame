@@ -2,7 +2,7 @@
 // Created by KirilliriK on 01.03.2022.
 //
 
-#include "Octree.h"
+#include "Octree.hpp"
 
 Octree::Octree() {
     maxDepth = 8;

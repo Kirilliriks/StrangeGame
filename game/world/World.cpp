@@ -2,7 +2,7 @@
 // Created by KirilliriK on 23.05.2023.
 //
 
-#include "World.h"
+#include "World.hpp"
 #include <random>
 #include "glm/gtc/noise.hpp"
 #include "imgui.h"

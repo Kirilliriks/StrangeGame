@@ -7,8 +7,8 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "docktest.h"
-#include "../game/world/Octree.h"
-#include "../game/utils/Paths.h"
+#include "../game/world/Octree.hpp"
+#include "../game/utils/Paths.hpp"
 
 TEST_CASE("Octree create") {
     Octree octree;

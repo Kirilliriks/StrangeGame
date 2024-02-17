@@ -5,9 +5,9 @@
 #ifndef STRANGEGAME_WORLD_H
 #define STRANGEGAME_WORLD_H
 
-#include "Octree.h"
-#include "../render/Camera.h"
-#include "../Game.h"
+#include "Octree.hpp"
+#include "../render/Camera.hpp"
+#include "../Game.hpp"
 
 class Game;
 class World {

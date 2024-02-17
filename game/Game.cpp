@@ -1,7 +1,7 @@
 //
 // Created by KirilliriK on 28.02.2022.
 //
-#include "Game.h"
+#include "Game.hpp"
 
 bool Game::focused = true;
 

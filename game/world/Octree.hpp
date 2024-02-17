@@ -6,7 +6,7 @@
 #define STRANGEGAME_OCTREE_H
 
 #include <vector>
-#include "Node.h"
+#include "Node.hpp"
 
 class Octree {
 public:

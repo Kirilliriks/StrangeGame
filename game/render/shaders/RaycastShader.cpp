@@ -2,8 +2,8 @@
 // Created by KirilliriK on 01.03.2022.
 //
 
-#include "RaycastShader.h"
-#include "Shader.h"
+#include "RaycastShader.hpp"
+#include "Shader.hpp"
 
 RaycastShader::RaycastShader(std::string shader) {
     glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &maxGroupX);

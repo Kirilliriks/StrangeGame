@@ -1,14 +1,14 @@
 //
 // Created by KirilliriK on 01.03.2022.
 //
+#include <glad.h>
+#include <iostream>
+#include <fstream>
 
-#include "Window.h"
+#include "Window.hpp"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-
-#include <iostream>
-#include <fstream>
 
 Window::Window() {
     std::ifstream input("options.opt");

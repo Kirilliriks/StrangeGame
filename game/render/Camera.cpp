@@ -2,11 +2,11 @@
 // Created by KirilliriK on 28.02.2022.
 //
 
-#include "Camera.h"
+#include "Camera.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
-#include "../utils/Input.h"
-#include "../Game.h"
+#include "../utils/Input.hpp"
+#include "../Game.hpp"
 #include "imgui.h"
 
 Camera::Camera(Window *window) {

@@ -5,10 +5,10 @@
 #ifndef GAME_GAME_H
 #define GAME_GAME_H
 
-#include "render/voxel/VoxelRender.h"
-#include "utils/Input.h"
-#include "render/Window.h"
-#include "world/World.h"
+#include "render/voxel/VoxelRender.hpp"
+#include "utils/Input.hpp"
+#include "render/Window.hpp"
+#include "world/World.hpp"
 
 class VoxelRender;
 class World;

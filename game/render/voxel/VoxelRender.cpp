@@ -1,12 +1,10 @@
 //
 // Created by KirilliriK on 28.02.2022.
 //
-
-#include "VoxelRender.h"
-
 #include <glad.h>
 
-#include "../shaders/RaycastShader.h"
+#include "VoxelRender.hpp"
+#include "../shaders/RaycastShader.hpp"
 
 VoxelRender::VoxelRender(Game *game) : world(game->getWorld()) {
     this->game = game;
