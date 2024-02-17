@@ -10,7 +10,7 @@
 class Window {
 public:
     Window();
-    GLFWwindow *getGLWindow();
+    GLFWwindow *getGLWindow() const;
 
     int width, height;
 private:

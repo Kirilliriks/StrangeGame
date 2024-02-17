@@ -108,7 +108,7 @@ glm::vec3 Camera::getPosition() {
 
 glm::vec3 Camera::getDirection() {
     glm::mat4 rota(1.0f);
-    glm::mat4 rx = glm::rotate(rota, glm::degrees(yaw), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 ry = glm::rotate(rota, glm::degrees(pitch), glm::vec3(1.0f, 0.0f, 0.0f));
-    return glm::vec3(rx * ry * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+    glm::mat4 ry = glm::rotate(rota, glm::degrees(yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 rx = glm::rotate(rota, glm::degrees(pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+    return glm::vec3(ry * rx * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 }

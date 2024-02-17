@@ -3,3 +3,12 @@
 //
 
 #include "PolygonRender.hpp"
+
+PolygonRender::PolygonRender(Game* game) {
+}
+
+void PolygonRender::updateWorld() {
+}
+
+void PolygonRender::render(double deltaTime) {
+}

@@ -7,21 +7,19 @@
 
 #include "render/voxel/VoxelRender.hpp"
 #include "utils/Input.hpp"
-#include "render/Window.hpp"
-#include "world/World.hpp"
 
 class VoxelRender;
 class World;
 class Game {
 public:
-    Game(Window *window);
-    void update(double deltaTime);
-    void render(double deltaTime);
-    void imgui(double deltaTime);
+    explicit Game(Window *window);
+    void update(double deltaTime) const;
+    void render(double deltaTime) const;
+    void imgui(double deltaTime) const;
 
-    Window *getWindow();
-    World *getWorld();
-    VoxelRender *getRenderer();
+    Window *getWindow() const;
+    World *getWorld() const;
+    VoxelRender *getRenderer() const;
 
     static bool focused;
 private:

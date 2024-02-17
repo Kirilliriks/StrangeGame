@@ -10,7 +10,7 @@
 
 class RaycastShader {
 public:
-    RaycastShader(std::string shader);
+    RaycastShader(const std::string& shader);
     GLuint getHandle();
     int maxGroupX, maxGroupY;
 private:

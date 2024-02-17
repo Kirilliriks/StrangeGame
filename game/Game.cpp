@@ -13,26 +13,26 @@ Game::Game(Window *window) : window(window) {
     renderer->updateWorld();
 }
 
-void Game::update(double deltaTime) {
+void Game::update(const double deltaTime) const {
     world->update(deltaTime);
 }
 
-void Game::render(double deltaTime) {
+void Game::render(const double deltaTime) const {
     renderer->render(deltaTime);
 }
 
-void Game::imgui(double deltaTime) {
+void Game::imgui(const double deltaTime) const {
     world->imgui(deltaTime);
 }
 
-Window *Game::getWindow() {
+Window *Game::getWindow() const {
     return window;
 }
 
-World *Game::getWorld() {
+World *Game::getWorld() const {
     return world;
 }
 
-VoxelRender *Game::getRenderer() {
+VoxelRender *Game::getRenderer() const {
     return renderer;
 }

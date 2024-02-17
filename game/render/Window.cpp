@@ -20,7 +20,7 @@ Window::Window() {
     std::getline(input, line);
     height = std::stoi(line);
 
-    if(!glfwInit()) {
+    if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return;
     }
@@ -29,8 +29,8 @@ Window::Window() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
     glfwWindowHint(GLFW_RED_BITS, mode->redBits);
     glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
@@ -39,7 +39,7 @@ Window::Window() {
 
     glWindow = glfwCreateWindow(mode->width, mode->height, "StrangeGame",
                                 nullptr, nullptr);
-    if(glWindow == nullptr) {
+    if (glWindow == nullptr) {
         std::cerr << "Failed to open GLFW window" << std::endl;
         glfwTerminate();
         return;
@@ -51,8 +51,7 @@ Window::Window() {
 
     glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return;
     }
@@ -75,6 +74,6 @@ Window::Window() {
     glfwSetWindowTitle(glWindow, title.c_str());
 }
 
-GLFWwindow *Window::getGLWindow() {
+GLFWwindow* Window::getGLWindow() const {
     return glWindow;
 }

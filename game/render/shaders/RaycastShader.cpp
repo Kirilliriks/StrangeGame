@@ -5,16 +5,16 @@
 #include "RaycastShader.hpp"
 #include "Shader.hpp"
 
-RaycastShader::RaycastShader(std::string shader) {
+RaycastShader::RaycastShader(const std::string& shader) {
     glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &maxGroupX);
     glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &maxGroupY);
 
     // Creating the compute shader, and the program object containing the shader
     progHandle = glCreateProgram();
-    GLuint cs = glCreateShader(GL_COMPUTE_SHADER);
+    const GLuint cs = glCreateShader(GL_COMPUTE_SHADER);
 
-    std::string shader_source = Shader::loadShaderFromFile(shader);
-    auto buffer = static_cast<const GLchar *>(shader_source.c_str());
+    const std::string shader_source = Shader::loadShaderFromFile(shader);
+    const auto buffer = shader_source.c_str();
     glShaderSource(cs, 1, &buffer, nullptr);
 
     glCompileShader(cs);

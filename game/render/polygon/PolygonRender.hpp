@@ -6,9 +6,14 @@
 #define POLYGONRENDER_H
 
 
-
+class Game;
 class PolygonRender {
+public:
+    explicit PolygonRender(Game *game);
+    ~PolygonRender() = default;
 
+    void updateWorld();
+    void render(double deltaTime);
 };
 
 
