@@ -5,8 +5,6 @@
 #ifndef STRANGEGAME_WORLD_H
 #define STRANGEGAME_WORLD_H
 
-#include <glad.h>
-#include "GLFW/glfw3.h"
 #include "Octree.h"
 #include "../render/Camera.h"
 #include "../Game.h"

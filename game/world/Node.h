@@ -16,7 +16,7 @@ struct Node {
     void divide(std::vector<Node> &nodes);
     void setVoxel(glm::vec4 color);
     int getSubNodeIndex(const glm::ivec3& vec);
-    int getSubNodeIndex(int subIndex);
+    int getSubNodeIndex(int subIndex) const;
 
     alignas(16) glm::ivec4 position; // TODO remove? Если мы знаем изначальный центр дерева то по идее можем вычислить координаты вокселя
     alignas(16) glm::vec4 color;

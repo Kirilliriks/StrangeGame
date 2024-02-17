@@ -15,7 +15,7 @@ Camera::Camera(Window *window) {
     direction = glm::vec3(0, 0, 1);
     yaw = 0;
     pitch = 0;
-    position = glm::vec3(18, 28, 18);
+    position = glm::vec3(18, 10, 18);
 }
 
 void Camera::update(double deltaTime, float mouseX, float mouseY) {

@@ -5,7 +5,6 @@
 #include "VoxelRender.h"
 
 #include "shaders/RaycastShader.h"
-#include "imgui.h"
 
 VoxelRender::VoxelRender(Game *game) : world(game->getWorld()) {
     this->game = game;

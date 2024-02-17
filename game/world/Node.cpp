@@ -29,7 +29,7 @@ bool Node::isEmpty() {
 void Node::divide(std::vector<Node> &nodes) {
     sub = nodes.size();
     for (int i = 0; i < 8; i++) {
-        glm::ivec3 pos = glm::ivec3(position);
+        auto pos = glm::ivec3(position);
 
         if ((i & 2) == 2) {
             pos.x += halfSize;
@@ -64,6 +64,6 @@ int Node::getSubNodeIndex(const glm::ivec3& vec) {
     return getSubNodeIndex(getSubIndex(vec));
 }
 
-int Node::getSubNodeIndex(int subIndex) {
+int Node::getSubNodeIndex(int subIndex) const {
     return sub + subIndex;
 }
