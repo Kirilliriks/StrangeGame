@@ -11,6 +11,7 @@
 class Octree {
 public:
     struct DebugCast {
+        std::vector<glm::vec3> entryStack;
         glm::ivec3 voxelPos;
         glm::ivec3 preVoxelPos;
         int iterations;

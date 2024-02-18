@@ -9,15 +9,20 @@
 
 class Object {
 public:
+    Object() = default;
     Object(const glm::vec3& position, Mesh* mesh);
 
     void render() const;
     const glm::mat4& getModelMatrix() const;
+    void setToRemove();
+    bool isNeedRemove() const;
 private:
-    Mesh* mesh;
+    Mesh* mesh = nullptr;
 
     glm::vec3 position;
     glm::mat4 model;
+
+    bool toRemove = false;
 };
 
 

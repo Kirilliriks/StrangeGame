@@ -4,6 +4,7 @@
 #include "Game.hpp"
 
 bool Game::focused = true;
+bool Game::debugRender = true;
 
 Game::Game(Window *window) : window(window) {
     input = new Input(window->getGLWindow());
@@ -38,4 +39,8 @@ World *Game::getWorld() const {
 
 VoxelRender *Game::getRenderer() const {
     return renderer;
+}
+
+PolygonRender* Game::getPolygonRenderer() const {
+    return polygonRenderer;
 }

@@ -26,14 +26,21 @@ void World::update(const double deltaTime) {
         return;
     }
 
-    if (Input::leftClick.pressed || (Input::leftClick.down && Input::leftShift.down)) {
-        octree.setVoxel(debugCast.preVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
-        game->getRenderer()->updateWorld();
-    }
+    if (!Game::debugRender) {
+        if (Input::leftClick.pressed || (Input::leftClick.down && Input::leftShift.down)) {
+            octree.setVoxel(debugCast.preVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
+            game->getRenderer()->updateWorld();
+        }
 
-    if (Input::rightClick.pressed || (Input::rightClick.down && Input::leftShift.down)) {
-        octree.removeVoxel(v);
-        game->getRenderer()->updateWorld();
+        if (Input::rightClick.pressed || (Input::rightClick.down && Input::leftShift.down)) {
+            octree.removeVoxel(v);
+            game->getRenderer()->updateWorld();
+        }
+    } else {
+        if (Input::leftClick.pressed) {
+            const auto debugCast = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
+            game->getPolygonRenderer()->traceLine(debugCast.entryStack);
+        }
     }
 }
 

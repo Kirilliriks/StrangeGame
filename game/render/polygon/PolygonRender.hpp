@@ -16,12 +16,16 @@ public:
     explicit PolygonRender(Game *game);
     ~PolygonRender() = default;
 
+    void traceLine(const std::vector<glm::vec3>& points);
     void updateWorld();
+    void update();
     void render(double deltaTime) const;
+    void clearObjects();
 private:
     Game &game;
     Shader shader;
 
+    Object world;
     std::vector<Object> objects;
 };
 

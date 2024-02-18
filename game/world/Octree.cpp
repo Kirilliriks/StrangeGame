@@ -145,6 +145,8 @@ Octree::DebugCast Octree::voxelRaycast(const glm::vec3& rayDirection, const glm:
 
     int iter = 0;
     while(distance < maxDistance) {
+        debugCast.entryStack.emplace_back(start_position + distance * rayDirection);
+
         iter++;
         debugCast.preVoxelPos = glm::ivec3(voxelPos);
         if (rayLength.x < rayLength.y) {
@@ -339,6 +341,7 @@ Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm:
 
     float realDistance = 0.0f;
     while (iter++ < 500) {
+
         currentLayer = layers[currentDepth];
         currentNode = nodes[currentLayer.nodeIndex];
 
@@ -359,6 +362,7 @@ Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm:
 
                 for (const Layer& layer : layers) {
                     realDistance += layer.distance;
+                    debugCast.entryStack.emplace_back(start_position + realDistance * rayDirection);
                 }
 
                 debugCast.distance = realDistance;

@@ -4,27 +4,33 @@
 
 #include "PolygonRender.hpp"
 
+#include <algorithm>
+
 #include "../../Game.hpp"
 #include "mesh/MeshBuilder.hpp"
 #include "mesh/MeshStorage.hpp"
 
 PolygonRender::PolygonRender(Game* game) : game(*game) {
     shader = Shader(R"(..\game\resources\shaders\polygon\vertex_pol.glsl)",
-                        R"(..\game\resources\shaders\polygon\fragment_pol.glsl)");
+                    R"(..\game\resources\shaders\polygon\fragment_pol.glsl)");
+}
 
+void PolygonRender::traceLine(const std::vector<glm::vec3>& points) {
     MeshBuilder meshBuilder;
-    meshBuilder.cube(glm::vec3(0, 0, 1), glm::vec4(1, 0, 0, 1), 2.0f);
+    meshBuilder.cube(glm::vec3(0, 0, 0), glm::vec4(1.0f, 20 / 25.0f, 1.0f, 1), 0.1f);
     const auto mesh = new Mesh(meshBuilder);
-    MeshStorage::pushMesh("test_mesh", mesh);
+    MeshStorage::pushMesh("point_mesh", mesh);
 
-    auto object = Object(glm::vec3(0, 0, 1), mesh);
-    //objects.emplace_back(object);
+    clearObjects();
+    for (const glm::vec3& point : points) {
+        objects.emplace_back(point, mesh);
+    }
 }
 
 void PolygonRender::updateWorld() {
     MeshBuilder meshBuilder;
 
-    Octree& octree = game.getWorld()->getOctree();
+    Octree&octree = game.getWorld()->getOctree();
     const int halfSize = octree.getSize();
 
     for (int y = 0; y < halfSize; y++) {
@@ -44,7 +50,18 @@ void PolygonRender::updateWorld() {
     MeshStorage::pushMesh("world_mesh", mesh);
 
     auto object = Object(glm::vec3(0, 0, 0), mesh);
+    world = object;
     objects.emplace_back(object);
+}
+
+void PolygonRender::update() {
+    objects.erase(
+        std::ranges::remove_if(objects,
+                               [](const Object& object) {
+                                   return object.isNeedRemove();
+                               }
+        ).begin()
+    );
 }
 
 
@@ -52,10 +69,15 @@ void PolygonRender::render(double deltaTime) const {
     shader.bind();
     shader.uniformMatrix("projection_view", game.getWorld()->getCamera().getMatrixMultiply());
 
-    for (const Object& object : objects) {
+    for (const Object& object: objects) {
         shader.uniformMatrix("model", object.getModelMatrix());
         object.render();
     }
 
     shader.unbind();
+}
+
+void PolygonRender::clearObjects() {
+    objects.clear();
+    objects.emplace_back(world);
 }

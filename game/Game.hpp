@@ -13,6 +13,9 @@ class VoxelRender;
 class World;
 class Game {
 public:
+    static bool focused;
+    static bool debugRender;
+
     explicit Game(Window *window);
     void update(double deltaTime) const;
     void render(double deltaTime) const;
@@ -21,8 +24,7 @@ public:
     Window *getWindow() const;
     World *getWorld() const;
     VoxelRender *getRenderer() const;
-
-    static bool focused;
+    PolygonRender *getPolygonRenderer() const;
 private:
     Window *window;
     Input *input;
