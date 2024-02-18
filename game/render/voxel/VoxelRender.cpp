@@ -20,10 +20,10 @@ VoxelRender::VoxelRender(Game *game) : world(game->getWorld()) {
     glGenBuffers(1, &windowBufferID);
     glBindBuffer(GL_ARRAY_BUFFER, windowBufferID);
     constexpr float data[] = {
-            -1.0f, -1.0f,
             -1.0f, 1.0f,
-            1.0f, -1.0f,
-            1.0f, 1.0f
+            -1.0f, -1.0f,
+            1.0f, 1.0f,
+            1.0f, -1.0f
     };
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8, data, GL_STATIC_DRAW);
 
@@ -56,8 +56,12 @@ void VoxelRender::render(double deltaTime) const {
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
     shader.bind();
+    glBindVertexArray(windowArrayID);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
     shader.unbind();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void VoxelRender::updateWorld() const {

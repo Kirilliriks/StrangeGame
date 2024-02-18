@@ -8,10 +8,10 @@ bool Game::focused = true;
 Game::Game(Window *window) : window(window) {
     input = new Input(window->getGLWindow());
     world = new World(this);
-    //renderer = new VoxelRender(this);
+    renderer = new VoxelRender(this);
     polygonRenderer = new PolygonRender(this);
     world->createWorld();
-    //renderer->updateWorld();
+    renderer->updateWorld();
 }
 
 void Game::update(const double deltaTime) const {
@@ -19,7 +19,7 @@ void Game::update(const double deltaTime) const {
 }
 
 void Game::render(const double deltaTime) const {
-    //renderer->render(deltaTime);
+    renderer->render(deltaTime);
     polygonRenderer->render(deltaTime);
 }
 

@@ -32,22 +32,22 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
     if (Game::focused) {
         int state = glfwGetKey(glWindow, GLFW_KEY_W);
         if (state == GLFW_PRESS) {
-            movement = -speed * direction;
+            movement = speed * direction;
         }
 
         state = glfwGetKey(glWindow, GLFW_KEY_S);
         if (state == GLFW_PRESS) {
-            movement = speed * direction;
+            movement = -speed * direction;
         }
 
         state = glfwGetKey(glWindow, GLFW_KEY_A);
         if (state == GLFW_PRESS) {
-            movement = speed * glm::normalize(glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f)));
+            movement = speed * glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), direction));
         }
 
         state = glfwGetKey(glWindow, GLFW_KEY_D);
         if (state == GLFW_PRESS) {
-            movement = speed * glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), direction));
+            movement = speed * glm::normalize(glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f)));
         }
 
         state = glfwGetKey(glWindow, GLFW_KEY_SPACE);
@@ -132,10 +132,7 @@ glm::vec3 Camera::getPosition() {
 }
 
 glm::vec3 Camera::getDirection() const {
-    const glm::mat4 rota(1.0f);
-    const glm::mat4 ry = glm::rotate(rota, glm::degrees(yaw), glm::vec3(0.0f, 1.0f, 0.0f));
-    const glm::mat4 rx = glm::rotate(rota, glm::degrees(pitch), glm::vec3(1.0f, 0.0f, 0.0f));
-    return glm::vec3(ry * rx * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+    return front;
 }
 
 glm::mat4 Camera::getProjection() const {

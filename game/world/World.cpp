@@ -28,12 +28,12 @@ void World::update(const double deltaTime) {
 
     if (Input::leftClick.pressed || (Input::leftClick.down && Input::leftShift.down)) {
         octree.setVoxel(debugCast.preVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
-        //game->getRenderer()->updateWorld();
+        game->getRenderer()->updateWorld();
     }
 
     if (Input::rightClick.pressed || (Input::rightClick.down && Input::leftShift.down)) {
         octree.removeVoxel(v);
-        //game->getRenderer()->updateWorld();
+        game->getRenderer()->updateWorld();
     }
 }
 

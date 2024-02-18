@@ -445,7 +445,7 @@ void rotate(inout vec3 v, const in vec3 axis, float theta) {
 
 void main() {
     const ivec2 pixel_coord = ivec2(gl_GlobalInvocationID.xy);
-    const ivec3 screen_coord = ivec3(pixel_coord - ivec2(window_size.x / 2, window_size.y / 2), window_size.x);
+    const ivec3 screen_coord = ivec3(pixel_coord - window_size / 2, -window_size.x);
 
     vec3 rayDir = normalize(screen_coord);
     rotate(rayDir, vec3(1, 0, 0), camera_angles.y);
