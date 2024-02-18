@@ -13,7 +13,7 @@ World::World(Game *game) : game(game), camera(game->getWindow()) {
 
 }
 
-void World::update(double deltaTime) {
+void World::update(const double deltaTime) {
     double mouseX, mouseY;
     glfwGetCursorPos(game->getWindow()->getGLWindow(), &mouseX, &mouseY);
     camera.update(deltaTime, (float)mouseX, (float)mouseY);

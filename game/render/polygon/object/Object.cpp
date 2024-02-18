@@ -4,17 +4,13 @@
 
 #include "Object.hpp"
 
-#include "../mesh/MeshBuilder.hpp"
 
-Object::Object(const glm::vec3& position) : position(position) {
-    MeshBuilder meshBuilder;
-    meshBuilder.cube(glm::vec3(5, 5, 5), glm::vec3(1, 0, 0), 5);
-    mesh = Mesh(meshBuilder);
+Object::Object(const glm::vec3& position, Mesh* mesh) : mesh(mesh), position(position) {
     model = glm::mat4(1);
 }
 
 void Object::render() const {
-    mesh.render();
+    mesh->render();
 }
 
 const glm::mat4& Object::getModelMatrix() const {

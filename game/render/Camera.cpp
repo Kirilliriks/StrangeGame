@@ -67,8 +67,8 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
 
         position += glm::vec3(movement.x * deltaTime, movement.y * deltaTime, movement.z * deltaTime);
 
-        //yaw = (mouseX - (float) window->width / 2.0f) * 0.0005f;
-        //pitch = (mouseY - (float) window->height / 2.0f) * 0.0005f;
+        yaw = (-mouseX - (float) window->width / 2.0f) * 0.005f;
+        pitch = (-mouseY - (float) window->height / 2.0f) * 0.005f;
 
         direction = getDirection();
 
@@ -140,7 +140,7 @@ glm::vec3 Camera::getDirection() const {
 
 glm::mat4 Camera::getProjection() const {
     const float aspect = (float) window->width / (float) window->height;
-    return glm::perspective(glm::radians(fov), aspect, 0.01f, 10000.0f);
+    return glm::perspective(fov, aspect, 0.01f, 1000.0f);
 }
 
 glm::mat4 Camera::getView() const {

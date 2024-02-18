@@ -6,7 +6,7 @@
 #define STRANGEGAME_RAYCASTSHADER_H
 
 #include <iostream>
-#include "glad.h"
+#include "gl.h"
 
 class RaycastShader { // TODO make extend Shader
 public:

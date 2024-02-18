@@ -9,12 +9,12 @@
 
 class Object {
 public:
-    explicit Object(const glm::vec3& position);
+    Object(const glm::vec3& position, Mesh* mesh);
 
     void render() const;
     const glm::mat4& getModelMatrix() const;
 private:
-    Mesh mesh;
+    Mesh* mesh;
 
     glm::vec3 position;
     glm::mat4 model;

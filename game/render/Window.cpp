@@ -1,7 +1,7 @@
 //
 // Created by KirilliriK on 01.03.2022.
 //
-#include <glad.h>
+#include <gl.h>
 #include <iostream>
 #include <fstream>
 
@@ -52,7 +52,7 @@ Window::Window() {
     glfwSetWindowSize(glWindow, width, height);
     glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+    if (!gladLoadGL(glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return;
     }

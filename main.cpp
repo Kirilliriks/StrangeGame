@@ -1,4 +1,4 @@
-#include <glad.h>
+#include <gl.h>
 #include "GLFW/glfw3.h"
 
 #include "game/Game.hpp"

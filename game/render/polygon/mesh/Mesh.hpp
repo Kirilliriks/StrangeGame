@@ -10,13 +10,12 @@
 class MeshBuilder;
 class Mesh {
 public:
-    Mesh() = default;
     explicit Mesh(MeshBuilder& meshBuilder);
-    Mesh(const std::vector<float>&buffer, const int& vertexes, const std::vector<int>& attributes);
+    Mesh(const std::vector<float>& buffer, const int& vertices, const std::vector<int>& attributes);
     ~Mesh();
 
     void render() const;
-
+    const unsigned int& getVertices() const;
 private:
     unsigned int vao = -1;
     unsigned int vbo = -1;

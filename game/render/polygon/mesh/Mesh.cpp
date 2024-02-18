@@ -3,28 +3,28 @@
 //
 
 #include "Mesh.hpp"
-#include <glad.h>
+#include <gl.h>
 #include <iostream>
 
 #include "MeshBuilder.hpp"
 
-float vertic[] = {
-    // x    y     z
-    -1.0f,-1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-     1.0f,-1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-    -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-
-     1.0f,-1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-     1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-    -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-};
+// std::vector vector {
+//     -1.0f,-1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+//    1.0f,-1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+//   -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+//
+//    1.0f,-1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+//    1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+//   -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+// };
 
 Mesh::Mesh(MeshBuilder& meshBuilder)
 : Mesh(meshBuilder.getBuffer(), meshBuilder.getVertexes(), meshBuilder.getAttributes()) {
-
 }
 
-Mesh::Mesh(const std::vector<float>& buffer, const int& vertexes, const std::vector<int>& attributes) {
+Mesh::Mesh(const std::vector<float>& buffer, const int& vertices, const std::vector<int>& attributes) {
+    this->vertices = vertices;
+
     int vertexSize = 0;
     for (const int attribute : attributes) {
         vertexSize += attribute;
@@ -35,8 +35,7 @@ Mesh::Mesh(const std::vector<float>& buffer, const int& vertexes, const std::vec
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertic), &vertic, GL_STATIC_DRAW);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexSize * vertexes, &buffer[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * buffer.size(), &buffer.front(), GL_STATIC_DRAW);
 
     // attributes
     int offset = 0;
@@ -47,8 +46,6 @@ Mesh::Mesh(const std::vector<float>& buffer, const int& vertexes, const std::vec
         offset += attribute;
         i++;
     }
-
-    glBindVertexArray(0);
 }
 
 Mesh::~Mesh() {
@@ -58,6 +55,10 @@ Mesh::~Mesh() {
 
 void Mesh::render() const {
     glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArrays(GL_TRIANGLES, 0, vertices);
     glBindVertexArray(0);
+}
+
+const unsigned int& Mesh::getVertices() const {
+    return vertices;
 }

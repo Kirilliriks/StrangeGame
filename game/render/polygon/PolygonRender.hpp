@@ -22,7 +22,7 @@ private:
     Game &game;
     Shader shader;
 
-    std::vector<Mesh> objects;
+    std::vector<Object> objects;
 };
 
 

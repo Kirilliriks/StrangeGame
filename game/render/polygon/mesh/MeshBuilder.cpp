@@ -42,9 +42,9 @@ void MeshBuilder::quad(
     vertex(second, color);
     vertex(third, color);
 
-    vertex(first, color);
-    vertex(second, color);
+    vertex(third, color);
     vertex(four, color);
+    vertex(first, color);
 }
 
 void MeshBuilder::vertex(const glm::vec3& pos, const glm::vec3& color) {

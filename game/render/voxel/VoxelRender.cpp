@@ -1,7 +1,7 @@
 //
 // Created by KirilliriK on 28.02.2022.
 //
-#include <glad.h>
+#include <gl.h>
 
 #include "VoxelRender.hpp"
 #include "../shaders/RaycastShader.hpp"

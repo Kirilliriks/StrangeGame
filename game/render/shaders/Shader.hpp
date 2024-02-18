@@ -8,7 +8,7 @@
 #include <iostream>
 #include "glm/glm.hpp"
 
-#include "glad.h"
+#include "gl.h"
 
 class Shader {
 public:
