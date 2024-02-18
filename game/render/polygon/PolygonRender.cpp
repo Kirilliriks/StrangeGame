@@ -13,9 +13,9 @@ PolygonRender::PolygonRender(Game* game) : game(*game) {
                         R"(..\game\resources\shaders\polygon\fragment_pol.glsl)");
 
     MeshBuilder meshBuilder;
-    meshBuilder.cube(glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), 0.1f);
+    meshBuilder.cube(glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), 2.0f);
     const auto mesh = new Mesh(meshBuilder);
-    MeshStorage::pushMesh("test_mesg", mesh);
+    MeshStorage::pushMesh("test_mesh", mesh);
 
     auto object = Object(glm::vec3(0, 0, 1), mesh);
     objects.emplace_back(object);
