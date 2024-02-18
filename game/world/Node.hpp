@@ -9,13 +9,13 @@
 #include "glm/glm.hpp"
 
 struct Node {
-    Node(int size, glm::ivec3 position);
+    Node(int size, const glm::ivec3& position);
 
-    bool isEmpty();
-    int getSubIndex(const glm::ivec3& vec);
+    bool isEmpty() const;
+    int getSubIndex(const glm::ivec3& vec) const;
     void divide(std::vector<Node> &nodes);
-    void setVoxel(glm::vec4 color);
-    int getSubNodeIndex(const glm::ivec3& vec);
+    void setVoxel(const glm::vec4& color);
+    int getSubNodeIndex(const glm::ivec3& vec) const;
     int getSubNodeIndex(int subIndex) const;
 
     alignas(16) glm::ivec4 position; // TODO remove? Если мы знаем изначальный центр дерева то по идее можем вычислить координаты вокселя

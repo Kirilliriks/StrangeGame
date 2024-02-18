@@ -10,20 +10,20 @@
 
 class MeshBuilder {
 public:
-    static constexpr int VERTEX_SIZE = 3 + 3; // XYZ + RGB
+    static constexpr int VERTEX_SIZE = 3 + 4; // XYZ + RGBA
 
     MeshBuilder();
     ~MeshBuilder() = default;
 
-    void cube(const glm::vec3& pos, const glm::vec3& color, float size);
+    void cube(const glm::vec3& pos, const glm::vec4& color, float size);
     void quad(
         const glm::vec3& first,
         const glm::vec3& second,
         const glm::vec3& third,
         const glm::vec3& four,
-        const glm::vec3& color
+        const glm::vec4& color
     );
-    void vertex(const glm::vec3&pos, const glm::vec3&color);
+    void vertex(const glm::vec3&pos, const glm::vec4&color);
 
     const std::vector<float>& getBuffer();
     const std::vector<int>& getAttributes();

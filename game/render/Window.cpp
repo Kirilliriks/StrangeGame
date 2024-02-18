@@ -65,7 +65,7 @@ Window::Window() {
     ImGui_ImplGlfw_InitForOpenGL(glWindow, true);
     ImGui_ImplOpenGL3_Init("#version 430");
 
-    //glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_DOUBLEBUFFER);
     glDepthFunc(GL_LESS);

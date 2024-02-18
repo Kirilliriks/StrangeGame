@@ -12,6 +12,7 @@ Game::Game(Window *window) : window(window) {
     polygonRenderer = new PolygonRender(this);
     world->createWorld();
     renderer->updateWorld();
+    polygonRenderer->updateWorld();
 }
 
 void Game::update(const double deltaTime) const {
@@ -19,7 +20,7 @@ void Game::update(const double deltaTime) const {
 }
 
 void Game::render(const double deltaTime) const {
-    renderer->render(deltaTime);
+    //renderer->render(deltaTime);
     polygonRenderer->render(deltaTime);
 }
 

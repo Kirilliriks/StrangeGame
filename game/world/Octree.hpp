@@ -19,20 +19,22 @@ public:
     };
 
     Octree();
-    int getSize();
+    int getSize() const;
     void setVoxel(const glm::ivec3& vec, const glm::vec4& color);
+    Node getVoxel(const glm::ivec3& vec);
     void removeVoxel(const glm::ivec3& vec);
 
     Node *getData();
-    int nodesCount();
+    int nodesCount() const;
 
     DebugCast castDRay(const glm::vec3& rayDirection, const glm::vec3& start_position);
     DebugCast raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position);
     DebugCast voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance);
 private:
     void setVoxel(int index, int depth, const glm::ivec3& vec, const glm::vec4& color);
+    Node getVoxel(int index, int depth, const glm::ivec3& vec);
     void removeVoxel(int index, int depth, const glm::ivec3& vec);
-    int findVoxel(const glm::ivec3 &voxelPos);
+    int findVoxel(const glm::ivec3 &voxelPos) const;
 
     std::vector<Node> nodes;
     int maxDepth;

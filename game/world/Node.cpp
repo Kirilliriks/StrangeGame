@@ -3,17 +3,6 @@
 //
 #include "Node.hpp"
 
-Node::Node(int size, glm::ivec3 position) {
-    this->halfSize = size / 2;
-    this->position = glm::vec4(position, 0.0f);
-    sub = -1;
-    color = glm::vec4(0.0f, 0.0f, 0.0f, -1.0f);
-}
-
-bool Node::isEmpty() {
-    return sub == -1;
-}
-
 // Little help struct, TODO delete
 //enum nodeIndex {
 //    DOWN_LEFT_FRONT = 0, //000
@@ -25,6 +14,17 @@ bool Node::isEmpty() {
 //    UPPER_RIGHT_FRONT = 6, //110
 //    UPPER_RIGHT_BACK = 7   //111
 //};
+
+Node::Node(const int size, const glm::ivec3& position) {
+    this->halfSize = size / 2;
+    this->position = glm::vec4(position, 0.0f);
+    sub = -1;
+    color = glm::vec4(0.0f, 0.0f, 0.0f, -1.0f);
+}
+
+bool Node::isEmpty() const {
+    return sub == -1;
+}
 
 void Node::divide(std::vector<Node> &nodes) {
     sub = nodes.size();
@@ -47,7 +47,7 @@ void Node::divide(std::vector<Node> &nodes) {
     }
 }
 
-int Node::getSubIndex(const glm::ivec3& vec) {
+int Node::getSubIndex(const glm::ivec3& vec) const {
     int subIndex = 0;
     subIndex |= vec.x >= (position.x + halfSize)? 2 : 0;
     subIndex |= vec.y >= (position.y + halfSize)? 4 : 0;
@@ -56,14 +56,14 @@ int Node::getSubIndex(const glm::ivec3& vec) {
     return subIndex;
 }
 
-void Node::setVoxel(glm::vec4 color) {
+void Node::setVoxel(const glm::vec4& color) {
     this->color = color;
 }
 
-int Node::getSubNodeIndex(const glm::ivec3& vec) {
+int Node::getSubNodeIndex(const glm::ivec3& vec) const {
     return getSubNodeIndex(getSubIndex(vec));
 }
 
-int Node::getSubNodeIndex(int subIndex) const {
+int Node::getSubNodeIndex(const int subIndex) const {
     return sub + subIndex;
 }

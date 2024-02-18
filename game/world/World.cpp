@@ -60,11 +60,13 @@ void World::createWorld() {
     std::uniform_int_distribution<int> rand(0,100);
 
     const int worldSize = octree.getSize();
+    float divider = 32.0f;
     for (int z = 0; z < worldSize; z++) {
         for (int x = 0; x < worldSize; x++) {
-            float per = glm::simplex(glm::vec3(x / 32.0f, z / 32.0f, 21));
+            float per = glm::simplex(glm::vec3(x / divider, z / divider, 21));
             per = (per + 1) / 2;
-            int y = (int)(per * (float)32);
+
+            const int y = (int)(per * (float)32);
             if (y < 0 || y > worldSize) continue;
 
             for (int i = 0; i <= y; i++) {
