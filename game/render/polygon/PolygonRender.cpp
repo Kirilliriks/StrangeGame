@@ -30,7 +30,7 @@ void PolygonRender::traceLine(const std::vector<glm::vec3>& points) {
 void PolygonRender::updateWorld() {
     MeshBuilder meshBuilder;
 
-    Octree&octree = game.getWorld()->getOctree();
+    Octree& octree = game.getWorld()->getOctree();
     const int halfSize = octree.getSize();
 
     for (int y = 0; y < halfSize; y++) {

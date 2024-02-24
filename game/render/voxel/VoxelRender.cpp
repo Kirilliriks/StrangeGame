@@ -43,7 +43,7 @@ void VoxelRender::render(const double& deltaTime) const {
     glUseProgram(raycastShaderID);
 
     const Camera& camera = world->getCamera();
-    const glm::ivec3& voxelPos = world->getDebugCast().voxelPos;
+    const glm::ivec3& voxelPos = world->getTraceCast().voxelPos;
 
     glUniform3f(2, camera.getX(), camera.getY(), camera.getZ());
     glUniform2f(3, camera.getYaw(), camera.getPitch());

@@ -27,4 +27,6 @@ add_library(
         render/polygon/object/Object.hpp
         render/polygon/mesh/MeshStorage.cpp
         render/polygon/mesh/MeshStorage.hpp
+        world/TraceStack.cpp
+        world/TraceStack.hpp
 )

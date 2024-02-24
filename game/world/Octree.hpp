@@ -7,18 +7,10 @@
 
 #include <vector>
 #include "Node.hpp"
+#include "TraceStack.hpp"
 
 class Octree {
 public:
-    struct DebugCast {
-        std::vector<glm::vec3> entryStack;
-        glm::ivec3 voxelPos;
-        glm::ivec3 preVoxelPos;
-        int iterations;
-        int iterationsF;
-        float distance;
-    };
-
     Octree();
     int getSize() const;
     void setVoxel(const glm::ivec3& vec, const glm::vec4& color);
@@ -28,9 +20,8 @@ public:
     Node *getData();
     int nodesCount() const;
 
-    DebugCast castDRay(const glm::vec3& rayDirection, const glm::vec3& start_position) const;
-    DebugCast raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position) const;
-    DebugCast voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance) const;
+    TraceStack raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position) const;
+    TraceStack voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance) const;
 private:
     void setVoxel(const int& index, const int& depth, const glm::ivec3& vec, const glm::vec4& color);
     Node getVoxel(const int& index, const int& depth, const glm::ivec3& vec);

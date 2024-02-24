@@ -17,8 +17,8 @@ void World::update(const double& deltaTime) {
     glfwGetCursorPos(game->getWindow()->getGLWindow(), &mouseX, &mouseY);
     camera.update(deltaTime, static_cast<float>(mouseX), static_cast<float>(mouseY));
 
-    debugCast = octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 100);
-    const glm::ivec3 v = debugCast.voxelPos; //octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
+    traceCast = octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 100);
+    const glm::ivec3 v = traceCast.voxelPos; //octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
     frontVoxel = glm::vec3(v);
 
     if (!Game::focused) {
@@ -27,7 +27,7 @@ void World::update(const double& deltaTime) {
 
     if (!Game::debugRender) {
         if (Input::leftClick.pressed || (Input::leftClick.down && Input::leftShift.down)) {
-            octree.setVoxel(debugCast.preVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
+            octree.setVoxel(traceCast.preVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
             game->getRenderer()->updateWorld();
         }
 
@@ -38,12 +38,7 @@ void World::update(const double& deltaTime) {
     }
     else {
         if (Input::leftClick.pressed) {
-            const auto [entryStack,
-                voxelPos,
-                preVoxelPos,
-                iterations,
-                iterationsF,
-                distance] = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
+            const auto entryStack = octree.raycastVoxel(camera.getDirection(), camera.getPosition()).entryStack;
             game->getPolygonRenderer()->traceLine(entryStack);
         }
     }
@@ -52,11 +47,11 @@ void World::update(const double& deltaTime) {
 void World::imgui(const double& deltaTime) const {
     ImGui::Begin("Info window");
     ImGui::SetWindowCollapsed(false);
-    ImGui::Text("Cam x=%d y=%d z=%d", (int)camera.getX(), (int)camera.getY(), (int)camera.getZ());
-    ImGui::Text("Cam yaw=%d pitch=%d", (int)camera.getYaw(), (int)camera.getPitch());
+    ImGui::Text("Cam x=%d y=%d z=%d", (int) camera.getX(), (int) camera.getY(), (int) camera.getZ());
+    ImGui::Text("Cam yaw=%d pitch=%d", (int) camera.getYaw(), (int) camera.getPitch());
     ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
-    ImGui::Text("Try x=%d y=%d z=%d", debugCast.voxelPos.x, debugCast.voxelPos.y, debugCast.voxelPos.z);
-    ImGui::Text("Distance %f", debugCast.distance);
+    ImGui::Text("Try x=%d y=%d z=%d", traceCast.voxelPos.x, traceCast.voxelPos.y, traceCast.voxelPos.z);
+    ImGui::Text("Distance %f", traceCast.distance);
 
     ImGui::ColorPicker3("Choose voxel color", editColor);
     ImGui::End();
@@ -72,13 +67,13 @@ void World::createWorld() {
     std::uniform_int_distribution<int> rand(0, 100);
 
     const int worldSize = octree.getSize();
-    float divider = 32.0f;
     for (int z = 0; z < worldSize; z++) {
         for (int x = 0; x < worldSize; x++) {
+            constexpr float divider = 32.0f;
             float per = glm::simplex(glm::vec3(x / divider, z / divider, 21));
-            per = (per + 1) / 2;
+            per = (per + 1) / 2.0f;
 
-            const int y = (int)(per * (float)32);
+            const int y = static_cast<int>(per * divider);
             if (y < 0 || y > worldSize) continue;
 
             for (int i = 0; i <= y; i++) {
@@ -99,8 +94,8 @@ Camera& World::getCamera() {
     return camera;
 }
 
-Octree::DebugCast& World::getDebugCast() {
-    return debugCast;
+TraceStack& World::getTraceCast() {
+    return traceCast;
 }
 
 glm::ivec3& World::getFrontVoxel() {

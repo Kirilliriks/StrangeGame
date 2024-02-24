@@ -126,29 +126,26 @@ int Octree::findVoxel(const glm::ivec3& voxelPos) const {
     return -1;
 }
 
-Octree::DebugCast Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance) const {
-    DebugCast debugCast;
-    debugCast.distance = 0;
-    debugCast.iterations = 0;
-    debugCast.voxelPos = glm::ivec3(-1);
+TraceStack Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance) const {
+    TraceStack traceStack;
+    traceStack.distance = 0;
+    traceStack.iterations = 0;
+    traceStack.voxelPos = glm::ivec3(-1);
 
-    float distance = 0.0f;
-
+    const auto dir = glm::ivec3(rayDirection.x > 0.0f, rayDirection.y > 0.0f, rayDirection.z > 0.0f);
+    const auto step = glm::ivec3(glm::sign(rayDirection));
     const glm::vec3 rayStepSize = glm::abs(glm::vec3(1.0f) / rayDirection);
 
-    glm::vec3 rayLength;
-    glm::ivec4 voxelPos = glm::ivec4(start_position, 0);
-    glm::ivec3 step = glm::ivec3(glm::sign(rayDirection));
-
-    glm::ivec3 dir = glm::ivec3(rayDirection.x > 0.0f, rayDirection.y > 0.0f, rayDirection.z > 0.0f);
-    rayLength = (glm::vec3(glm::ivec3(start_position) + dir) - start_position) / rayDirection;
+    auto voxelPos = glm::ivec4(start_position, 0);
+    auto rayLength = (glm::vec3(glm::ivec3(start_position) + dir) - start_position) / rayDirection;
 
     int iter = 0;
+    float distance = 0.0f;
     while(distance < maxDistance) {
-        debugCast.entryStack.emplace_back(start_position + distance * rayDirection);
+        traceStack.entryStack.emplace_back(start_position + distance * rayDirection);
 
         iter++;
-        debugCast.preVoxelPos = glm::ivec3(voxelPos);
+        traceStack.preVoxelPos = glm::ivec3(voxelPos);
         if (rayLength.x < rayLength.y) {
             if (rayLength.x < rayLength.z) {
                 voxelPos.x += step.x;
@@ -172,14 +169,14 @@ Octree::DebugCast Octree::voxelRaycast(const glm::vec3& rayDirection, const glm:
         }
 
         if (findVoxel(glm::ivec3(voxelPos)) == 1) {
-            debugCast.iterations = iter;
-            debugCast.distance = distance;
-            debugCast.voxelPos = glm::ivec3(voxelPos);
-            return debugCast;
+            traceStack.iterations = iter;
+            traceStack.distance = distance;
+            traceStack.voxelPos = glm::ivec3(voxelPos);
+            return traceStack;
         }
     }
 
-    return debugCast;
+    return traceStack;
 }
 
 int getSubIndexFromSubVector(const glm::ivec3& vec) {
@@ -202,128 +199,19 @@ struct Layer {
     float distance = 0.0f;
 };
 
-Layer calculateLayer(Layer &layer, const glm::ivec3& dir, const glm::vec3& rayStepSizeSingle) {
-    layer.subVec = glm::ivec3(layer.position) / layer.halfSize;
-    layer.distance = 0.0f;
-    layer.rayLength = (glm::vec3(layer.subVec + dir) * float(layer.halfSize) - layer.position) * rayStepSizeSingle;
-    return layer;
-}
-
 Layer calculateLayer(Layer &layer, const glm::ivec3& dir, const glm::vec3& rayStepSizeSingle, const int halfSize) {
     layer.subVec = glm::clamp(glm::ivec3(layer.position) / halfSize, 0, 1);
-    layer.rayLength = (glm::vec3(layer.subVec + dir) * float(halfSize) - layer.position) * rayStepSizeSingle;
+    layer.rayLength = (glm::vec3(layer.subVec + dir) * static_cast<float>(halfSize) - layer.position) * rayStepSizeSingle;
     layer.distance = 0.0f;
     return layer;
 }
 
-struct StackItem {
-    int nodeIndex = -1;
-    glm::ivec3 subVec;
-};
-
-Octree::DebugCast Octree::castDRay(const glm::vec3& rayDirection, const glm::vec3& start_position) const {
+TraceStack Octree::raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position) const {
     int iter = 0;
-    DebugCast debugCast;
-    debugCast.iterations = 0;
-    debugCast.voxelPos = glm::ivec3(-1);
+    TraceStack traceStack;
 
     const glm::vec3 rayStepSizeSingle = 1.0f / rayDirection;
-    const glm::ivec3 step = glm::ivec3(glm::sign(rayDirection));
-    const glm::ivec3 dir = glm::max(step, 0);
-
-    StackItem nodeStack[maxDepth + 1];
-
-    Layer currentLayer;
-    Node currentNode = nodes[0];
-    currentLayer.nodeIndex = 0;
-    currentLayer.halfSize = currentNode.halfSize;
-    currentLayer.position = start_position;
-    currentLayer.distance = 0.0f;
-    calculateLayer(currentLayer, dir, rayStepSizeSingle);
-
-    int currentDepth = maxDepth;
-    nodeStack[currentDepth].nodeIndex = 0;
-    nodeStack[currentDepth].subVec = currentLayer.subVec;
-
-    glm::ivec3 lastStep = glm::ivec3(0);
-    glm::vec3 rayStepSize = glm::vec3(currentLayer.halfSize) * glm::abs(rayStepSizeSingle);
-    while (iter++ < 500) {
-        int subIndex = getSubIndexFromSubVector(currentLayer.subVec);
-        if (subIndex < 0) {
-            while(subIndex < 0) {
-                currentDepth++;
-                if (currentDepth > maxDepth) {
-                    debugCast.iterations = 1;
-                    debugCast.voxelPos = glm::ivec3(currentLayer.position);
-                    return debugCast;
-                }
-                rayStepSize *= 2;
-
-                currentNode = nodes[nodeStack[currentDepth].nodeIndex];
-                currentLayer.halfSize = currentNode.halfSize;
-                currentLayer.subVec = nodeStack[currentDepth].subVec + lastStep;
-                subIndex = getSubIndexFromSubVector(currentLayer.subVec);
-            }
-            continue;
-        } else if (currentNode.sub != -1) {
-            const int subNodeIndex = currentNode.sub + subIndex;
-            currentNode = nodes[subNodeIndex];
-            if (currentNode.color.a != -1.0f) {
-                debugCast.voxelPos = glm::ivec3(currentNode.position);
-                debugCast.iterations = iter;
-                debugCast.iterations = -1;
-                return debugCast;
-            } else if (currentDepth != 1) { // If currentDepth == 1, this node has voxel neighbour
-                currentDepth--;
-                rayStepSize *= 0.5f;
-                currentLayer.halfSize = currentNode.halfSize;
-                currentLayer.subVec = glm::ivec3(currentLayer.position - glm::vec3(currentNode.position)) / currentLayer.halfSize;
-                nodeStack[currentDepth].nodeIndex = subNodeIndex;
-                nodeStack[currentDepth].subVec = currentLayer.subVec;
-                continue;
-            }
-        }
-
-        lastStep = glm::ivec3(0);
-        if (currentLayer.rayLength.x < currentLayer.rayLength.y) {
-            if (currentLayer.rayLength.x < currentLayer.rayLength.z) {
-                currentLayer.distance = currentLayer.rayLength.x;
-                currentLayer.rayLength.x += rayStepSize.x;
-                currentLayer.subVec.x += step.x;
-                lastStep.x = step.x;
-            } else {
-                currentLayer.distance = currentLayer.rayLength.z;
-                currentLayer.rayLength.z += rayStepSize.z;
-                currentLayer.subVec.z += step.z;
-                lastStep.z = step.z;
-            }
-        } else {
-            if (currentLayer.rayLength.y < currentLayer.rayLength.z) {
-                currentLayer.distance = currentLayer.rayLength.y;
-                currentLayer.rayLength.y += rayStepSize.y;
-                currentLayer.subVec.y += step.y;
-                lastStep.y = step.y;
-            } else {
-                currentLayer.distance = currentLayer.rayLength.z;
-                currentLayer.rayLength.z += rayStepSize.z;
-                currentLayer.subVec.z += step.z;
-                lastStep.z = step.z;
-            }
-        }
-        nodeStack[currentDepth].subVec = currentLayer.subVec;
-        currentLayer.position = start_position + rayDirection * currentLayer.distance;
-    }
-    debugCast.voxelPos = glm::ivec3(currentLayer.position);
-    debugCast.iterations = 2;
-    return debugCast;
-}
-
-Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position) const {
-    int iter = 0;
-    DebugCast debugCast;
-
-    const glm::vec3 rayStepSizeSingle = 1.0f / rayDirection;
-    const glm::ivec3 step = glm::ivec3(glm::sign(rayDirection));
+    const auto step = glm::ivec3(glm::sign(rayDirection));
     const glm::ivec3 dir = glm::max(step, 0);
 
     Layer layers[maxDepth + 1];
@@ -348,7 +236,7 @@ Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm:
         const int subIndex = getSubIndexFromSubVector(currentLayer.subVec);
         if (subIndex < 0) {
             currentDepth++;
-            if (currentDepth == maxDepth) return debugCast;
+            if (currentDepth == maxDepth) return traceStack;
 
             rayStepSize *= 2;
             halfSize *= 2;
@@ -357,17 +245,17 @@ Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm:
             currentNode = nodes[subNodexIndex];
 
             if (currentNode.color.a != -1.0f) {
-                debugCast.voxelPos = glm::ivec3(currentNode.position);
-                debugCast.iterations = iter;
+                traceStack.voxelPos = glm::ivec3(currentNode.position);
+                traceStack.iterations = iter;
 
                 for (const Layer& layer : layers) {
                     realDistance += layer.distance;
-                    debugCast.entryStack.emplace_back(start_position + realDistance * rayDirection);
+                    traceStack.entryStack.emplace_back(start_position + realDistance * rayDirection);
                 }
 
-                debugCast.distance = realDistance;
+                traceStack.distance = realDistance;
 
-                return debugCast;
+                return traceStack;
             }
 
             if (currentDepth != 0) { // If currentDepth == 0 this node empty and have voxel neighbour
@@ -411,5 +299,5 @@ Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm:
         }
         layers[currentDepth] = currentLayer;
     }
-    return debugCast;
+    return traceStack;
 }

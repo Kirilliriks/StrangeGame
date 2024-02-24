@@ -22,7 +22,7 @@ public:
 
     Octree &getOctree();
     Camera &getCamera();
-    Octree::DebugCast &getDebugCast();
+    TraceStack &getTraceCast();
     glm::ivec3 &getFrontVoxel();
 private:
     Game* game;
@@ -30,7 +30,7 @@ private:
     Camera camera;
     Octree octree;
 
-    Octree::DebugCast debugCast;
+    TraceStack traceCast;
     glm::ivec3 frontVoxel;
 };
 
