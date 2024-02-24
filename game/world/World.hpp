@@ -12,11 +12,11 @@
 class Game;
 class World {
 public:
-    World(Game* game);
+    explicit World(Game* game);
     ~World() = default;
 
-    void update(double deltaTime);
-    void imgui(double deltaTime);
+    void update(const double& deltaTime);
+    void imgui(const double& deltaTime) const;
     void setVoxel(const glm::ivec3& vec, const glm::vec4& color);
     void createWorld();
 

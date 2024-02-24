@@ -15,7 +15,7 @@ public:
     MeshBuilder();
     ~MeshBuilder() = default;
 
-    void cube(const glm::vec3& pos, const glm::vec4& color, float size);
+    void cube(const glm::vec3& pos, const glm::vec4& color, const float& size);
     void quad(
         const glm::vec3& first,
         const glm::vec3& second,

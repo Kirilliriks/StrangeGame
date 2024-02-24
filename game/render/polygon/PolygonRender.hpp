@@ -19,7 +19,7 @@ public:
     void traceLine(const std::vector<glm::vec3>& points);
     void updateWorld();
     void update();
-    void render(double deltaTime) const;
+    void render(const double& deltaTime) const;
     void clearObjects();
 private:
     Game &game;

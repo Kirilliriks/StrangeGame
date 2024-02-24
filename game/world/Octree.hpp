@@ -28,13 +28,13 @@ public:
     Node *getData();
     int nodesCount() const;
 
-    DebugCast castDRay(const glm::vec3& rayDirection, const glm::vec3& start_position);
-    DebugCast raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position);
-    DebugCast voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance);
+    DebugCast castDRay(const glm::vec3& rayDirection, const glm::vec3& start_position) const;
+    DebugCast raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position) const;
+    DebugCast voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance) const;
 private:
-    void setVoxel(int index, int depth, const glm::ivec3& vec, const glm::vec4& color);
-    Node getVoxel(int index, int depth, const glm::ivec3& vec);
-    void removeVoxel(int index, int depth, const glm::ivec3& vec);
+    void setVoxel(const int& index, const int& depth, const glm::ivec3& vec, const glm::vec4& color);
+    Node getVoxel(const int& index, const int& depth, const glm::ivec3& vec);
+    void removeVoxel(const int& index, const int& depth, const glm::ivec3& vec);
     int findVoxel(const glm::ivec3 &voxelPos) const;
 
     std::vector<Node> nodes;

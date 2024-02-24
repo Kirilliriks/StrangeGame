@@ -15,9 +15,6 @@ public:
     static std::string loadShaderFromFile(const std::string& path);
     static GLint createShader(const std::string& shader, GLuint shaderPtr);
 
-    static const char* defaultVertexShader;
-    static const char* defaultFragmentShader;
-
     Shader();
     Shader(const std::string& vertexName, const std::string& fragmentName);
 

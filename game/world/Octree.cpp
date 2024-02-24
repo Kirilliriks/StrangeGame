@@ -23,7 +23,7 @@ Node Octree::getVoxel(const glm::ivec3& vec) {
     return getVoxel(0, 0, vec);
 }
 
-void Octree::setVoxel(const int index, const int depth, const glm::ivec3& vec, const glm::vec4& color) {
+void Octree::setVoxel(const int& index, const int& depth, const glm::ivec3& vec, const glm::vec4& color) {
     Node currentNode = nodes.at(index);
 
     if (depth == maxDepth) { // If in voxel depth
@@ -41,7 +41,7 @@ void Octree::setVoxel(const int index, const int depth, const glm::ivec3& vec, c
     setVoxel(nextIndex, depth + 1, vec, color);
 }
 
-Node Octree::getVoxel(const int index, const int depth, const glm::ivec3& vec) {
+Node Octree::getVoxel(const int& index, const int& depth, const glm::ivec3& vec) {
     Node currentNode = nodes.at(index);
 
     if (depth == maxDepth) { // If in voxel depth
@@ -61,7 +61,7 @@ void Octree::removeVoxel(const glm::ivec3 &vec) {
     removeVoxel(0, 0, vec);
 }
 
-void Octree::removeVoxel(const int index, const int depth, const glm::ivec3 &vec) {
+void Octree::removeVoxel(const int& index, const int& depth, const glm::ivec3 &vec) {
     Node currentNode = nodes.at(index);
 
     if (depth == maxDepth) { // If in voxel depth
@@ -126,7 +126,7 @@ int Octree::findVoxel(const glm::ivec3& voxelPos) const {
     return -1;
 }
 
-Octree::DebugCast Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance) {
+Octree::DebugCast Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance) const {
     DebugCast debugCast;
     debugCast.distance = 0;
     debugCast.iterations = 0;
@@ -193,8 +193,8 @@ int getSubIndexFromSubVector(const glm::ivec3& vec) {
 }
 
 struct Layer {
-    int nodeIndex;
-    int halfSize;
+    int nodeIndex = -1;
+    int halfSize = -1;
     glm::vec3 position;
     glm::ivec3 subVec;
     glm::vec3 rayLength;
@@ -217,11 +217,11 @@ Layer calculateLayer(Layer &layer, const glm::ivec3& dir, const glm::vec3& raySt
 }
 
 struct StackItem {
-    int nodeIndex;
+    int nodeIndex = -1;
     glm::ivec3 subVec;
 };
 
-Octree::DebugCast Octree::castDRay(const glm::vec3& rayDirection, const glm::vec3& start_position) {
+Octree::DebugCast Octree::castDRay(const glm::vec3& rayDirection, const glm::vec3& start_position) const {
     int iter = 0;
     DebugCast debugCast;
     debugCast.iterations = 0;
@@ -318,7 +318,7 @@ Octree::DebugCast Octree::castDRay(const glm::vec3& rayDirection, const glm::vec
     return debugCast;
 }
 
-Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position) {
+Octree::DebugCast Octree::raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position) const {
     int iter = 0;
     DebugCast debugCast;
 

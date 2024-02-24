@@ -9,17 +9,16 @@
 
 static float editColor[] = {0, 0, 0};
 
-World::World(Game *game) : game(game), camera(game->getWindow()) {
-
+World::World(Game* game) : game(game), camera(game->getWindow()) {
 }
 
-void World::update(const double deltaTime) {
+void World::update(const double& deltaTime) {
     double mouseX, mouseY;
     glfwGetCursorPos(game->getWindow()->getGLWindow(), &mouseX, &mouseY);
-    camera.update(deltaTime, (float)mouseX, (float)mouseY);
+    camera.update(deltaTime, static_cast<float>(mouseX), static_cast<float>(mouseY));
 
     debugCast = octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 100);
-    const glm::ivec3 v = debugCast.voxelPos;//octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
+    const glm::ivec3 v = debugCast.voxelPos; //octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
     frontVoxel = glm::vec3(v);
 
     if (!Game::focused) {
@@ -36,15 +35,21 @@ void World::update(const double deltaTime) {
             octree.removeVoxel(v);
             game->getRenderer()->updateWorld();
         }
-    } else {
+    }
+    else {
         if (Input::leftClick.pressed) {
-            const auto debugCast = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
-            game->getPolygonRenderer()->traceLine(debugCast.entryStack);
+            const auto [entryStack,
+                voxelPos,
+                preVoxelPos,
+                iterations,
+                iterationsF,
+                distance] = octree.raycastVoxel(camera.getDirection(), camera.getPosition());
+            game->getPolygonRenderer()->traceLine(entryStack);
         }
     }
 }
 
-void World::imgui(double deltaTime) {
+void World::imgui(const double& deltaTime) const {
     ImGui::Begin("Info window");
     ImGui::SetWindowCollapsed(false);
     ImGui::Text("Cam x=%d y=%d z=%d", (int)camera.getX(), (int)camera.getY(), (int)camera.getZ());
@@ -57,14 +62,14 @@ void World::imgui(double deltaTime) {
     ImGui::End();
 }
 
-void World::setVoxel(const glm::ivec3 &vec, const glm::vec4& color) {
+void World::setVoxel(const glm::ivec3&vec, const glm::vec4&color) {
     octree.setVoxel(vec, color);
 }
 
 void World::createWorld() {
     std::random_device dev;
     std::mt19937 rng(dev());
-    std::uniform_int_distribution<int> rand(0,100);
+    std::uniform_int_distribution<int> rand(0, 100);
 
     const int worldSize = octree.getSize();
     float divider = 32.0f;
@@ -86,18 +91,18 @@ void World::createWorld() {
 }
 
 
-Octree &World::getOctree() {
+Octree& World::getOctree() {
     return octree;
 }
 
-Camera &World::getCamera() {
+Camera& World::getCamera() {
     return camera;
 }
 
-Octree::DebugCast &World::getDebugCast() {
+Octree::DebugCast& World::getDebugCast() {
     return debugCast;
 }
 
-glm::ivec3 &World::getFrontVoxel() {
+glm::ivec3& World::getFrontVoxel() {
     return frontVoxel;
 }

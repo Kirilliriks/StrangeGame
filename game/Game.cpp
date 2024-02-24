@@ -16,16 +16,16 @@ Game::Game(Window *window) : window(window) {
     polygonRenderer->updateWorld();
 }
 
-void Game::update(const double deltaTime) const {
+void Game::update(const double& deltaTime) const {
     world->update(deltaTime);
 }
 
-void Game::render(const double deltaTime) const {
+void Game::render(const double& deltaTime) const {
     //renderer->render(deltaTime);
     polygonRenderer->render(deltaTime);
 }
 
-void Game::imgui(const double deltaTime) const {
+void Game::imgui(const double& deltaTime) const {
     world->imgui(deltaTime);
 }
 

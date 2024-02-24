@@ -8,7 +8,7 @@
 
 int main() {
     const auto window = new Window();
-    const Game *game = new Game(window);
+    const auto game = new Game(window);
 
     GLFWwindow *glWindow = window->getGLWindow();
 

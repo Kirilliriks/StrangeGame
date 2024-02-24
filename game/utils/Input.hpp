@@ -9,7 +9,6 @@
 #include "glm/glm.hpp"
 #include "imgui_impl_glfw.h"
 #include <unordered_map>
-#include <string>
 
 class Input {
 public:
@@ -19,7 +18,7 @@ public:
         bool pressed = false;
         bool wasDown = false;
 
-        explicit Key(int code) : code(code) { }
+        explicit Key(const int& code) : code(code) { }
 
         void tick() {
             pressed = !wasDown && down;
@@ -53,20 +52,18 @@ public:
     static Button &leftClick;
     static Button &rightClick;
 
-    Input(GLFWwindow *window) {
-        glfwSetKeyCallback(window, [](GLFWwindow *window, int key, int scancode, int action, int mods) {
-            auto pair = keys.find(key);
-            if (pair != keys.end()) {
+    explicit Input(GLFWwindow *window) {
+        glfwSetKeyCallback(window, [](GLFWwindow* _, const int key, const int scancode, const int action, const int mods) {
+            if (const auto pair = keys.find(key); pair != keys.end()) {
                 const bool act = action != GLFW_RELEASE;
                 pair->second->down = act;
             }
         });
 
-        glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
+        glfwSetMouseButtonCallback(window, [](GLFWwindow* window, const int button, const int action, const int mods) {
             ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 
-            auto pair = buttons.find(button);
-            if (pair != buttons.end()) {
+            if (const auto pair = buttons.find(button); pair != buttons.end()) {
                 const bool act = action != GLFW_RELEASE;
                 pair->second->down = act;
             }

@@ -13,7 +13,7 @@ class Camera {
 public:
     explicit Camera(Window *window);
 
-    void update(double deltaTime, float mouseX, float mouseY);
+    void update(const double& deltaTime, const float& mouseX, const float& mouseY);
     float getYaw() const;
     float getPitch() const;
     float getX() const;

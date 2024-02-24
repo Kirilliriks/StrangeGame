@@ -12,7 +12,7 @@ MeshBuilder::MeshBuilder() {
     attruibutes.push_back(4); //RGBA
 }
 
-void MeshBuilder::cube(const glm::vec3& pos, const glm::vec4& color, float size) {
+void MeshBuilder::cube(const glm::vec3& pos, const glm::vec4& color, const float& size) {
     const auto leftDownBack = glm::vec3(pos.x - size, pos.y - size, pos.z - size);
     const auto leftUpBack = glm::vec3(pos.x - size, pos.y + size, pos.z - size);
     const auto leftDownFront = glm::vec3(pos.x - size, pos.y - size, pos.z + size);

@@ -9,12 +9,6 @@
 
 #include "glm/gtc/type_ptr.hpp"
 
-const char* Shader::defaultVertexShader =
-"#version 430\n in vec2 pos; out vec2 texCoord; void main() { texCoord = pos*0.5f + 0.5f; gl_Position = vec4(pos.x, pos.y, 0.0, 1.0); }";
-
-const char* Shader::defaultFragmentShader =
-"#version 430\n uniform sampler2D srcTex; in vec2 texCoord; out vec4 color; void main() { vec3 c = texture(srcTex, texCoord).xyz; color = vec4(1, 0, 0, 1.0); }";
-
 std::string Shader::loadShaderFromFile(const std::string &path) {
     std::stringstream shader;
 
@@ -59,9 +53,7 @@ GLint Shader::createShader(const std::string &shader, GLuint shaderPtr) {
     return GL_TRUE;
 }
 
-
-Shader::Shader() {
-    initializeShader(defaultVertexShader, defaultFragmentShader);
+Shader::Shader(): vertexShader(-1), fragmentShader(-1), shaderID(-1) {
 }
 
 Shader::Shader(const std::string &vertexName, const std::string &fragmentName) {

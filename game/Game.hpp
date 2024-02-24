@@ -17,9 +17,9 @@ public:
     static bool debugRender;
 
     explicit Game(Window *window);
-    void update(double deltaTime) const;
-    void render(double deltaTime) const;
-    void imgui(double deltaTime) const;
+    void update(const double& deltaTime) const;
+    void render(const double& deltaTime) const;
+    void imgui(const double& deltaTime) const;
 
     Window *getWindow() const;
     World *getWorld() const;

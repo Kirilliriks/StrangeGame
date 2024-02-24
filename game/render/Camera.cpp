@@ -23,7 +23,7 @@ Camera::Camera(Window *window) {
     updateVectors();
 }
 
-void Camera::update(double deltaTime, float mouseX, float mouseY) {
+void Camera::update(const double& deltaTime, const float& mouseX, const float& mouseY) {
     auto movement = glm::vec3(0.0f, 0.0f, 0.0f);
 
     // Keys management
@@ -67,8 +67,8 @@ void Camera::update(double deltaTime, float mouseX, float mouseY) {
 
         position += glm::vec3(movement.x * deltaTime, movement.y * deltaTime, movement.z * deltaTime);
 
-        yaw = (-mouseX - (float) window->width / 2.0f) * 0.005f;
-        pitch = (-mouseY - (float) window->height / 2.0f) * 0.005f;
+        yaw = (-mouseX - static_cast<float>(window->width) / 2.0f) * 0.005f;
+        pitch = (-mouseY - static_cast<float>(window->height) / 2.0f) * 0.005f;
 
         direction = getDirection();
 

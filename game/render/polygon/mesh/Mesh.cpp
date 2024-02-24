@@ -4,7 +4,6 @@
 
 #include "Mesh.hpp"
 #include <gl.h>
-#include <iostream>
 
 #include "MeshBuilder.hpp"
 
@@ -41,7 +40,7 @@ Mesh::Mesh(const std::vector<float>& buffer, const int& vertices, const std::vec
     int offset = 0;
     int i = 0;
     for (const int attribute : attributes) {
-        glVertexAttribPointer(i, attribute, GL_FLOAT, GL_FALSE, vertexSize * sizeof(float), (GLvoid*)(offset * sizeof(float)));
+        glVertexAttribPointer(i, attribute, GL_FLOAT, GL_FALSE, vertexSize * sizeof(float), reinterpret_cast<GLvoid*>(offset * sizeof(float)));
         glEnableVertexAttribArray(i);
         offset += attribute;
         i++;

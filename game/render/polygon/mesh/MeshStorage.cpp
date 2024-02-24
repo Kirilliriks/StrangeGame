@@ -4,6 +4,8 @@
 
 #include "MeshStorage.hpp"
 
+#include <ranges>
+
 #include "Mesh.hpp"
 
 std::unordered_map<std::string, Mesh*> MeshStorage::storage;
@@ -17,7 +19,7 @@ const Mesh& MeshStorage::getMesh(const std::string& name) {
 }
 
 void MeshStorage::clear() {
-    for (const auto& [name, mesh] : storage) {
+    for (const auto& mesh : std::ranges::views::values(storage)) {
         delete mesh;
     }
 }

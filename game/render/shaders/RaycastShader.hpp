@@ -11,7 +11,7 @@
 class RaycastShader { // TODO make extend Shader
 public:
     explicit RaycastShader(const std::string& shader);
-    GLuint getHandle();
+    GLuint getHandle() const;
     int maxGroupX, maxGroupY;
 private:
     GLuint progHandle;

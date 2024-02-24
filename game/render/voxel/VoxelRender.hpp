@@ -18,7 +18,7 @@ public:
     ~VoxelRender() = default;
 
     void updateWorld() const;
-    void render(double deltaTime) const;
+    void render(const double& deltaTime) const;
 private:
     void genTexture();
 

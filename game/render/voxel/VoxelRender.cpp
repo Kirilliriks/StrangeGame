@@ -38,7 +38,7 @@ VoxelRender::VoxelRender(Game *game) : world(game->getWorld()) {
     raycastShaderID = rayShader->getHandle();
 }
 
-void VoxelRender::render(double deltaTime) const {
+void VoxelRender::render(const double& deltaTime) const {
     glBindTexture(GL_TEXTURE_2D, textureID);
     glUseProgram(raycastShaderID);
 

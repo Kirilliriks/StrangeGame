@@ -43,6 +43,6 @@ RaycastShader::RaycastShader(const std::string& shader) {
     glUseProgram(progHandle);
 }
 
-GLuint RaycastShader::getHandle() {
+GLuint RaycastShader::getHandle() const {
     return progHandle;
 }

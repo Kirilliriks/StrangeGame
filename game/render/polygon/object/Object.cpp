@@ -6,7 +6,6 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-
 Object::Object(const glm::vec3& position, Mesh* mesh) : mesh(mesh), position(position) {
     model = glm::mat4(1);
     model = glm::translate(model, position);

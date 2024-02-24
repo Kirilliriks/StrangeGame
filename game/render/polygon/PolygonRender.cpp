@@ -65,7 +65,7 @@ void PolygonRender::update() {
 }
 
 
-void PolygonRender::render(double deltaTime) const {
+void PolygonRender::render(const double& deltaTime) const {
     shader.bind();
     shader.uniformMatrix("projection_view", game.getWorld()->getCamera().getMatrixMultiply());
 
