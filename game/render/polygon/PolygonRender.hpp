@@ -6,6 +6,7 @@
 #define POLYGONRENDER_H
 #include <vector>
 
+#include "../../world/TraceStack.hpp"
 #include "../shaders/Shader.hpp"
 #include "object/Object.hpp"
 
@@ -16,7 +17,7 @@ public:
     explicit PolygonRender(Game *game);
     ~PolygonRender() = default;
 
-    void traceLine(const std::vector<glm::vec3>& points);
+    void traceLine(const TraceStack& traceStack);
     void updateWorld();
     void update();
     void render(const double& deltaTime) const;

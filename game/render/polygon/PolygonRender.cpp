@@ -15,15 +15,27 @@ PolygonRender::PolygonRender(Game* game) : game(*game) {
                     R"(..\game\resources\shaders\polygon\fragment_pol.glsl)");
 }
 
-void PolygonRender::traceLine(const std::vector<glm::vec3>& points) {
+void PolygonRender::traceLine(const TraceStack& traceStack) {
     MeshBuilder meshBuilder;
-    meshBuilder.cube(glm::vec3(0, 0, 0), glm::vec4(1.0f, 20 / 25.0f, 1.0f, 1), 0.1f);
-    const auto mesh = new Mesh(meshBuilder);
+    meshBuilder.cube(glm::vec3(0, 0, 0), glm::vec4(1.0f, 20 / 25.0f, 1.0f, 0.8f), 0.1f);
+
+    auto mesh = new Mesh(meshBuilder);
     MeshStorage::pushMesh("point_mesh", mesh);
 
     clearObjects();
-    for (const glm::vec3& point : points) {
+    for (const glm::vec3& point : traceStack.entryStack) {
         objects.emplace_back(point, mesh);
+    }
+
+    int i = 0;
+    for (const Node& node : traceStack.nodesStack) {
+        MeshBuilder meshNodeBuilder;
+        meshNodeBuilder.cube(glm::vec3(node.halfSize - 0.5f, node.halfSize - 0.5f, node.halfSize - 0.5f), glm::vec4(0.0f, 1.0f, 1.0f, 0.5f), node.halfSize);
+
+        mesh = new Mesh(meshNodeBuilder);
+        MeshStorage::pushMesh("node_mesh " + i++, mesh);
+
+        objects.emplace_back(glm::vec3(node.position.x, node.position.y, node.position.z), mesh);
     }
 }
 

@@ -38,8 +38,8 @@ void World::update(const double& deltaTime) {
     }
     else {
         if (Input::leftClick.pressed) {
-            const auto entryStack = octree.voxelRaycastTraversal(camera.getDirection(), camera.getPosition()).entryStack;
-            game->getPolygonRenderer()->traceLine(entryStack);
+            const TraceStack traceStack = octree.voxelRaycastTraversal(camera.getDirection(), camera.getPosition());
+            game->getPolygonRenderer()->traceLine(traceStack);
         }
     }
 }
@@ -47,8 +47,8 @@ void World::update(const double& deltaTime) {
 void World::imgui(const double& deltaTime) const {
     ImGui::Begin("Info window");
     ImGui::SetWindowCollapsed(false);
-    ImGui::Text("Cam x=%d y=%d z=%d", (int) camera.getX(), (int) camera.getY(), (int) camera.getZ());
-    ImGui::Text("Cam yaw=%d pitch=%d", (int) camera.getYaw(), (int) camera.getPitch());
+    ImGui::Text("Cam x=%i y=%i z=%i", camera.getX(), camera.getY(), camera.getZ());
+    ImGui::Text("Cam yaw=%i pitch=%i", camera.getYaw(), camera.getPitch());
     ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
     ImGui::Text("Try x=%d y=%d z=%d", traceCast.voxelPos.x, traceCast.voxelPos.y, traceCast.voxelPos.z);
     ImGui::Text("Distance %f", traceCast.distance);

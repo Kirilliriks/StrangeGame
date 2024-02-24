@@ -87,9 +87,7 @@ int Octree::nodesCount() const {
 }
 
 int getSubIndexFromVector(const glm::ivec3& vec, const Node& node) {
-    int subIndex = 0;
-
-    const glm::ivec3 pos = glm::ivec3(node.position);
+    const auto pos = glm::ivec3(node.position);
     if (vec.x < pos.x) return -1;
     if (vec.y < pos.y) return -2;
     if (vec.z < pos.z) return -3;
@@ -100,6 +98,7 @@ int getSubIndexFromVector(const glm::ivec3& vec, const Node& node) {
     if (vec.y > pos.y + size) return -5;
     if (vec.z > pos.z + size) return -6;
 
+    int subIndex = 0;
     subIndex |= vec.x >= pos.x + halfSize? 2 : 0;
     subIndex |= vec.y >= pos.y + halfSize? 4 : 0;
     subIndex |= vec.z >= pos.z + halfSize? 1 : 0;
@@ -232,6 +231,7 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
 
         currentLayer = layers[currentDepth];
         currentNode = nodes[currentLayer.nodeIndex];
+        traceStack.nodesStack.push_back(currentNode);
 
         if (const int subIndex = getSubIndexFromSubVector(currentLayer.subVec); subIndex < 0) {
             currentDepth++;
