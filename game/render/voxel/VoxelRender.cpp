@@ -34,7 +34,7 @@ VoxelRender::VoxelRender(Game *game) : world(game->getWorld()) {
     genTexture(); // WINDOW TEXTURE
     glGenBuffers(1, &worldBufferID);
 
-    rayShader = new RaycastShader(R"(..\game\resources\shaders\raytracing\newnewcaster.comp)");
+    rayShader = new RaycastShader(R"(..\game\resources\shaders\raytracing\raycaster.comp)");
     raycastShaderID = rayShader->getHandle();
 }
 

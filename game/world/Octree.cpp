@@ -233,8 +233,7 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
         currentLayer = layers[currentDepth];
         currentNode = nodes[currentLayer.nodeIndex];
 
-        const int subIndex = getSubIndexFromSubVector(currentLayer.subVec);
-        if (subIndex < 0) {
+        if (const int subIndex = getSubIndexFromSubVector(currentLayer.subVec); subIndex < 0) {
             currentDepth++;
             if (currentDepth == maxDepth) return traceStack;
 
