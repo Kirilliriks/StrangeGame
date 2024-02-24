@@ -86,14 +86,13 @@ void Camera::update(const double& deltaTime) {
     if (Input::tab.pressed) {
         Game::focused = !Game::focused;
 
+        ImGuiIO& io = ImGui::GetIO();
         if (Game::focused) {
-            ImGuiIO& io = ImGui::GetIO();
             io.ConfigFlags |= ImGuiConfigFlags_NoMouse;            // Disable Mouse
             io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard; // Disable Keyboard
             glfwSetCursorPos(glWindow,windowHalfWidth,windowHalfHeight);
             glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         } else {
-            ImGuiIO& io = ImGui::GetIO();
             io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;            // Enable Mouse
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard
             glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);

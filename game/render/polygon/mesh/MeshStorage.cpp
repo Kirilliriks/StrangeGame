@@ -11,6 +11,11 @@
 std::unordered_map<std::string, Mesh*> MeshStorage::storage;
 
 void MeshStorage::pushMesh(const std::string& name, Mesh* mesh) {
+    if (storage.contains(name)) {
+        delete storage[name];
+        storage.erase(name);
+    }
+
     storage[name] = mesh;
 }
 

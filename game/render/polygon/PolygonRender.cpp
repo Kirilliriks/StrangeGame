@@ -10,36 +10,44 @@
 #include "mesh/MeshBuilder.hpp"
 #include "mesh/MeshStorage.hpp"
 
+static int nodeIndex[] = {};
+
 PolygonRender::PolygonRender(Game* game) : game(*game) {
     shader = Shader(R"(..\game\resources\shaders\polygon\vertex_pol.glsl)",
                     R"(..\game\resources\shaders\polygon\fragment_pol.glsl)");
 }
 
 void PolygonRender::traceLine(const TraceStack& traceStack) {
+    clearObjects();
+
+    if (nodeIndex[0] >= traceStack.nodesStack.size()) {
+        nodeIndex[0] = traceStack.nodesStack.size() - 1;
+    }
+
     MeshBuilder meshBuilder;
     meshBuilder.cube(glm::vec3(0), glm::vec4(1.0f, 20 / 25.0f, 1.0f, 0.8f), 0.1f);
 
     auto mesh = new Mesh(meshBuilder);
     MeshStorage::pushMesh("point_mesh", mesh);
 
-    clearObjects();
     for (const glm::vec3& point : traceStack.entryStack) {
         objects.emplace_back(point, mesh);
     }
 
-    int i = 0;
-    for (const Node& node : traceStack.nodesStack) {
-        MeshBuilder meshNodeBuilder;
-        meshNodeBuilder.cube(glm::vec3(node.halfSize - 0.5f), glm::vec4(0.0f, 1.0f, 1.0f, 0.5f), node.halfSize);
+    const Node& node = traceStack.nodesStack[nodeIndex[0]];
 
-        mesh = new Mesh(meshNodeBuilder);
-        MeshStorage::pushMesh("node_mesh " + i++, mesh);
+    MeshBuilder meshNodeBuilder;
+    meshNodeBuilder.cube(glm::vec3(node.halfSize - 0.5f), glm::vec4(0.0f, 1.0f, 1.0f, 0.5f), node.halfSize);
 
-        objects.emplace_back(glm::vec3(node.position), mesh);
-    }
+    mesh = new Mesh(meshNodeBuilder);
+    MeshStorage::pushMesh("node_mesh", mesh);
+
+    objects.emplace_back(glm::vec3(node.position), mesh);
+
+    lastTrace = traceStack;
 }
 
-void PolygonRender::updateWorld() {
+void PolygonRender::rebuildWorld() {
     MeshBuilder meshBuilder;
 
     Octree& octree = game.getWorld()->getOctree();
@@ -74,6 +82,15 @@ void PolygonRender::update() {
                                }
         ).begin()
     );
+}
+
+void PolygonRender::imgui() {
+    ImGui::Begin("Info window");
+    ImGui::SetWindowCollapsed(false);
+    if (ImGui::SliderInt("Node Index", nodeIndex, 0, lastTrace.nodesStack.size() - 1)) {
+        traceLine(lastTrace);
+    }
+    ImGui::End();
 }
 
 

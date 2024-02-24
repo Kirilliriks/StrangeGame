@@ -13,7 +13,7 @@ Game::Game(Window *window) : window(window) {
     polygonRenderer = new PolygonRender(this);
     world->createWorld();
     renderer->updateWorld();
-    polygonRenderer->updateWorld();
+    polygonRenderer->rebuildWorld();
 }
 
 void Game::update(const double& deltaTime) const {
@@ -27,6 +27,7 @@ void Game::render(const double& deltaTime) const {
 
 void Game::imgui(const double& deltaTime) const {
     world->imgui(deltaTime);
+    polygonRenderer->imgui();
 }
 
 Window *Game::getWindow() const {

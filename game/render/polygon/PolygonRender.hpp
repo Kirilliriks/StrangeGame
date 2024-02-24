@@ -18,13 +18,16 @@ public:
     ~PolygonRender() = default;
 
     void traceLine(const TraceStack& traceStack);
-    void updateWorld();
+    void rebuildWorld();
     void update();
+    void imgui();
     void render(const double& deltaTime) const;
     void clearObjects();
 private:
     Game &game;
     Shader shader;
+
+    TraceStack lastTrace;
 
     Object world;
     std::vector<Object> objects;
