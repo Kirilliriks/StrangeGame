@@ -23,11 +23,19 @@ Camera::Camera(Window *window) {
     updateVectors();
 }
 
-void Camera::update(const double& deltaTime, const float& mouseX, const float& mouseY) {
-    auto movement = glm::vec3(0.0f);
-
-    // Keys management
+void Camera::update(const double& deltaTime) {
     GLFWwindow *glWindow = window->getGLWindow();
+
+    double mouseX, mouseY;
+    glfwGetCursorPos(glWindow, &mouseX, &mouseY);
+
+    const double windowHalfWidth = window->getHalfWidth();
+    const double windowHalfHeight = window->getHalfHeight();
+    if (Game::focused) {
+        glfwSetCursorPos(glWindow,windowHalfWidth,windowHalfHeight);
+    }
+
+    auto movement = glm::vec3(0.0f);
 
     if (Game::focused) {
         int state = glfwGetKey(glWindow, GLFW_KEY_W);
@@ -67,8 +75,8 @@ void Camera::update(const double& deltaTime, const float& mouseX, const float& m
 
         position += glm::vec3(movement.x * deltaTime, movement.y * deltaTime, movement.z * deltaTime);
 
-        yaw = (-mouseX - static_cast<float>(window->width) / 2.0f) * 0.005f;
-        pitch = (-mouseY - static_cast<float>(window->height) / 2.0f) * 0.005f;
+        yaw -= (mouseX - windowHalfWidth) * 0.005;
+        pitch -= (mouseY - windowHalfHeight) * 0.005;
 
         direction = getDirection();
 
@@ -82,11 +90,12 @@ void Camera::update(const double& deltaTime, const float& mouseX, const float& m
             ImGuiIO& io = ImGui::GetIO();
             io.ConfigFlags |= ImGuiConfigFlags_NoMouse;            // Disable Mouse
             io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard; // Disable Keyboard
+            glfwSetCursorPos(glWindow,windowHalfWidth,windowHalfHeight);
             glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         } else {
             ImGuiIO& io = ImGui::GetIO();
             io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;            // Enable Mouse
-            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard
+            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard
             glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
     }
@@ -136,7 +145,7 @@ glm::vec3 Camera::getDirection() const {
 }
 
 glm::mat4 Camera::getProjection() const {
-    const float aspect = (float) window->width / (float) window->height;
+    const float aspect = static_cast<float>(window->width) / static_cast<float>(window->height);
     return glm::perspective(fov, aspect, 0.01f, 1000.0f);
 }
 

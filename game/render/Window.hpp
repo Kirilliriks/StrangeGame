@@ -16,6 +16,14 @@ public:
 
     int width, height;
 
+    double getHalfWidth() const {
+        return width / 2.0;
+    }
+
+    double getHalfHeight() const {
+        return height / 2.0;
+    }
+
 private:
     GLFWwindow *glWindow;
 };

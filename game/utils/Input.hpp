@@ -13,7 +13,7 @@
 class Input {
 public:
     struct Key {
-        int code;
+        const int code;
         bool down = false;
         bool pressed = false;
         bool wasDown = false;
@@ -27,12 +27,12 @@ public:
     };
 
     struct Button {
-        int code;
+        const int code;
         bool down = false;
         bool pressed = false;
         bool wasDown = false;
 
-        explicit Button(int code) : code(code) { }
+        explicit Button(const int& code) : code(code) { }
 
         void tick() {
             pressed = !wasDown && down;

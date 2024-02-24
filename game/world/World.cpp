@@ -13,9 +13,7 @@ World::World(Game* game) : game(game), camera(game->getWindow()) {
 }
 
 void World::update(const double& deltaTime) {
-    double mouseX, mouseY;
-    glfwGetCursorPos(game->getWindow()->getGLWindow(), &mouseX, &mouseY);
-    camera.update(deltaTime, static_cast<float>(mouseX), static_cast<float>(mouseY));
+    camera.update(deltaTime);
 
     traceCast = octree.voxelRaycastDDA(camera.getDirection(), camera.getPosition(), 100);
     const glm::ivec3 v = traceCast.voxelPos; //octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);

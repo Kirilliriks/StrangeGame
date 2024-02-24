@@ -37,7 +37,7 @@ Window::Window() {
     glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
     glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-    glWindow = glfwCreateWindow(mode->width, mode->height, "StrangeGame",
+    glWindow = glfwCreateWindow(width, height, "StrangeGame",
                                 nullptr, nullptr);
     if (glWindow == nullptr) {
         std::cerr << "Failed to open GLFW window" << std::endl;
