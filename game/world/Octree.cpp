@@ -126,7 +126,7 @@ int Octree::findVoxel(const glm::ivec3& voxelPos) const {
     return -1;
 }
 
-TraceStack Octree::voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance) const {
+TraceStack Octree::voxelRaycastDDA(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance) const {
     TraceStack traceStack;
     traceStack.distance = 0;
     traceStack.iterations = 0;
@@ -206,7 +206,7 @@ Layer calculateLayer(Layer &layer, const glm::ivec3& dir, const glm::vec3& raySt
     return layer;
 }
 
-TraceStack Octree::raycastVoxel(const glm::vec3& rayDirection, const glm::vec3& start_position) const {
+TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const glm::vec3& start_position) const {
     int iter = 0;
     TraceStack traceStack;
 

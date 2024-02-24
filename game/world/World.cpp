@@ -17,7 +17,7 @@ void World::update(const double& deltaTime) {
     glfwGetCursorPos(game->getWindow()->getGLWindow(), &mouseX, &mouseY);
     camera.update(deltaTime, static_cast<float>(mouseX), static_cast<float>(mouseY));
 
-    traceCast = octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 100);
+    traceCast = octree.voxelRaycastDDA(camera.getDirection(), camera.getPosition(), 100);
     const glm::ivec3 v = traceCast.voxelPos; //octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
     frontVoxel = glm::vec3(v);
 
@@ -38,7 +38,7 @@ void World::update(const double& deltaTime) {
     }
     else {
         if (Input::leftClick.pressed) {
-            const auto entryStack = octree.raycastVoxel(camera.getDirection(), camera.getPosition()).entryStack;
+            const auto entryStack = octree.voxelRaycastTraversal(camera.getDirection(), camera.getPosition()).entryStack;
             game->getPolygonRenderer()->traceLine(entryStack);
         }
     }
