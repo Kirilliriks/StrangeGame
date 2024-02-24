@@ -8,7 +8,7 @@ Octree::Octree() {
     maxDepth = 5; // OLD 8
     size = 1 << maxDepth; // std::pow(2, maxDepth);
 
-    nodes.emplace_back(size, glm::ivec3(0, 0, 0));
+    nodes.emplace_back(size, glm::ivec3(0));
 }
 
 int Octree::getSize() const {

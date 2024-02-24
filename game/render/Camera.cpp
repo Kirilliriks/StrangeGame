@@ -24,7 +24,7 @@ Camera::Camera(Window *window) {
 }
 
 void Camera::update(const double& deltaTime, const float& mouseX, const float& mouseY) {
-    auto movement = glm::vec3(0.0f, 0.0f, 0.0f);
+    auto movement = glm::vec3(0.0f);
 
     // Keys management
     GLFWwindow *glWindow = window->getGLWindow();

@@ -4,8 +4,8 @@
 
 #include "Input.hpp"
 
-glm::vec3 Input::mousePos = glm::vec3(0, 0, 0);
-glm::vec3 Input::lastMousePos = glm::vec3(0, 0, 0);
+glm::vec3 Input::mousePos = glm::vec3(0);
+glm::vec3 Input::lastMousePos = glm::vec3(0);
 std::unordered_map<int, Input::Key*> Input::keys;
 std::unordered_map<int, Input::Button*> Input::buttons;
 

@@ -17,7 +17,7 @@ PolygonRender::PolygonRender(Game* game) : game(*game) {
 
 void PolygonRender::traceLine(const TraceStack& traceStack) {
     MeshBuilder meshBuilder;
-    meshBuilder.cube(glm::vec3(0, 0, 0), glm::vec4(1.0f, 20 / 25.0f, 1.0f, 0.8f), 0.1f);
+    meshBuilder.cube(glm::vec3(0), glm::vec4(1.0f, 20 / 25.0f, 1.0f, 0.8f), 0.1f);
 
     auto mesh = new Mesh(meshBuilder);
     MeshStorage::pushMesh("point_mesh", mesh);
@@ -30,12 +30,12 @@ void PolygonRender::traceLine(const TraceStack& traceStack) {
     int i = 0;
     for (const Node& node : traceStack.nodesStack) {
         MeshBuilder meshNodeBuilder;
-        meshNodeBuilder.cube(glm::vec3(node.halfSize - 0.5f, node.halfSize - 0.5f, node.halfSize - 0.5f), glm::vec4(0.0f, 1.0f, 1.0f, 0.5f), node.halfSize);
+        meshNodeBuilder.cube(glm::vec3(node.halfSize - 0.5f), glm::vec4(0.0f, 1.0f, 1.0f, 0.5f), node.halfSize);
 
         mesh = new Mesh(meshNodeBuilder);
         MeshStorage::pushMesh("node_mesh " + i++, mesh);
 
-        objects.emplace_back(glm::vec3(node.position.x, node.position.y, node.position.z), mesh);
+        objects.emplace_back(glm::vec3(node.position), mesh);
     }
 }
 
@@ -61,7 +61,7 @@ void PolygonRender::updateWorld() {
     const auto mesh = new Mesh(meshBuilder);
     MeshStorage::pushMesh("world_mesh", mesh);
 
-    auto object = Object(glm::vec3(0, 0, 0), mesh);
+    auto object = Object(glm::vec3(0), mesh);
     world = object;
     objects.emplace_back(object);
 }
