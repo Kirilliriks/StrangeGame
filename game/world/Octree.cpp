@@ -260,6 +260,7 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
             if (currentDepth != 0) { // If currentDepth == 0 this node empty and have voxel neighbour
                 // Start subRaycast
                 Layer newLayer;
+                traceStack.pathNodesStack.push_back(currentNode);
 
                 currentDepth--;
                 rayStepSize /= 2;

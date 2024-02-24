@@ -11,6 +11,7 @@
 #include "mesh/MeshStorage.hpp"
 
 static int nodeIndex[] = {0};
+static bool showPathNode[] = {false};
 
 void tryChangeNodeIndex(const int& stackSize, const int& newIndex) {
     if (newIndex < 0 || newIndex >= stackSize) {
@@ -28,8 +29,10 @@ PolygonRender::PolygonRender(Game* game) : game(*game) {
 void PolygonRender::traceLine(const TraceStack& traceStack) {
     clearObjects();
 
-    if (nodeIndex[0] > 0 && nodeIndex[0] >= traceStack.nodesStack.size()) {
-        nodeIndex[0] = traceStack.nodesStack.size() - 1;
+    const glm::vec4 color = showPathNode[0] ? glm::vec4(1.0f, 0.0f, 0.0f, 0.5f) : glm::vec4(0.0f, 1.0f, 1.0f, 0.5f);
+    const std::vector<Node> nodes = showPathNode[0] ? lastTrace.pathNodesStack : lastTrace.nodesStack;
+    if (nodeIndex[0] > 0 && nodeIndex[0] >= nodes.size()) {
+        nodeIndex[0] = nodes.size() - 1;
     }
 
     MeshBuilder meshBuilder;
@@ -42,11 +45,11 @@ void PolygonRender::traceLine(const TraceStack& traceStack) {
         objects.emplace_back(point, mesh);
     }
 
-    if (!traceStack.nodesStack.empty()) {
-        const Node& node = traceStack.nodesStack[nodeIndex[0]];
+    if (!nodes.empty()) {
+        const Node& node = nodes[nodeIndex[0]];
 
         MeshBuilder meshNodeBuilder;
-        meshNodeBuilder.cube(glm::vec3(node.halfSize), glm::vec4(0.0f, 1.0f, 1.0f, 0.5f), node.halfSize);
+        meshNodeBuilder.cube(glm::vec3(node.halfSize), color, node.halfSize);
 
         mesh = new Mesh(meshNodeBuilder);
         MeshStorage::pushMesh("node_mesh", mesh);
@@ -93,13 +96,15 @@ void PolygonRender::update() {
     //     ).begin()
     // );
 
+    const int maxSize =
+        static_cast<int>(showPathNode[0] ? lastTrace.pathNodesStack.size() : lastTrace.nodesStack.size());
     if (Input::q.pressed) {
-        tryChangeNodeIndex(lastTrace.nodesStack.size(), nodeIndex[0] - 1);
+        tryChangeNodeIndex(maxSize, nodeIndex[0] - 1);
         traceLine(lastTrace);
     }
 
     if (Input::e.pressed) {
-        tryChangeNodeIndex(lastTrace.nodesStack.size(), nodeIndex[0] + 1);
+        tryChangeNodeIndex(maxSize, nodeIndex[0] + 1);
         traceLine(lastTrace);
     }
 }
@@ -107,9 +112,16 @@ void PolygonRender::update() {
 void PolygonRender::imgui() {
     ImGui::Begin("Info window");
     ImGui::SetWindowCollapsed(false);
-    if (ImGui::SliderInt("Node Index", nodeIndex, 0, lastTrace.nodesStack.size() - 1)) {
+
+    const int maxSize =
+        static_cast<int>(showPathNode[0] ? lastTrace.pathNodesStack.size() : lastTrace.nodesStack.size()) - 1;
+    if (ImGui::SliderInt("Node Index", nodeIndex, 0, maxSize)) {
         traceLine(lastTrace);
     }
+    if (ImGui::Checkbox("Show Path Nodes", showPathNode)) {
+        traceLine(lastTrace);
+    }
+
     ImGui::End();
 }
 

@@ -14,6 +14,7 @@ class TraceStack {
 public:
     std::vector<glm::vec3> entryStack;
     std::vector<Node> nodesStack;
+    std::vector<Node> pathNodesStack;
 
     glm::ivec3 voxelPos;
     glm::ivec3 preVoxelPos;
