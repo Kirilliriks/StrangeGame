@@ -10,7 +10,15 @@
 #include "mesh/MeshBuilder.hpp"
 #include "mesh/MeshStorage.hpp"
 
-static int nodeIndex[] = {};
+static int nodeIndex[] = {0};
+
+void tryChangeNodeIndex(const int& stackSize, const int& newIndex) {
+    if (newIndex < 0 || newIndex >= stackSize) {
+        return;
+    }
+
+    nodeIndex[0] = newIndex;
+}
 
 PolygonRender::PolygonRender(Game* game) : game(*game) {
     shader = Shader(R"(..\game\resources\shaders\polygon\vertex_pol.glsl)",
@@ -20,7 +28,7 @@ PolygonRender::PolygonRender(Game* game) : game(*game) {
 void PolygonRender::traceLine(const TraceStack& traceStack) {
     clearObjects();
 
-    if (nodeIndex[0] >= traceStack.nodesStack.size()) {
+    if (nodeIndex[0] > 0 && nodeIndex[0] >= traceStack.nodesStack.size()) {
         nodeIndex[0] = traceStack.nodesStack.size() - 1;
     }
 
@@ -75,13 +83,23 @@ void PolygonRender::rebuildWorld() {
 }
 
 void PolygonRender::update() {
-    objects.erase(
-        std::ranges::remove_if(objects,
-                               [](const Object& object) {
-                                   return object.isNeedRemove();
-                               }
-        ).begin()
-    );
+    // objects.erase(
+    //     std::ranges::remove_if(objects,
+    //                            [](const Object& object) {
+    //                                return object.isNeedRemove();
+    //                            }
+    //     ).begin()
+    // );
+
+    if (Input::q.pressed) {
+        tryChangeNodeIndex(lastTrace.nodesStack.size(), nodeIndex[0] - 1);
+        traceLine(lastTrace);
+    }
+
+    if (Input::e.pressed) {
+        tryChangeNodeIndex(lastTrace.nodesStack.size(), nodeIndex[0] + 1);
+        traceLine(lastTrace);
+    }
 }
 
 void PolygonRender::imgui() {

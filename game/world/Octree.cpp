@@ -228,7 +228,6 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
 
     float realDistance = 0.0f;
     while (iter++ < 500) {
-
         currentLayer = layers[currentDepth];
         currentNode = nodes[currentLayer.nodeIndex];
         traceStack.nodesStack.push_back(currentNode);
@@ -247,7 +246,8 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
                 traceStack.voxelPos = glm::ivec3(currentNode.position);
                 traceStack.iterations = iter;
 
-                for (const Layer& layer : layers) {
+                for (int i = maxDepth; i > 0; i--) {
+                    const Layer& layer = layers[i];
                     realDistance += layer.distance;
                     traceStack.entryStack.emplace_back(start_position + realDistance * rayDirection);
                 }

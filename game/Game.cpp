@@ -18,6 +18,7 @@ Game::Game(Window *window) : window(window) {
 
 void Game::update(const double& deltaTime) const {
     world->update(deltaTime);
+    polygonRenderer->update();
 }
 
 void Game::render(const double& deltaTime) const {

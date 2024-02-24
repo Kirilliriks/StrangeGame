@@ -5,6 +5,8 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#include <ranges>
+
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include "imgui_impl_glfw.h"
@@ -48,12 +50,14 @@ public:
     static Key &enter;
     static Key &tab;
     static Key &leftShift;
+    static Key &q;
+    static Key &e;
 
     static Button &leftClick;
     static Button &rightClick;
 
     explicit Input(GLFWwindow *window) {
-        glfwSetKeyCallback(window, [](GLFWwindow* _, const int key, const int scancode, const int action, const int mods) {
+        glfwSetKeyCallback(window, [](GLFWwindow* _, const int key, const int, const int action, const int) {
             if (const auto pair = keys.find(key); pair != keys.end()) {
                 const bool act = action != GLFW_RELEASE;
                 pair->second->down = act;
@@ -71,12 +75,12 @@ public:
     }
 
     static void tick() {
-        for (auto pair: keys) {
-            pair.second->tick();
+        for (Key* key : std::ranges::views::values(keys)) {
+            key->tick();
         }
 
-        for (auto pair: buttons) {
-            pair.second->tick();
+        for (Button* button: std::ranges::views::values(buttons)) {
+            button->tick();
         }
     }
 
