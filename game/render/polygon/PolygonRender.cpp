@@ -107,6 +107,11 @@ void PolygonRender::update() {
         tryChangeNodeIndex(maxSize, nodeIndex[0] + 1);
         traceLine(lastTrace);
     }
+
+    if (Input::f.pressed) {
+        showPathNode[0] = !showPathNode[0];
+        traceLine(lastTrace);
+    }
 }
 
 void PolygonRender::imgui() {

@@ -15,6 +15,7 @@ Input::Key &Input::leftShift = registerKey(new Key(GLFW_KEY_LEFT_SHIFT));
 
 Input::Key &Input::q = registerKey(new Key(GLFW_KEY_Q));
 Input::Key &Input::e = registerKey(new Key(GLFW_KEY_E));
+Input::Key &Input::f = registerKey(new Key(GLFW_KEY_F));
 
 Input::Button &Input::leftClick = registerButton(new Button(GLFW_MOUSE_BUTTON_LEFT));
 Input::Button &Input::rightClick = registerButton(new Button(GLFW_MOUSE_BUTTON_RIGHT));

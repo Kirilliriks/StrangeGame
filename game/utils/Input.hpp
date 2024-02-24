@@ -52,6 +52,7 @@ public:
     static Key &leftShift;
     static Key &q;
     static Key &e;
+    static Key &f;
 
     static Button &leftClick;
     static Button &rightClick;

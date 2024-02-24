@@ -254,6 +254,108 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
 
                 traceStack.distance = realDistance;
 
+                traceStack.pathNodesStack.push_back(currentNode);
+                return traceStack;
+            }
+
+            if (currentDepth != 0) { // If currentDepth == 0 this node empty and have voxel neighbour
+                // Start subRaycast
+                Layer newLayer;
+                traceStack.pathNodesStack.push_back(currentNode);
+
+                currentDepth--;
+                rayStepSize /= 2;
+
+                newLayer.nodeIndex = subNodexIndex;
+                newLayer.position = currentLayer.position + currentLayer.distance * rayDirection - glm::vec3(halfSize * currentLayer.subVec);
+
+                halfSize /= 2;
+
+                layers[currentDepth] = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
+                continue;
+            }
+        }
+
+        currentLayer = layers[currentDepth];
+        if (currentLayer.rayLength.x < currentLayer.rayLength.y) {
+            if (currentLayer.rayLength.x < currentLayer.rayLength.z) {
+                currentLayer.distance = currentLayer.rayLength.x;
+                currentLayer.rayLength.x += rayStepSize.x;
+                currentLayer.subVec.x += step.x;
+            } else {
+                currentLayer.distance = currentLayer.rayLength.z;
+                currentLayer.rayLength.z += rayStepSize.z;
+                currentLayer.subVec.z += step.z;
+            }
+        } else {
+            if (currentLayer.rayLength.y < currentLayer.rayLength.z) {
+                currentLayer.distance = currentLayer.rayLength.y;
+                currentLayer.rayLength.y += rayStepSize.y;
+                currentLayer.subVec.y += step.y;
+            } else {
+                currentLayer.distance = currentLayer.rayLength.z;
+                currentLayer.rayLength.z += rayStepSize.z;
+                currentLayer.subVec.z += step.z;
+            }
+        }
+        layers[currentDepth] = currentLayer;
+    }
+    return traceStack;
+}
+
+TraceStack Octree::voxelRaycastTraversalTest(const glm::vec3& rayDirection, const glm::vec3& start_position) const {
+    int iter = 0;
+    TraceStack traceStack;
+
+    const glm::vec3 rayStepSizeSingle = 1.0f / rayDirection;
+    const auto step = glm::ivec3(glm::sign(rayDirection));
+    const glm::ivec3 dir = glm::max(step, 0);
+
+    Layer layers[maxDepth + 1];
+
+    int currentDepth = maxDepth - 1;
+    Layer currentLayer;
+    Node currentNode = nodes[0];
+    currentLayer.nodeIndex = 0;
+    currentLayer.position = start_position;
+
+    int halfSize = currentNode.halfSize;
+    glm::vec3 rayStepSize = glm::vec3(halfSize) * glm::abs(rayStepSizeSingle);
+
+    layers[currentDepth] = calculateLayer(currentLayer, dir, rayStepSizeSingle, halfSize);
+
+    float realDistance = 0.0f;
+    while (iter++ < 500) {
+        currentLayer = layers[currentDepth];
+        currentNode = nodes[currentLayer.nodeIndex];
+        traceStack.nodesStack.push_back(currentNode);
+
+        if (const int subIndex = getSubIndexFromSubVector(currentLayer.subVec); subIndex < 0) {
+            currentDepth++;
+            if (currentDepth == maxDepth) return traceStack;
+
+            for (int i = maxDepth; i > 0; i--) {
+                const Layer& layer = layers[i];
+                realDistance += layer.distance;
+            }
+
+            return voxelRaycastTraversal(rayDirection, start_position + realDistance * rayDirection);
+        } else if (currentNode.sub != -1) {
+            const int subNodexIndex = currentNode.sub + subIndex;
+            currentNode = nodes[subNodexIndex];
+
+            if (currentNode.color.a != -1.0f) {
+                traceStack.voxelPos = glm::ivec3(currentNode.position);
+                traceStack.iterations = iter;
+
+                for (int i = maxDepth; i > 0; i--) {
+                    const Layer& layer = layers[i];
+                    realDistance += layer.distance;
+                    traceStack.entryStack.emplace_back(start_position + realDistance * rayDirection);
+                }
+
+                traceStack.distance = realDistance;
+
                 return traceStack;
             }
 
