@@ -42,15 +42,17 @@ void PolygonRender::traceLine(const TraceStack& traceStack) {
         objects.emplace_back(point, mesh);
     }
 
-    const Node& node = traceStack.nodesStack[nodeIndex[0]];
+    if (!traceStack.nodesStack.empty()) {
+        const Node& node = traceStack.nodesStack[nodeIndex[0]];
 
-    MeshBuilder meshNodeBuilder;
-    meshNodeBuilder.cube(glm::vec3(node.halfSize - 0.5f), glm::vec4(0.0f, 1.0f, 1.0f, 0.5f), node.halfSize);
+        MeshBuilder meshNodeBuilder;
+        meshNodeBuilder.cube(glm::vec3(node.halfSize), glm::vec4(0.0f, 1.0f, 1.0f, 0.5f), node.halfSize);
 
-    mesh = new Mesh(meshNodeBuilder);
-    MeshStorage::pushMesh("node_mesh", mesh);
+        mesh = new Mesh(meshNodeBuilder);
+        MeshStorage::pushMesh("node_mesh", mesh);
 
-    objects.emplace_back(glm::vec3(node.position), mesh);
+        objects.emplace_back(glm::vec3(node.position), mesh);
+    }
 
     lastTrace = traceStack;
 }
@@ -69,7 +71,7 @@ void PolygonRender::rebuildWorld() {
                     continue;
                 }
 
-                meshBuilder.cube(glm::vec3(x, y, z), node.color, 0.5f);
+                meshBuilder.cube(glm::vec3(x, y, z) + 0.5f, node.color, 0.5f);
             }
         }
     }

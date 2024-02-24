@@ -33,9 +33,11 @@ void World::update(const double& deltaTime) {
             octree.removeVoxel(v);
             game->getRenderer()->updateWorld();
         }
-    }
-    else {
+    } else {
         if (Input::leftClick.pressed) {
+            const TraceStack traceStack = octree.voxelRaycastDDA(camera.getDirection(), camera.getPosition(), 100);
+            game->getPolygonRenderer()->traceLine(traceStack);
+        } else if (Input::rightClick.pressed) {
             const TraceStack traceStack = octree.voxelRaycastTraversal(camera.getDirection(), camera.getPosition());
             game->getPolygonRenderer()->traceLine(traceStack);
         }
