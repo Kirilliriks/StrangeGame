@@ -49,9 +49,9 @@ void Node::divide(std::vector<Node>& nodes) {
 
 int Node::getSubIndex(const glm::ivec3& vec) const {
     int subIndex = 0;
-    subIndex |= vec.x >= (position.x + halfSize)? 2 : 0;
-    subIndex |= vec.y >= (position.y + halfSize)? 4 : 0;
-    subIndex |= vec.z >= (position.z + halfSize)? 1 : 0;
+    subIndex |= vec.x >= (position.x + halfSize) ? 2 : 0;
+    subIndex |= vec.y >= (position.y + halfSize) ? 4 : 0;
+    subIndex |= vec.z >= (position.z + halfSize) ? 1 : 0;
 
     return subIndex;
 }
