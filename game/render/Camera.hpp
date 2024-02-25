@@ -23,6 +23,8 @@ public:
     void updateVectors();
     void updateMatrix();
 
+    void setSpeed(const int& speed);
+
     glm::vec3 getPosition();
     glm::vec3 getDirection() const;
 

@@ -36,13 +36,15 @@ void World::update(const double& deltaTime) {
     } else {
         if (Input::LEFT_CLICK.pressed) {
             const TraceStack testStack = octree.voxelRaycastTraversalTest(camera.getDirection(), camera.getPosition());
-            const TraceStack traceStack = octree.voxelRaycastTraversal(camera.getDirection(), camera.getPosition());
-            game->getPolygonRenderer()->traceLine(testStack, traceStack);
+            const TraceStack traceStack = voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
+            game->getPolygonRenderer()->traceLine(traceStack, traceStack);
         }
     }
 }
 
-void World::imgui(const double& deltaTime) const {
+static int cameraSpeed[] = {30};
+
+void World::imgui(const double& deltaTime) {
     ImGui::Begin("Info window");
     ImGui::SetWindowCollapsed(false);
     ImGui::Text("Cam x=%d y=%d z=%d", (int) camera.getX(), (int) camera.getY(), (int) camera.getZ());
@@ -52,6 +54,11 @@ void World::imgui(const double& deltaTime) const {
     ImGui::Text("Distance %f", traceCast.distance);
 
     ImGui::ColorPicker3("Choose voxel color", editColor);
+
+    if (ImGui::InputInt("Camera speed", cameraSpeed)) {
+        camera.setSpeed(cameraSpeed[0]);
+    }
+
     ImGui::End();
 }
 
@@ -98,4 +105,59 @@ TraceStack& World::getTraceCast() {
 
 glm::ivec3& World::getFrontVoxel() {
     return frontVoxel;
+}
+
+TraceStack World::voxelRaycast(
+    const glm::vec3& rayDirection,
+    const glm::vec3& startPosition,
+    float maxDistance
+) const {
+    TraceStack traceStack;
+
+    const float octreeSize = octree.getSize();
+    const auto step = glm::ivec3(glm::sign(rayDirection));
+
+    const glm::vec3 rayStepSizeSingle = 1.0f / glm::max(glm::abs(rayDirection), 0.001f);
+    const glm::vec3 rayStepSize = rayStepSizeSingle * octreeSize;
+
+    auto voxelPos = glm::ivec3(startPosition / octreeSize);
+    if (startPosition.x < 0) {
+        voxelPos.x--;
+    }
+
+    if (startPosition.y < 0) {
+        voxelPos.y--;
+    }
+
+    if (startPosition.z < 0) {
+        voxelPos.z--;
+    }
+
+    const float halfOctreeSize = octreeSize / 2.0f;
+    auto rayLength = -(glm::sign(rayDirection) * (glm::mod(startPosition, octreeSize) - halfOctreeSize) - halfOctreeSize) * rayStepSizeSingle;
+
+    glm::bvec3 mask;
+
+    float distance = 0.0f;
+    while (distance < maxDistance) {
+        if (voxelPos == glm::ivec3(0)) {
+            return octree.voxelRaycastTraversalTest(rayDirection, startPosition + rayDirection * distance);
+        }
+
+        mask = glm::lessThanEqual(
+            rayLength,
+            glm::min(
+                glm::vec3(rayLength.y, rayLength.z, rayLength.x),
+                glm::vec3(rayLength.z, rayLength.x, rayLength.y)
+            )
+        );
+
+        rayLength += glm::vec3(mask) * rayStepSize;
+        distance = glm::length(glm::vec3(mask) * (rayLength - rayStepSize));
+        voxelPos += glm::ivec3(glm::vec3(mask)) * step;
+
+        traceStack.entryStack.push_back(startPosition + rayDirection * distance);
+    }
+
+    return traceStack;
 }

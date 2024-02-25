@@ -17,7 +17,7 @@ Camera::Camera(Window *window) {
     pitch = 0;
     position = glm::vec3(0, 0, 1);
     fov = 75;
-    speed = 15;
+    speed = 30;
 
     rotation = glm::mat4(1.0f);
     updateVectors();
@@ -133,6 +133,10 @@ void Camera::updateMatrix() {
     rotation = glm::rotate(rotation, glm::degrees(pitch), glm::vec3(1, 0, 0));
 
     updateVectors();
+}
+
+void Camera::setSpeed(const int& speed) {
+    this->speed = speed;
 }
 
 glm::vec3 Camera::getPosition() {

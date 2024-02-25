@@ -255,13 +255,13 @@ vec3 insideCubeHit(
     return -(sign(rayDirection) * (localRayPosition - size) - size) * rayStepSizeSingle;
 }
 
-vec4 castRayTest(in vec3 rayDirection) {
+vec4 castRayTest(in vec3 rayDirection, in vec3 rayStartPosition) {
     const vec3 rayStepSizeSingle = 1.0 / max(abs(rayDirection), 0.001);
 
-    float size = nodes[0].halfSize;
+    float size = nodes[0].halfSize * 2;
 
-    vec3 localRayPosition = mod(start_position, size);
-    vec3 voxelRayPosition = start_position - localRayPosition;
+    vec3 localRayPosition = mod(rayStartPosition, size);
+    vec3 voxelRayPosition = rayStartPosition - localRayPosition;
 
     vec3 mask;
     bool exitOctree = false;
@@ -294,7 +294,9 @@ vec4 castRayTest(in vec3 rayDirection) {
 
         bool skip = false;
         Node node;
-        getNode(ivec3(voxelRayPosition), depth, node);
+        if (!getNode(ivec3(voxelRayPosition), depth, node)) {
+            return vec4(0, 0, 0, 0);
+        }
 
         if (node.color.a != -1.0f) {
             return node.color;
@@ -328,14 +330,54 @@ vec4 castRayTest(in vec3 rayDirection) {
             distance += len;
             localRayPosition += rayDirection * len - mask * sign(rayDirection) * size;
 
-            vec3 temp = start_position + distance * rayDirection;
-
             vec3 newVoxelRayPosition = voxelRayPosition + mask * sign(rayDirection) * size;
             exitOctree = (floor(newVoxelRayPosition / size * 0.5f) != floor(voxelRayPosition / size * 0.5f))
             && (depth > 0);
 
             voxelRayPosition = newVoxelRayPosition;
         }
+    }
+
+    return vec4(0, 0, 0, 0);
+}
+
+
+vec4 castWorld(in vec3 rayDirection) {
+    const float octreeSize = nodes[0].halfSize * 2.0;
+    const ivec3 step = ivec3(sign(rayDirection));
+
+    const vec3 rayStepSizeSingle = 1.0f / max(abs(rayDirection), 0.001f);
+    const vec3 rayStepSize = rayStepSizeSingle * octreeSize;
+
+    ivec3 voxelPos = ivec3(start_position / octreeSize);
+    if (start_position.x < 0) {
+        voxelPos.x--;
+    }
+    
+    if (start_position.y < 0) {
+        voxelPos.y--;
+    }
+    
+    if (start_position.z < 0) {
+        voxelPos.z--;
+    }
+    
+    const float halfOctreeSize = octreeSize / 2.0f;
+    vec3 rayLength = -(sign(rayDirection) * (mod(start_position, octreeSize) - halfOctreeSize) - halfOctreeSize) * rayStepSizeSingle;
+
+    bvec3 mask;
+
+    float distance = 0.0f;
+    for (int iterations = 0; iterations < 200; iterations++) {
+        if (voxelPos == ivec3(0)) {
+            return castRayTest(rayDirection, start_position + rayDirection * distance);
+        }
+
+        mask = lessThanEqual(rayLength.xyz, min(rayLength.yzx, rayLength.zxy));
+
+        rayLength += vec3(mask) * rayStepSize;
+        distance = length(vec3(mask) * (rayLength - rayStepSize));
+        voxelPos += ivec3(vec3(mask)) * step;
     }
 
     return vec4(0, 0, 0, 0);
@@ -360,5 +402,5 @@ void main() {
     rotate(rayDir, vec3(1, 0, 0), camera_angles.y);
     rotate(rayDir, vec3(0, 1, 0), camera_angles.x);
 
-    imageStore(img_output, pixel_coord, castRayTest(rayDir));
+    imageStore(img_output, pixel_coord, castWorld(rayDir));
 }

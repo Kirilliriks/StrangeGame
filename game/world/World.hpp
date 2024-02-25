@@ -16,7 +16,7 @@ public:
     ~World() = default;
 
     void update(const double& deltaTime);
-    void imgui(const double& deltaTime) const;
+    void imgui(const double& deltaTime);
     void setVoxel(const glm::ivec3& vec, const glm::vec4& color);
     void createWorld();
 
@@ -24,6 +24,8 @@ public:
     Camera &getCamera();
     TraceStack &getTraceCast();
     glm::ivec3 &getFrontVoxel();
+
+    TraceStack voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &startPosition, float maxDistance) const;
 private:
     Game* game;
 
