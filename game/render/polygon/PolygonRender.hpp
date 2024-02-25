@@ -17,7 +17,7 @@ public:
     explicit PolygonRender(Game *game);
     ~PolygonRender() = default;
 
-    void traceLine(const TraceStack& traceStack);
+    void traceLine(const TraceStack& testStack, const TraceStack& traceStack);
     void rebuildWorld();
     void update();
     void imgui();
@@ -27,6 +27,7 @@ private:
     Game &game;
     Shader shader;
 
+    TraceStack testTrace;
     TraceStack lastTrace;
 
     Object world;

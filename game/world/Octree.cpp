@@ -253,8 +253,6 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
                 }
 
                 traceStack.distance = realDistance;
-
-                traceStack.pathNodesStack.push_back(currentNode);
                 return traceStack;
             }
 

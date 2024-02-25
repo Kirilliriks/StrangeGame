@@ -83,7 +83,7 @@ void Camera::update(const double& deltaTime) {
         updateMatrix();
     }
 
-    if (Input::tab.pressed) {
+    if (Input::TAB.pressed) {
         Game::focused = !Game::focused;
 
         ImGuiIO& io = ImGui::GetIO();

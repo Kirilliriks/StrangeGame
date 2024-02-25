@@ -47,18 +47,19 @@ public:
     static std::unordered_map<int, Key*> keys;
     static std::unordered_map<int, Button*> buttons;
 
-    static Key &enter;
-    static Key &tab;
-    static Key &leftShift;
-    static Key &q;
-    static Key &e;
-    static Key &f;
+    static Key &ENTER;
+    static Key &TAB;
+    static Key &LEFT_SHIFT;
+    static Key &Q;
+    static Key &E;
+    static Key &F;
+    static Key &T;
 
-    static Button &leftClick;
-    static Button &rightClick;
+    static Button &LEFT_CLICK;
+    static Button &RIGHT_CLICK;
 
     explicit Input(GLFWwindow *window) {
-        glfwSetKeyCallback(window, [](GLFWwindow* _, const int key, const int, const int action, const int) {
+        glfwSetKeyCallback(window, [](GLFWwindow*, const int key, const int, const int action, const int) {
             if (const auto pair = keys.find(key); pair != keys.end()) {
                 const bool act = action != GLFW_RELEASE;
                 pair->second->down = act;

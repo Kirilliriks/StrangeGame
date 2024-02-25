@@ -24,22 +24,20 @@ void World::update(const double& deltaTime) {
     }
 
     if (!Game::debugRender) {
-        if (Input::leftClick.pressed || (Input::leftClick.down && Input::leftShift.down)) {
+        if (Input::LEFT_CLICK.pressed || (Input::LEFT_CLICK.down && Input::LEFT_SHIFT.down)) {
             octree.setVoxel(traceCast.preVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
             game->getRenderer()->updateWorld();
         }
 
-        if (Input::rightClick.pressed || (Input::rightClick.down && Input::leftShift.down)) {
+        if (Input::RIGHT_CLICK.pressed || (Input::RIGHT_CLICK.down && Input::LEFT_SHIFT.down)) {
             octree.removeVoxel(v);
             game->getRenderer()->updateWorld();
         }
     } else {
-        if (Input::leftClick.pressed) {
-            const TraceStack traceStack = octree.voxelRaycastTraversalTest(camera.getDirection(), camera.getPosition());
-            game->getPolygonRenderer()->traceLine(traceStack);
-        } else if (Input::rightClick.pressed) {
+        if (Input::LEFT_CLICK.pressed) {
+            const TraceStack testStack = octree.voxelRaycastTraversalTest(camera.getDirection(), camera.getPosition());
             const TraceStack traceStack = octree.voxelRaycastTraversal(camera.getDirection(), camera.getPosition());
-            game->getPolygonRenderer()->traceLine(traceStack);
+            game->getPolygonRenderer()->traceLine(testStack, traceStack);
         }
     }
 }

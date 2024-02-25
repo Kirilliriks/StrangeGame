@@ -12,6 +12,7 @@
 
 static int nodeIndex[] = {0};
 static bool showPathNode[] = {false};
+static bool showTestTrace[] = {false};
 
 void tryChangeNodeIndex(const int& stackSize, const int& newIndex) {
     if (newIndex < 0 || newIndex >= stackSize) {
@@ -26,11 +27,16 @@ PolygonRender::PolygonRender(Game* game) : game(*game) {
                     R"(..\game\resources\shaders\polygon\fragment_pol.glsl)");
 }
 
-void PolygonRender::traceLine(const TraceStack& traceStack) {
+void PolygonRender::traceLine(const TraceStack& testStack, const TraceStack& traceStack) {
     clearObjects();
 
+    lastTrace = traceStack;
+    testTrace = testStack;
+
+    const TraceStack& trace = showTestTrace[0] ? testTrace : lastTrace;
+
     const glm::vec4 color = showPathNode[0] ? glm::vec4(1.0f, 0.0f, 0.0f, 0.5f) : glm::vec4(0.0f, 1.0f, 1.0f, 0.5f);
-    const std::vector<Node> nodes = showPathNode[0] ? lastTrace.pathNodesStack : lastTrace.nodesStack;
+    const std::vector<Node> nodes = showPathNode[0] ? trace.pathNodesStack : trace.nodesStack;
     if (nodeIndex[0] > 0 && nodeIndex[0] >= nodes.size()) {
         nodeIndex[0] = nodes.size() - 1;
     }
@@ -41,7 +47,7 @@ void PolygonRender::traceLine(const TraceStack& traceStack) {
     auto mesh = new Mesh(meshBuilder);
     MeshStorage::pushMesh("point_mesh", mesh);
 
-    for (const glm::vec3& point : traceStack.entryStack) {
+    for (const glm::vec3& point : trace.entryStack) {
         objects.emplace_back(point, mesh);
     }
 
@@ -57,7 +63,13 @@ void PolygonRender::traceLine(const TraceStack& traceStack) {
         objects.emplace_back(glm::vec3(node.position), mesh);
     }
 
-    lastTrace = traceStack;
+    MeshBuilder meshVoxelBuilder;
+    meshVoxelBuilder.cube(glm::vec3(0.51f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), 0.51f);
+
+    mesh = new Mesh(meshVoxelBuilder);
+    MeshStorage::pushMesh("target_xoel_mesh", mesh);
+
+    objects.emplace_back(glm::vec3(trace.voxelPos), mesh);
 }
 
 void PolygonRender::rebuildWorld() {
@@ -96,21 +108,27 @@ void PolygonRender::update() {
     //     ).begin()
     // );
 
+    const TraceStack& trace = showTestTrace[0] ? testTrace : lastTrace;
     const int maxSize =
-        static_cast<int>(showPathNode[0] ? lastTrace.pathNodesStack.size() : lastTrace.nodesStack.size());
-    if (Input::q.pressed) {
+        static_cast<int>(showPathNode[0] ? trace.pathNodesStack.size() : trace.nodesStack.size());
+    if (Input::Q.pressed) {
         tryChangeNodeIndex(maxSize, nodeIndex[0] - 1);
-        traceLine(lastTrace);
+        traceLine(testTrace, lastTrace);
     }
 
-    if (Input::e.pressed) {
+    if (Input::E.pressed) {
         tryChangeNodeIndex(maxSize, nodeIndex[0] + 1);
-        traceLine(lastTrace);
+        traceLine(testTrace, lastTrace);
     }
 
-    if (Input::f.pressed) {
+    if (Input::T.pressed) {
         showPathNode[0] = !showPathNode[0];
-        traceLine(lastTrace);
+        traceLine(testTrace, lastTrace);
+    }
+
+    if (Input::F.pressed) {
+        showTestTrace[0] = !showTestTrace[0];
+        traceLine(testTrace, lastTrace);
     }
 }
 
@@ -118,13 +136,17 @@ void PolygonRender::imgui() {
     ImGui::Begin("Info window");
     ImGui::SetWindowCollapsed(false);
 
+    const TraceStack& trace = showTestTrace[0] ? testTrace : lastTrace;
     const int maxSize =
-        static_cast<int>(showPathNode[0] ? lastTrace.pathNodesStack.size() : lastTrace.nodesStack.size()) - 1;
+        static_cast<int>(showPathNode[0] ? trace.pathNodesStack.size() : trace.nodesStack.size()) - 1;
     if (ImGui::SliderInt("Node Index", nodeIndex, 0, maxSize)) {
-        traceLine(lastTrace);
+        traceLine(testTrace, lastTrace);
     }
     if (ImGui::Checkbox("Show Path Nodes", showPathNode)) {
-        traceLine(lastTrace);
+        traceLine(testTrace, lastTrace);
+    }
+    if (ImGui::Checkbox("Show Test Trace", showTestTrace)) {
+        traceLine(testTrace, lastTrace);
     }
 
     ImGui::End();
