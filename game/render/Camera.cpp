@@ -75,8 +75,22 @@ void Camera::update(const double& deltaTime) {
 
         position += glm::vec3(movement.x * deltaTime, movement.y * deltaTime, movement.z * deltaTime);
 
-        yaw -= (mouseX - windowHalfWidth) * 0.005;
-        pitch -= (mouseY - windowHalfHeight) * 0.005;
+        yaw -= glm::degrees((mouseX - windowHalfWidth) * 0.005);
+        pitch -= glm::degrees((mouseY - windowHalfHeight) * 0.005);
+
+        if (yaw < 0) {
+            yaw += 360;
+        } else if (yaw > 360) {
+            yaw -= 360;
+        }
+
+        if (pitch < -90) {
+            pitch = -90;
+        }
+
+        if (pitch > 90) {
+            pitch = 90;
+        }
 
         direction = getDirection();
 
@@ -129,8 +143,8 @@ void Camera::updateVectors() {
 void Camera::updateMatrix() {
     rotation = glm::mat4(1.0f);
     rotation = glm::rotate(rotation, 0.0f, glm::vec3(0, 0, 1));
-    rotation = glm::rotate(rotation, glm::degrees(yaw), glm::vec3(0, 1, 0));
-    rotation = glm::rotate(rotation, glm::degrees(pitch), glm::vec3(1, 0, 0));
+    rotation = glm::rotate(rotation, yaw, glm::vec3(0, 1, 0));
+    rotation = glm::rotate(rotation, pitch, glm::vec3(1, 0, 0));
 
     updateVectors();
 }
