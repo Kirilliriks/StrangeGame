@@ -29,11 +29,11 @@ layout(location=5) uniform ivec3 front_voxel;
 
 layout(location=6) uniform ivec3 debug_voxel;
 
-bool nodeIsLeaf(in Node node) {
+bool nodeIsLeaf(const in Node node) {
     return node.color.a != -1.0;
 }
 
-ivec3 getSubVector(in ivec3 vec, in Node node) {
+ivec3 getSubVector(const in ivec3 vec, const in Node node) {
     const ivec3 pos = node.position.xyz;
     if (vec.x < pos.x || vec.y < pos.y || vec.z < pos.z) return ivec3(-1);
 
@@ -49,7 +49,7 @@ ivec3 getSubVector(in ivec3 vec, in Node node) {
     return subVector;
 }
 
-int getSubIndexFromSubVector(in const ivec3 vec) {
+int getSubIndexFromSubVector(const in ivec3 vec) {
     if (min(vec.x, min(vec.y, vec.z)) < 0 || max(vec.x, max(vec.y, vec.z)) > 1) return -1;
 
     int subIndex = 0;
@@ -59,7 +59,7 @@ int getSubIndexFromSubVector(in const ivec3 vec) {
     return subIndex;
 }
 
-int getSubIndex(in ivec3 vec, in Node node) {
+int getSubIndex(const in ivec3 vec, const in Node node) {
     const ivec3 pos = node.position.xyz;
     if (vec.x < pos.x || vec.y < pos.y || vec.z < pos.z) return -1;
 
@@ -75,7 +75,7 @@ int getSubIndex(in ivec3 vec, in Node node) {
     return subIndex;
 }
 
-bool findVoxel(in ivec3 voxelPos, out vec3 color) {
+bool findVoxel(const in ivec3 voxelPos, out vec3 color) {
     int index = 0;
     while (index != -1) {
         const Node currentNode = nodes[index];
@@ -95,7 +95,7 @@ bool findVoxel(in ivec3 voxelPos, out vec3 color) {
     return false;
 }
 
-vec4 debugCast(vec3 s_pos, in vec3 rayDirection) {
+vec4 debugCast(const in vec3 s_pos, const in vec3 rayDirection) {
     vec3 color = vec3(0);
 
     const vec3 rayStepSize = abs(1.0f / rayDirection);
@@ -116,7 +116,7 @@ vec4 debugCast(vec3 s_pos, in vec3 rayDirection) {
     return vec4(color, 1.0);
 }
 
-bool getNode(in ivec3 voxelPos, in int nodeDepth, out Node node) {
+bool getNode(const in ivec3 voxelPos, const in int nodeDepth, out Node node) {
     int index = 0;
     int depth = 0;
     while (index != -1) {
@@ -137,9 +137,9 @@ bool getNode(in ivec3 voxelPos, in int nodeDepth, out Node node) {
 }
 
 vec3 insideCubeHit(
-    const vec3 localRayPosition,
-    const vec3 signedDirection,
-    const vec3 rayStepSizeSingle,
+    const in vec3 localRayPosition,
+    const in vec3 signedDirection,
+    const in vec3 rayStepSizeSingle,
     float size
 ) {
     size *= 0.5;
@@ -147,7 +147,7 @@ vec3 insideCubeHit(
     return -(signedDirection * (localRayPosition - size) - size) * rayStepSizeSingle;
 }
 
-vec4 castRay(in vec3 rayDirection, in vec3 rayStartPosition) {
+vec4 castRay(const in vec3 rayDirection, const in vec3 rayStartPosition) {
     const vec3 signedDirection = sign(rayDirection);
     const vec3 rayStepSizeSingle = 1.0 / max(abs(rayDirection), 0.001);
 
@@ -220,7 +220,7 @@ vec4 castRay(in vec3 rayDirection, in vec3 rayStartPosition) {
 }
 
 
-vec4 castWorld(in vec3 rayDirection) {
+vec4 castWorld(const in vec3 rayDirection) {
     const float octreeSize = nodes[0].halfSize * 2.0;
     const ivec3 step = ivec3(sign(rayDirection));
 
@@ -250,18 +250,12 @@ vec4 castWorld(in vec3 rayDirection) {
     return vec4(0);
 }
 
-void rotate(inout vec3 v, const in vec3 axis, float theta) {
+void rotate(inout vec3 v, const in vec3 axis, const in float theta) {
     const float cos_theta = cos(theta);
     v = (v * cos_theta) + (cross(axis, v) * sin(theta)) + (axis * dot(axis, v)) * (1 - cos_theta);
 }
 
 void main() {
-    /*
-        TODO CHECK OPTIMIZATION
-        vec2 uv = (fragCoord.xy * 2.0 - iResolution.xy) / iResolution.y;
-        vec3 rayDirection = normalize(vec3(uv, 1.0));
-    */
-
     const ivec2 pixel_coord = ivec2(gl_GlobalInvocationID.xy);
     const ivec3 screen_coord = ivec3(pixel_coord - window_size / 2, -window_size.x);
 
