@@ -4,20 +4,6 @@
 
 layout(local_size_x = 8, local_size_y = 8) in;
 
-struct Layer {
-    vec3 position;
-    int nodeIndex;
-    ivec3 subVec;
-    vec3 rayLength;
-    float distance;
-};
-
-struct Batch {
-    Layer layers[maxDepth];
-};
-
-shared Batch batchs[64];
-
 uint localID = gl_LocalInvocationID.x  + gl_LocalInvocationID.y * 8;
 
 struct Node {
@@ -25,11 +11,6 @@ struct Node {
     vec4 color;
     int halfSize;
     int sub;
-};
-
-struct HitPoint {
-    bool hit;
-    vec3 color;
 };
 
 layout(std430, binding=4) readonly buffer Octree_data {
@@ -53,19 +34,14 @@ bool nodeIsLeaf(in Node node) {
 }
 
 ivec3 getSubVector(in ivec3 vec, in Node node) {
-    ivec3 subVector = ivec3(0, 0, 0);
-
     const ivec3 pos = node.position.xyz;
-    if (vec.x < pos.x) return ivec3(-1, -1, -1);
-    if (vec.y < pos.y) return ivec3(-1, -1, -1);
-    if (vec.z < pos.z) return ivec3(-1, -1, -1);
+    if (vec.x < pos.x || vec.y < pos.y || vec.z < pos.z) return ivec3(-1);
 
     const int halfSize = node.halfSize;
     const int size = halfSize * 2;
-    if (vec.x > pos.x + size) return ivec3(-1, -1, -1);
-    if (vec.y > pos.y + size) return ivec3(-1, -1, -1);
-    if (vec.z > pos.z + size) return ivec3(-1, -1, -1);
+    if (vec.x > pos.x + size || vec.y > pos.y + size || vec.z > pos.z + size) return ivec3(-1);
 
+    ivec3 subVector = ivec3(0);
     subVector.x = vec.x >= pos.x + halfSize? 1 : 0;
     subVector.y = vec.y >= pos.y + halfSize? 1 : 0;
     subVector.z = vec.z >= pos.z + halfSize? 1 : 0;
@@ -73,20 +49,25 @@ ivec3 getSubVector(in ivec3 vec, in Node node) {
     return subVector;
 }
 
-int getSubIndex(in ivec3 vec, in Node node) {
-    int subIndex = 0;
+int getSubIndexFromSubVector(in const ivec3 vec) {
+    if (min(vec.x, min(vec.y, vec.z)) < 0 || max(vec.x, max(vec.y, vec.z)) > 1) return -1;
 
+    int subIndex = 0;
+    subIndex |= (vec.x >= 1 ? 2 : 0);
+    subIndex |= (vec.y >= 1 ? 4 : 0);
+    subIndex |= (vec.z >= 1 ? 1 : 0);
+    return subIndex;
+}
+
+int getSubIndex(in ivec3 vec, in Node node) {
     const ivec3 pos = node.position.xyz;
-    if (vec.x < pos.x) return -1;
-    if (vec.y < pos.y) return -2;
-    if (vec.z < pos.z) return -3;
+    if (vec.x < pos.x || vec.y < pos.y || vec.z < pos.z) return -1;
 
     const int halfSize = node.halfSize;
     const int size = halfSize * 2;
-    if (vec.x > pos.x + size) return -4;
-    if (vec.y > pos.y + size) return -5;
-    if (vec.z > pos.z + size) return -6;
+    if (vec.x > pos.x + size || vec.y > pos.y + size || vec.z > pos.z + size) return -1;
 
+    int subIndex = 0;
     subIndex |= vec.x >= pos.x + halfSize ? 2 : 0;
     subIndex |= vec.y >= pos.y + halfSize ? 4 : 0;
     subIndex |= vec.z >= pos.z + halfSize ? 1 : 0;
@@ -135,95 +116,6 @@ vec4 debugCast(vec3 s_pos, in vec3 rayDirection) {
     return vec4(color, 1.0f);
 }
 
-int getSubIndexFromSubVector(in const ivec3 vec) {
-    if (min(vec.x, min(vec.y, vec.z)) < 0 || max(vec.x, max(vec.y, vec.z)) > 1) return -1;
-
-    int subIndex = 0;
-    subIndex |= (vec.x >= 1 ? 2 : 0);
-    subIndex |= (vec.y >= 1 ? 4 : 0);
-    subIndex |= (vec.z >= 1 ? 1 : 0);
-    return subIndex;
-}
-
-Layer calculateLayer(inout Layer layer, in const ivec3 dir, in const vec3 rayStepSizeSingle, in const int halfSize) {
-    ivec3 vecc = ivec3(layer.position) / halfSize;
-    if (min(vecc.x, min(vecc.y, vecc.z)) < -1 || max(vecc.x, max(vecc.y, vecc.z)) > 2) {
-        layer.subVec = ivec3(-1, -1, -1);
-    } else {
-        layer.subVec = clamp(vecc, 0, 1);
-    }
-
-    layer.rayLength = (vec3(layer.subVec + dir) * float(halfSize) - layer.position) * rayStepSizeSingle;
-    layer.distance = 0.0f;
-    return layer;
-}
-
-void moveLayer(inout Layer currentLayer, in const ivec3 step, in const vec3 rayStepSize) {
-    const vec3 mask = vec3(lessThanEqual(currentLayer.rayLength.xyz, min(currentLayer.rayLength.yzx, currentLayer.rayLength.zxy)).xyz);
-    currentLayer.distance = length(mask * currentLayer.rayLength);
-    currentLayer.rayLength += mask * rayStepSize;
-    currentLayer.subVec += ivec3(mask) * step;
-}
-
-vec4 castRay(in vec3 rayDirection) {
-    const vec3 rayStepSizeSingle = 1.0f / rayDirection;
-    const ivec3 step = ivec3(sign(rayDirection));
-    const ivec3 dir = max(step, 0);
-
-    int currentDepth = maxDepth - 1;
-    Layer currentLayer;
-    Node currentNode = nodes[0];
-    currentLayer.nodeIndex = 0;
-    currentLayer.position = start_position;
-
-    int halfSize = currentNode.halfSize;
-    vec3 rayStepSize = vec3(halfSize) * abs(rayStepSizeSingle);
-
-    Layer layers[] = batchs[localID].layers;
-    layers[currentDepth] = calculateLayer(currentLayer, dir, rayStepSizeSingle, halfSize);
-
-    int iter = 0;
-    while (iter++ < 500) {
-        currentLayer = layers[currentDepth];
-        currentNode = nodes[currentLayer.nodeIndex];
-
-        const int subIndex = getSubIndexFromSubVector(currentLayer.subVec);
-        if (subIndex < 0) {
-            if (++currentDepth == maxDepth) return vec4(0, 0, 0, 0);
-
-            rayStepSize *= 2;
-            halfSize *= 2;
-        } else if (currentNode.sub != -1) { // If sub == -1 node has't subNodes
-            const int subNodexIndex = currentNode.sub + subIndex;
-            currentNode = nodes[subNodexIndex];
-
-            if (currentNode.color.a != -1.0f) {
-                if (front_voxel == ivec3(currentNode.position)) {
-                    return vec4(1, 1, 0, 1);
-                }
-                return currentNode.color; //vec4(10.0f / iter, 10.0f / iter, 10.0f / iter, 1.0f);
-            }
-
-            if (currentDepth != 0) { // If currentDepth == 0 this node empty and have voxel neighbour
-                // Start subRaycast
-                Layer newLayer;
-
-                rayStepSize /= 2;
-
-                newLayer.nodeIndex = subNodexIndex;
-                newLayer.position = currentLayer.position + currentLayer.distance * rayDirection - vec3(halfSize * currentLayer.subVec);
-
-                halfSize /= 2;
-
-                layers[--currentDepth] = calculateLayer(newLayer, dir, rayStepSizeSingle, halfSize);
-                continue;
-            }
-        }
-        moveLayer(layers[currentDepth], step, rayStepSize);
-    }
-    return vec4(0, 0, 0, 0);
-}
-
 bool getNode(in ivec3 voxelPos, in int nodeDepth, out Node node) {
     int index = 0;
     int depth = 0;
@@ -255,7 +147,7 @@ vec3 insideCubeHit(
     return -(sign(rayDirection) * (localRayPosition - size) - size) * rayStepSizeSingle;
 }
 
-vec4 castRayTest(in vec3 rayDirection, in vec3 rayStartPosition) {
+vec4 castRay(in vec3 rayDirection, in vec3 rayStartPosition) {
     const vec3 rayStepSizeSingle = 1.0 / max(abs(rayDirection), 0.001);
 
     float size = nodes[0].halfSize * 2;
@@ -370,7 +262,7 @@ vec4 castWorld(in vec3 rayDirection) {
     float distance = 0.0f;
     for (int iterations = 0; iterations < 200; iterations++) {
         if (voxelPos == ivec3(0)) {
-            return castRayTest(rayDirection, start_position + rayDirection * distance);
+            return castRay(rayDirection, start_position + rayDirection * distance);
         }
 
         mask = lessThanEqual(rayLength.xyz, min(rayLength.yzx, rayLength.zxy));

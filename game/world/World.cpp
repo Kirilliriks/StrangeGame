@@ -155,7 +155,7 @@ TraceStack World::voxelRaycast(
     float distance = 0.0f;
     while (distance < maxDistance) {
         if (voxelPos == glm::ivec3(0)) {
-            return octree.voxelRaycastTraversalTest(rayDirection, startPosition + rayDirection * distance);
+            return octree.voxelRaycastTraversal(rayDirection, startPosition + rayDirection * distance);
         }
 
         mask = glm::lessThanEqual(
