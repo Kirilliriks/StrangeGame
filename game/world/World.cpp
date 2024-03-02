@@ -15,8 +15,7 @@ World::World(Game* game) : game(game), camera(game->getWindow()) {
 void World::update(const double& deltaTime) {
     camera.update(deltaTime);
 
-    traceCast = octree.voxelRaycastDDA(camera.getDirection(), camera.getPosition(), 100);
-    const glm::ivec3 v = traceCast.voxelPos; //octree.voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
+    const glm::ivec3 v = octree.voxelRaycastDDA(camera.getDirection(), camera.getPosition(), 100).voxelPos;
     frontVoxel = glm::vec3(v);
 
     if (!Game::focused) {
@@ -35,7 +34,6 @@ void World::update(const double& deltaTime) {
         }
     } else {
         if (Input::LEFT_CLICK.pressed) {
-            const TraceStack testStack = octree.voxelRaycastTraversalTest(camera.getDirection(), camera.getPosition());
             const TraceStack traceStack = voxelRaycast(camera.getDirection(), camera.getPosition(), 500);
             game->getPolygonRenderer()->traceLine(traceStack, traceStack);
         }
@@ -47,10 +45,26 @@ static int cameraSpeed[] = {30};
 void World::imgui(const double& deltaTime) {
     ImGui::Begin("Info window");
     ImGui::SetWindowCollapsed(false);
-    ImGui::Text("Cam x=%d y=%d z=%d", (int) camera.getX(), (int) camera.getY(), (int) camera.getZ());
-    ImGui::Text("Cam yaw=%d pitch=%d", (int) camera.getYaw(), (int) camera.getPitch());
-    ImGui::Text("Voxel x=%d y=%d z=%d", frontVoxel.x, frontVoxel.y, frontVoxel.z);
-    ImGui::Text("Try x=%d y=%d z=%d", traceCast.voxelPos.x, traceCast.voxelPos.y, traceCast.voxelPos.z);
+
+    ImGui::Text("Position x=%d y=%d z=%d",
+        static_cast<int>(camera.getX()),
+        static_cast<int>(camera.getY()),
+        static_cast<int>(camera.getZ())
+    );
+    ImGui::Text("Camera direction x=%.2f y=%.2f z=%.2f",
+        camera.getDirection().x,
+        camera.getDirection().y,
+        camera.getDirection().z
+    );
+    ImGui::Text("Camera angels yaw=%d pitch=%d",
+        static_cast<int>(camera.getYaw()),
+        static_cast<int>(camera.getPitch())
+    );
+    ImGui::Text("Voxel x=%d y=%d z=%d",
+        frontVoxel.x,
+        frontVoxel.y,
+        frontVoxel.z
+    );
     ImGui::Text("Distance %f", traceCast.distance);
 
     ImGui::ColorPicker3("Choose voxel color", editColor);
