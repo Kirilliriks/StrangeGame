@@ -30,7 +30,7 @@ layout(location=5) uniform ivec3 front_voxel;
 layout(location=6) uniform ivec3 debug_voxel;
 
 bool nodeIsLeaf(in Node node) {
-    return node.color.a != -1.0f;
+    return node.color.a != -1.0;
 }
 
 ivec3 getSubVector(in ivec3 vec, in Node node) {
@@ -80,7 +80,7 @@ bool findVoxel(in ivec3 voxelPos, out vec3 color) {
     while (index != -1) {
         const Node currentNode = nodes[index];
         if (currentNode.sub == -1) {
-            if (currentNode.color.a != -1.0f) {
+            if (currentNode.color.a != -1.0) {
                 color = currentNode.color.rgb;
                 return true;
             }
@@ -101,7 +101,7 @@ vec4 debugCast(vec3 s_pos, in vec3 rayDirection) {
     const vec3 rayStepSize = abs(1.0f / rayDirection);
     const ivec3 step = ivec3(sign(rayDirection));
     ivec3 voxelPos = ivec3(s_pos);
-    vec3 rayLength = (step * (voxelPos - s_pos) + (step * 0.5f) + 0.5f) * rayStepSize;
+    vec3 rayLength = (step * (voxelPos - s_pos) + (step * 0.5) + 0.5) * rayStepSize;
 
     const int maxSize = nodes[0].halfSize * 2;
     bvec3 mask;
@@ -111,9 +111,9 @@ vec4 debugCast(vec3 s_pos, in vec3 rayDirection) {
         rayLength += vec3(mask) * rayStepSize;
         voxelPos += ivec3(vec3(mask)) * step;
 
-        if (findVoxel(voxelPos, color)) return vec4(color, 1.0f);
+        if (findVoxel(voxelPos, color)) return vec4(color, 1.0);
     }
-    return vec4(color, 1.0f);
+    return vec4(color, 1.0);
 }
 
 bool getNode(in ivec3 voxelPos, in int nodeDepth, out Node node) {
@@ -138,16 +138,17 @@ bool getNode(in ivec3 voxelPos, in int nodeDepth, out Node node) {
 
 vec3 insideCubeHit(
     const vec3 localRayPosition,
-    const vec3 rayDirection,
+    const vec3 signedDirection,
     const vec3 rayStepSizeSingle,
     float size
 ) {
     size *= 0.5;
 
-    return -(sign(rayDirection) * (localRayPosition - size) - size) * rayStepSizeSingle;
+    return -(signedDirection * (localRayPosition - size) - size) * rayStepSizeSingle;
 }
 
 vec4 castRay(in vec3 rayDirection, in vec3 rayStartPosition) {
+    const vec3 signedDirection = sign(rayDirection);
     const vec3 rayStepSizeSingle = 1.0 / max(abs(rayDirection), 0.001);
 
     float size = nodes[0].halfSize * 2;
@@ -174,11 +175,11 @@ vec4 castRay(in vec3 rayDirection, in vec3 rayStartPosition) {
             exitOctree = (depth > 0) &&
                 abs(
                     dot(
-                        mod(voxelRayPosition / size + 0.5f, 2.0)
-                        - 1.0f + mask * sign(rayDirection) * 0.5f,
+                        mod(voxelRayPosition / size + 0.5, 2.0)
+                        - 1.0 + mask * signedDirection * 0.5,
                         mask
                     )
-                ) < 0.1f;
+                ) < 0.1;
             continue;
         }
 
@@ -187,7 +188,7 @@ vec4 castRay(in vec3 rayDirection, in vec3 rayStartPosition) {
             return vec4(0);
         }
 
-        if (node.color.a != -1.0f) {
+        if (node.color.a != -1.0) {
             return node.color;
         }
 
@@ -199,24 +200,16 @@ vec4 castRay(in vec3 rayDirection, in vec3 rayStartPosition) {
             voxelRayPosition += upMask;
             localRayPosition -= upMask;
         } else if (node.sub == -1 || depth > maxDepth) {
-            const vec3 hit = insideCubeHit(localRayPosition, rayDirection, rayStepSizeSingle, size);
+            const vec3 hit = insideCubeHit(localRayPosition, signedDirection, rayStepSizeSingle, size);
 
-            mask = vec3(
-                lessThan(
-                    hit,
-                    min(
-                        vec3(hit.y, hit.z, hit.x),
-                        vec3(hit.z, hit.x, hit.y)
-                    )
-                )
-            );
+            mask = vec3(lessThan(hit, min(hit.yzx, hit.zxy)));
             const float len = dot(hit, mask);
 
             distance += len;
-            localRayPosition += rayDirection * len - mask * sign(rayDirection) * size;
+            localRayPosition += rayDirection * len - mask * signedDirection * size;
 
-            const vec3 newVoxelRayPosition = voxelRayPosition + mask * sign(rayDirection) * size;
-            exitOctree = (floor(newVoxelRayPosition / size * 0.5f) != floor(voxelRayPosition / size * 0.5f))
+            const vec3 newVoxelRayPosition = voxelRayPosition + mask * signedDirection * size;
+            exitOctree = (floor(newVoxelRayPosition / size * 0.5) != floor(voxelRayPosition / size * 0.5))
             && (depth > 0);
 
             voxelRayPosition = newVoxelRayPosition;
@@ -231,17 +224,17 @@ vec4 castWorld(in vec3 rayDirection) {
     const float octreeSize = nodes[0].halfSize * 2.0;
     const ivec3 step = ivec3(sign(rayDirection));
 
-    const vec3 rayStepSizeSingle = 1.0f / max(abs(rayDirection), 0.001f);
+    const vec3 rayStepSizeSingle = 1.0 / max(abs(rayDirection), 0.001);
     const vec3 rayStepSize = rayStepSizeSingle * octreeSize;
 
     ivec3 octreePosition = ivec3((start_position / octreeSize) + min(vec3(0), sign(start_position)));
     
-    const float halfOctreeSize = octreeSize / 2.0f;
-    vec3 rayLength = -(sign(rayDirection) * (mod(start_position, octreeSize) - halfOctreeSize) - halfOctreeSize) * rayStepSizeSingle;
+    const float halfOctreeSize = octreeSize / 2.0;
+    vec3 rayLength = -(step * (mod(start_position, octreeSize) - halfOctreeSize) - halfOctreeSize) * rayStepSizeSingle;
 
     vec3 mask;
 
-    float distance = 0.0f;
+    float distance = 0.0;
     for (int iterations = 0; iterations < 200; iterations++) {
         if (octreePosition == ivec3(0)) {
             return castRay(rayDirection, abs(start_position + rayDirection * distance));
