@@ -187,7 +187,7 @@ vec4 castRay(in vec3 rayDirection, in vec3 rayStartPosition) {
         bool skip = false;
         Node node;
         if (!getNode(ivec3(voxelRayPosition), depth, node)) {
-            return vec4(0, 0, 0, 0);
+            return vec4(0);
         }
 
         if (node.color.a != -1.0f) {
@@ -202,9 +202,9 @@ vec4 castRay(in vec3 rayDirection, in vec3 rayStartPosition) {
             depth++;
             size *= 0.5;
 
-            vec3 mask2 = step(vec3(size), localRayPosition) * size;
-            voxelRayPosition += mask2;
-            localRayPosition -= mask2;
+            vec3 upMask = step(vec3(size), localRayPosition) * size;
+            voxelRayPosition += upMask;
+            localRayPosition -= upMask;
         } else if (node.sub == -1 || skip) {
             vec3 hit = insideCubeHit(localRayPosition, rayDirection, rayStepSizeSingle, size);
 
