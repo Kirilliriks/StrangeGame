@@ -135,17 +135,12 @@ TraceStack World::voxelRaycast(
     const glm::vec3 rayStepSize = rayStepSizeSingle * octreeSize;
 
     auto octreePosition = glm::ivec3(startPosition / octreeSize);
-    if (startPosition.x < 0) {
-        octreePosition.x--;
-    }
+    octreePosition += glm::min(glm::vec3(0), glm::sign(startPosition));
 
-    if (startPosition.y < 0) {
-        octreePosition.y--;
-    }
-
-    if (startPosition.z < 0) {
-        octreePosition.z--;
-    }
+    // std::cout << "SP x=" << startPosition.x << " y=" << startPosition.y << " z=" << startPosition.z << std::endl;
+    // std::cout << "SP / OS x=" << startPositionDivideOctreePosition.x << " y=" << startPositionDivideOctreePosition.y << " z=" << startPositionDivideOctreePosition.z << std::endl;
+    // std::cout << "OP x=" << octreePosition.x << " y=" << octreePosition.y << " z=" << octreePosition.z << std::endl;
+    // std::cout << "OS " << octreeSize << std::endl;
 
     const float halfOctreeSize = octreeSize / 2;
     auto rayLength = -(glm::sign(rayDirection) * (glm::mod(startPosition, octreeSize) - halfOctreeSize) - halfOctreeSize) * rayStepSizeSingle;

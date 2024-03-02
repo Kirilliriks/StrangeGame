@@ -241,18 +241,7 @@ vec4 castWorld(in vec3 rayDirection) {
     const vec3 rayStepSizeSingle = 1.0f / max(abs(rayDirection), 0.001f);
     const vec3 rayStepSize = rayStepSizeSingle * octreeSize;
 
-    ivec3 octreePosition = ivec3(start_position / octreeSize);
-    if (start_position.x < 0) {
-        octreePosition.x--;
-    }
-    
-    if (start_position.y < 0) {
-        octreePosition.y--;
-    }
-    
-    if (start_position.z < 0) {
-        octreePosition.z--;
-    }
+    ivec3 octreePosition = ivec3((start_position / octreeSize) + min(vec3(0), sign(start_position)));
     
     const float halfOctreeSize = octreeSize / 2.0f;
     vec3 rayLength = -(sign(rayDirection) * (mod(start_position, octreeSize) - halfOctreeSize) - halfOctreeSize) * rayStepSizeSingle;
