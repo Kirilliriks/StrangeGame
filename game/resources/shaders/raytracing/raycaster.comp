@@ -241,38 +241,38 @@ vec4 castWorld(in vec3 rayDirection) {
     const vec3 rayStepSizeSingle = 1.0f / max(abs(rayDirection), 0.001f);
     const vec3 rayStepSize = rayStepSizeSingle * octreeSize;
 
-    ivec3 voxelPos = ivec3(start_position / octreeSize);
+    ivec3 octreePosition = ivec3(start_position / octreeSize);
     if (start_position.x < 0) {
-        voxelPos.x--;
+        octreePosition.x--;
     }
     
     if (start_position.y < 0) {
-        voxelPos.y--;
+        octreePosition.y--;
     }
     
     if (start_position.z < 0) {
-        voxelPos.z--;
+        octreePosition.z--;
     }
     
     const float halfOctreeSize = octreeSize / 2.0f;
     vec3 rayLength = -(sign(rayDirection) * (mod(start_position, octreeSize) - halfOctreeSize) - halfOctreeSize) * rayStepSizeSingle;
 
-    bvec3 mask;
+    vec3 mask;
 
     float distance = 0.0f;
     for (int iterations = 0; iterations < 200; iterations++) {
-        if (voxelPos == ivec3(0)) {
-            return castRay(rayDirection, start_position + rayDirection * distance);
+        if (octreePosition == ivec3(0)) {
+            return castRay(rayDirection, abs(start_position + rayDirection * distance));
         }
 
-        mask = lessThanEqual(rayLength.xyz, min(rayLength.yzx, rayLength.zxy));
+        mask = vec3(lessThanEqual(rayLength.xyz, min(rayLength.yzx, rayLength.zxy)));
 
-        rayLength += vec3(mask) * rayStepSize;
-        distance = length(vec3(mask) * (rayLength - rayStepSize));
-        voxelPos += ivec3(vec3(mask)) * step;
+        rayLength += mask * rayStepSize;
+        distance = length(mask * (rayLength - rayStepSize));
+        octreePosition += ivec3(mask) * step;
     }
 
-    return vec4(0, 0, 0, 0);
+    return vec4(0);
 }
 
 void rotate(inout vec3 v, const in vec3 axis, float theta) {

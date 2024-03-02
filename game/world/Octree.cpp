@@ -230,6 +230,10 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
     glm::vec3 localRayPosition = glm::mod(rayStartPosition, size);
     glm::vec3 voxelRayPosition = rayStartPosition - localRayPosition;
 
+    //std::cout << "RSP x=" << rayStartPosition.x << " y=" << rayStartPosition.y << " z=" << rayStartPosition.z << std::endl;
+    //std::cout << "LRP x=" << localRayPosition.x << " y=" << localRayPosition.y << " z=" << localRayPosition.z << std::endl;
+    //std::cout << "VRP x=" << voxelRayPosition.x << " y=" << voxelRayPosition.y << " z=" << voxelRayPosition.z << std::endl;
+
     glm::vec3 mask;
     bool exitOctree = false;
     int depth = 0;

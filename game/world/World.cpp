@@ -134,28 +134,28 @@ TraceStack World::voxelRaycast(
     const glm::vec3 rayStepSizeSingle = 1.0f / glm::max(glm::abs(rayDirection), 0.001f);
     const glm::vec3 rayStepSize = rayStepSizeSingle * octreeSize;
 
-    auto voxelPos = glm::ivec3(startPosition / octreeSize);
+    auto octreePosition = glm::ivec3(startPosition / octreeSize);
     if (startPosition.x < 0) {
-        voxelPos.x--;
+        octreePosition.x--;
     }
 
     if (startPosition.y < 0) {
-        voxelPos.y--;
+        octreePosition.y--;
     }
 
     if (startPosition.z < 0) {
-        voxelPos.z--;
+        octreePosition.z--;
     }
 
-    const float halfOctreeSize = octreeSize / 2.0f;
+    const float halfOctreeSize = octreeSize / 2;
     auto rayLength = -(glm::sign(rayDirection) * (glm::mod(startPosition, octreeSize) - halfOctreeSize) - halfOctreeSize) * rayStepSizeSingle;
 
     glm::bvec3 mask;
 
     float distance = 0.0f;
     while (distance < maxDistance) {
-        if (voxelPos == glm::ivec3(0)) {
-            return octree.voxelRaycastTraversal(rayDirection, startPosition + rayDirection * distance);
+        if (octreePosition == glm::ivec3(0)) {
+            return octree.voxelRaycastTraversal(rayDirection, glm::abs(startPosition + rayDirection * distance));
         }
 
         mask = glm::lessThanEqual(
@@ -168,7 +168,7 @@ TraceStack World::voxelRaycast(
 
         rayLength += glm::vec3(mask) * rayStepSize;
         distance = glm::length(glm::vec3(mask) * (rayLength - rayStepSize));
-        voxelPos += glm::ivec3(glm::vec3(mask)) * step;
+        octreePosition += glm::ivec3(glm::vec3(mask)) * step;
 
         traceStack.entryStack.push_back(startPosition + rayDirection * distance);
     }

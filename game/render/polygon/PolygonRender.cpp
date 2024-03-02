@@ -67,7 +67,7 @@ void PolygonRender::traceLine(const TraceStack& testStack, const TraceStack& tra
     meshVoxelBuilder.cube(glm::vec3(0.51f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), 0.51f);
 
     mesh = new Mesh(meshVoxelBuilder);
-    MeshStorage::pushMesh("target_xoel_mesh", mesh);
+    MeshStorage::pushMesh("target_voxel_mesh", mesh);
 
     objects.emplace_back(glm::vec3(trace.voxelPos), mesh);
 }
@@ -137,6 +137,13 @@ void PolygonRender::imgui() {
     ImGui::SetWindowCollapsed(false);
 
     const TraceStack& trace = showTestTrace[0] ? testTrace : lastTrace;
+
+    ImGui::Text("Selected voxel x=%d y=%d z=%d",
+        trace.voxelPos.x,
+        trace.voxelPos.y,
+        trace.voxelPos.z
+    );
+
     const int maxSize =
         static_cast<int>(showPathNode[0] ? trace.pathNodesStack.size() : trace.nodesStack.size()) - 1;
     if (ImGui::SliderInt("Node Index", nodeIndex, 0, maxSize)) {
