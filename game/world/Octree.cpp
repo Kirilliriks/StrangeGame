@@ -296,7 +296,6 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
 
             glm::vec3 temp = rayStartPosition + distance * rayDirection;
             traceStack.entryStack.emplace_back(temp);
-            std::cout << "temp " << temp.x << " " << temp.y << " " << temp.z << std::endl;
 
             glm::vec3 newVoxelRayPosition = voxelRayPosition + mask * glm::sign(rayDirection) * size;
             exitOctree = (glm::floor(newVoxelRayPosition / size * 0.5f) != glm::floor(voxelRayPosition / size * 0.5f))
