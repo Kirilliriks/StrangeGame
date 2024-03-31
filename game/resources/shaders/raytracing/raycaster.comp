@@ -95,18 +95,18 @@ bool findVoxel(const in ivec3 voxelPos, out vec3 color) {
     return false;
 }
 
-vec4 debugCast(const in vec3 s_pos, const in vec3 rayDirection) {
+vec4 debugCast(const in vec3 rayDirection) {
     vec3 color = vec3(0);
 
     const vec3 rayStepSize = abs(1.0f / rayDirection);
     const ivec3 step = ivec3(sign(rayDirection));
-    ivec3 voxelPos = ivec3(s_pos);
-    vec3 rayLength = (step * (voxelPos - s_pos) + (step * 0.5) + 0.5) * rayStepSize;
+    ivec3 voxelPos = ivec3(start_position);
+    vec3 rayLength = (step * (voxelPos - start_position) + (step * 0.5) + 0.5) * rayStepSize;
 
     const int maxSize = nodes[0].halfSize * 2;
     bvec3 mask;
     int iter = 0;
-    while (iter++ < 400) {
+    while (iter++ < 700) {
         mask = lessThanEqual(rayLength.xyz, min(rayLength.yzx, rayLength.zxy));
         rayLength += vec3(mask) * rayStepSize;
         voxelPos += ivec3(vec3(mask)) * step;
