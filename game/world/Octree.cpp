@@ -156,8 +156,8 @@ TraceStack Octree::voxelRaycastDDA(const glm::vec3& rayDirection, const glm::vec
     const auto step = glm::ivec3(glm::sign(rayDirection));
     const glm::vec3 rayStepSize = glm::abs(glm::vec3(1.0f) / rayDirection);
 
-    auto voxelPos = glm::ivec4(start_position, 0);
-    auto rayLength = (glm::vec3(glm::ivec3(start_position) + dir) - start_position) / rayDirection;
+    auto voxelPos = glm::ivec3(start_position);
+    auto rayLength = (glm::vec3(voxelPos + dir) - start_position) / rayDirection;
 
     int iter = 0;
     float distance = 0.0f;
@@ -165,7 +165,7 @@ TraceStack Octree::voxelRaycastDDA(const glm::vec3& rayDirection, const glm::vec
         traceStack.entryStack.emplace_back(start_position + distance * rayDirection);
 
         iter++;
-        traceStack.preVoxelPos = glm::ivec3(voxelPos);
+        traceStack.preVoxelPos = voxelPos;
         if (rayLength.x < rayLength.y) {
             if (rayLength.x < rayLength.z) {
                 voxelPos.x += step.x;
@@ -188,10 +188,10 @@ TraceStack Octree::voxelRaycastDDA(const glm::vec3& rayDirection, const glm::vec
             }
         }
 
-        if (findVoxel(glm::ivec3(voxelPos)) == 1) {
+        if (findVoxel(voxelPos) == 1) {
             traceStack.iterations = iter;
             traceStack.distance = distance;
-            traceStack.voxelPos = glm::ivec3(voxelPos);
+            traceStack.voxelPos = voxelPos;
             return traceStack;
         }
     }
