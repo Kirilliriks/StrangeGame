@@ -44,7 +44,7 @@ void OctreeSpace::setOctree(const glm::ivec3& position, std::shared_ptr<Octree> 
     }
 
     relativeOctree += radius;
-    octrees[relativeOctree.x + (relativeOctree.y * diameter + relativeOctree.z) * diameter] = std::move(octree);
+    octrees[relativeOctree.x + (relativeOctree.z * diameter + relativeOctree.y) * diameter] = std::move(octree);
 }
 
 
@@ -60,7 +60,7 @@ std::shared_ptr<Octree> OctreeSpace::getOctree(const glm::ivec3& position, const
     relativeOctree += radius;
     //std::cout << "@ " << relativeOctree.x + (relativeOctree.y * diameter + relativeOctree.z) * diameter << std::endl;
 
-    return octrees[relativeOctree.x + (relativeOctree.y * diameter + relativeOctree.z) * diameter];
+    return octrees[relativeOctree.x + (relativeOctree.z * diameter + relativeOctree.y) * diameter];
 }
 
 glm::ivec3 OctreeSpace::getOctreePosition(const glm::ivec3& position) const {
@@ -75,8 +75,12 @@ int OctreeSpace::getRadius() const {
     return radius;
 }
 
-int OctreeSpace::getDataSize() {
-    return dataSize;
+int OctreeSpace::getDiameter() const {
+    return radius;
+}
+
+glm::ivec3 OctreeSpace::getSpaceCenter() const {
+    return spaceCenter;
 }
 
 void OctreeSpace::fillBuffers(const int& worldBuffer, const int& matrixBuffer) {
@@ -86,16 +90,12 @@ void OctreeSpace::fillBuffers(const int& worldBuffer, const int& matrixBuffer) {
 
     glBufferData(GL_SHADER_STORAGE_BUFFER, dataSize, nullptr, GL_STATIC_DRAW);
 
-    std::cout << "\n" << std::endl;
-
+    int lastNodesCount = 0;
     int offset = 0;
     for (int z = -radius; z <= radius; z++) {
         for (int y = -radius; y <= radius; y++) {
             for (int x = -radius; x <= radius; x++) {
                 const auto octree = getOctree(glm::ivec3(x, y, z), true);
-                if (!octree) {
-                    exit(21);
-                }
 
                 const int nodesCount = octree->nodesCount();
                 const int size = nodesCount * sizeof(Node);
@@ -108,8 +108,8 @@ void OctreeSpace::fillBuffers(const int& worldBuffer, const int& matrixBuffer) {
                 );
 
                 offset += size;
-
-                ids.push_back(nodesCount);
+                ids.push_back(lastNodesCount);
+                lastNodesCount += nodesCount;
             }
         }
     }
@@ -118,7 +118,7 @@ void OctreeSpace::fillBuffers(const int& worldBuffer, const int& matrixBuffer) {
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, matrixBuffer);
 
-    glBufferData(GL_SHADER_STORAGE_BUFFER, ids.size() * sizeof(int), ids.data(), GL_STATIC_DRAW);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, ids.size(), ids.data(), GL_STATIC_DRAW);
 
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, matrixBuffer);
 }
@@ -191,14 +191,12 @@ void OctreeSpace::updateOctrees() {
                 }
                 // std::cout << "GENERATED " << x << " " << y << " " << z << std::endl;
                 // std::cout << "@ " << x + (y * diameter + z) * diameter << std::endl; // 2 + (8) * 3
-                octrees[x + (y * diameter + z) * diameter] = octree;
+                octrees[x + (z * diameter + y) * diameter] = octree;
 
                 dataSize += octree->nodesCount() * sizeof(Node);
             }
         }
     }
-
-    std::cout << "\n" << std::endl;
 }
 
 void OctreeSpace::generateOctree(const glm::ivec3& position, const std::shared_ptr<Octree>& octree) const {

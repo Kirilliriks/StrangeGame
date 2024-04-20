@@ -30,7 +30,7 @@ private:
     TraceStack testTrace;
     TraceStack lastTrace;
 
-    Object world;
+    std::vector<Object> world;
     std::vector<Object> objects;
 };
 

@@ -71,30 +71,43 @@ void PolygonRender::traceLine(const TraceStack& testStack, const TraceStack& tra
 }
 
 void PolygonRender::rebuildWorld() {
-    MeshBuilder meshBuilder;
+    world.clear();
 
-    // Octree& octree = game.getWorld()->getOctree(); TODO
-    // const int halfSize = octree.getSize();
-    //
-    // for (int y = 0; y < halfSize; y++) {
-    //     for (int z = 0; z < halfSize; z++) {
-    //         for (int x = 0; x < halfSize; x++) {
-    //             Node node = octree.getVoxel(glm::ivec3(x, y, z));
-    //             if (node.position.x <= -1 || node.color.a <= 0.0f) {
-    //                 continue;
-    //             }
-    //
-    //             meshBuilder.cube(glm::vec3(x, y, z) + 0.5f, node.color, 0.5f);
-    //         }
-    //     }
-    // }
-    //
-    // const auto mesh = new Mesh(meshBuilder);
-    // MeshStorage::pushMesh("world_mesh", mesh);
-    //
-    // auto object = Object(glm::vec3(0), mesh);
-    // world = object;
-    // objects.emplace_back(object);
+    OctreeSpace octreeSpace = game.getWorld()->getOctreeSpace();
+    const int halfSize = octreeSpace.getOctreeSideSize();
+    for (int zOctree = -octreeSpace.getRadius(); zOctree <= 0; zOctree++) {
+        for (int yOctree = -octreeSpace.getRadius(); yOctree <= 0; yOctree++) {
+            for (int xOctree = -octreeSpace.getRadius(); xOctree <= 0; xOctree++) {
+                MeshBuilder meshBuilder;
+
+                auto octree = octreeSpace.getOctree(glm::ivec3(xOctree, yOctree, zOctree), true);
+                if (octree->nodesCount() <= 1) {
+                    continue;
+                }
+
+                for (int y = 0; y < halfSize; y++) {
+                    for (int z = 0; z < halfSize; z++) {
+                        for (int x = 0; x < halfSize; x++) {
+                            Node node = octree->getVoxel(glm::ivec3(x, y, z));
+                            if (node.position.x <= -1 || node.color.a <= 0.0f) {
+                                continue;
+                            }
+
+                            meshBuilder.cube(glm::vec3(x, y, z) + 0.5f, node.color, 0.5f);
+                        }
+                    }
+                }
+
+                const auto mesh = new Mesh(meshBuilder);
+                MeshStorage::pushMesh("world_mesh" + std::to_string(xOctree) + " " + std::to_string(yOctree) + " " + std::to_string(zOctree) + " ", mesh);
+
+                auto object = Object(glm::vec3(xOctree * halfSize, 0, zOctree * halfSize), mesh);
+                world.emplace_back(object);
+                objects.emplace_back(object);
+            }
+        }
+    }
+
 }
 
 void PolygonRender::update() {
@@ -172,5 +185,7 @@ void PolygonRender::render(const double& deltaTime) const {
 
 void PolygonRender::clearObjects() {
     objects.clear();
-    objects.emplace_back(world);
+    for (const auto& object : world) {
+        objects.emplace_back(object);
+    }
 }

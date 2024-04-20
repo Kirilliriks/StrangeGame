@@ -23,7 +23,9 @@ public:
 
     int getOctreeSideSize() const;
     int getRadius() const;
-    int getDataSize();
+    int getDiameter() const;
+
+    glm::ivec3 getSpaceCenter() const;
 
     void fillBuffers(const int& worldBuffer, const int& matrixBuffer);
 
