@@ -32,6 +32,7 @@ private:
     GLuint windowArrayID{};
     GLuint windowBufferID{};
     GLuint worldBufferID{};
+    GLuint matrixBufferID{};
     GLuint textureID{};
 
     RaycastShader *rayShader;

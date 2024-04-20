@@ -5,9 +5,9 @@
 #ifndef STRANGEGAME_WORLD_H
 #define STRANGEGAME_WORLD_H
 
-#include "Octree.hpp"
 #include "../render/Camera.hpp"
 #include "../Game.hpp"
+#include "octree/OctreeSpace.hpp"
 
 class Game;
 class World {
@@ -20,17 +20,17 @@ public:
     void setVoxel(const glm::ivec3& vec, const glm::vec4& color);
     void createWorld();
 
-    Octree &getOctree();
+    OctreeSpace &getOctreeSpace();
     Camera &getCamera();
     TraceStack &getTraceCast();
     glm::ivec3 &getFrontVoxel();
 
-    TraceStack voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &startPosition, float maxDistance) const;
+    TraceStack voxelRaycast(const glm::vec3 &rayDirection, const glm::vec3 &startPosition, float maxDistance);
 private:
     Game* game;
 
     Camera camera;
-    Octree octree;
+    OctreeSpace octreeSpace = OctreeSpace(1);
 
     TraceStack traceCast;
     glm::ivec3 frontVoxel;

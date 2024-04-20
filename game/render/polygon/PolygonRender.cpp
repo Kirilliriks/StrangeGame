@@ -4,13 +4,11 @@
 
 #include "PolygonRender.hpp"
 
-#include <algorithm>
-
 #include "../../Game.hpp"
 #include "mesh/MeshBuilder.hpp"
 #include "mesh/MeshStorage.hpp"
 
-static int nodeIndex[] = {0};
+static int nodeIndex[] = {};
 static bool showPathNode[] = {false};
 static bool showTestTrace[] = {false};
 
@@ -75,28 +73,28 @@ void PolygonRender::traceLine(const TraceStack& testStack, const TraceStack& tra
 void PolygonRender::rebuildWorld() {
     MeshBuilder meshBuilder;
 
-    Octree& octree = game.getWorld()->getOctree();
-    const int halfSize = octree.getSize();
-
-    for (int y = 0; y < halfSize; y++) {
-        for (int z = 0; z < halfSize; z++) {
-            for (int x = 0; x < halfSize; x++) {
-                Node node = octree.getVoxel(glm::ivec3(x, y, z));
-                if (node.position.x <= -1 || node.color.a <= 0.0f) {
-                    continue;
-                }
-
-                meshBuilder.cube(glm::vec3(x, y, z) + 0.5f, node.color, 0.5f);
-            }
-        }
-    }
-
-    const auto mesh = new Mesh(meshBuilder);
-    MeshStorage::pushMesh("world_mesh", mesh);
-
-    auto object = Object(glm::vec3(0), mesh);
-    world = object;
-    objects.emplace_back(object);
+    // Octree& octree = game.getWorld()->getOctree(); TODO
+    // const int halfSize = octree.getSize();
+    //
+    // for (int y = 0; y < halfSize; y++) {
+    //     for (int z = 0; z < halfSize; z++) {
+    //         for (int x = 0; x < halfSize; x++) {
+    //             Node node = octree.getVoxel(glm::ivec3(x, y, z));
+    //             if (node.position.x <= -1 || node.color.a <= 0.0f) {
+    //                 continue;
+    //             }
+    //
+    //             meshBuilder.cube(glm::vec3(x, y, z) + 0.5f, node.color, 0.5f);
+    //         }
+    //     }
+    // }
+    //
+    // const auto mesh = new Mesh(meshBuilder);
+    // MeshStorage::pushMesh("world_mesh", mesh);
+    //
+    // auto object = Object(glm::vec3(0), mesh);
+    // world = object;
+    // objects.emplace_back(object);
 }
 
 void PolygonRender::update() {

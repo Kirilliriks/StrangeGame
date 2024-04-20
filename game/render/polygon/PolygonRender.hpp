@@ -6,7 +6,7 @@
 #define POLYGONRENDER_H
 #include <vector>
 
-#include "../../world/TraceStack.hpp"
+#include "../../world/octree/TraceStack.hpp"
 #include "../shaders/Shader.hpp"
 #include "object/Object.hpp"
 

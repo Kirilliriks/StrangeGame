@@ -11,8 +11,7 @@
 
 class Octree {
 public:
-    Octree();
-    int getSize() const;
+    Octree(const int& size, const int& maxDepth);
     void setVoxel(const glm::ivec3& vec, const glm::vec4& color);
     Node getVoxel(const glm::ivec3& vec);
     Node getNode(const glm::ivec3& vec, int depth) const;
@@ -30,9 +29,8 @@ private:
     void removeVoxel(const int& index, const int& depth, const glm::ivec3& vec);
     int findVoxel(const glm::ivec3 &voxelPos) const;
 
+    const int maxDepth;
     std::vector<Node> nodes;
-    int maxDepth;
-    int size;
 };
 
 

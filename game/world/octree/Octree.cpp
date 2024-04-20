@@ -7,15 +7,8 @@
 #include <iostream>
 #include <random>
 
-Octree::Octree() {
-    maxDepth = 8;
-    size = 1 << maxDepth; // std::pow(2, maxDepth);
-
+Octree::Octree(const int& size, const int& maxDepth) : maxDepth(maxDepth) {
     nodes.emplace_back(size, glm::ivec3(0));
-}
-
-int Octree::getSize() const {
-    return size;
 }
 
 void Octree::setVoxel(const glm::ivec3& vec, const glm::vec4& color) {

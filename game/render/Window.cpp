@@ -15,10 +15,10 @@ Window::Window() {
     std::string line;
 
     std::getline(input, line);
-    width = std::stoi(line);
+    width = 2560; //std::stoi(line);
 
     std::getline(input, line);
-    height = std::stoi(line);
+    height = 1440; //std::stoi(line);
 
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;

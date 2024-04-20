@@ -17,6 +17,10 @@ layout(std430, binding=4) readonly buffer Octree_data {
     Node nodes[];
 };
 
+layout(std430, binding=5) readonly buffer Octree_matrix {
+    int octrees[];
+};
+
 layout(rgba32f) uniform image2D img_output;
 
 layout(location=2) uniform vec3 start_position;

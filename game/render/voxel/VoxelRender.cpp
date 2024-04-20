@@ -33,6 +33,7 @@ VoxelRender::VoxelRender(Game *game) : world(game->getWorld()) {
 
     genTexture(); // WINDOW TEXTURE
     glGenBuffers(1, &worldBufferID);
+    glGenBuffers(1, &matrixBufferID);
 
     rayShader = new RaycastShader(R"(..\game\resources\shaders\raytracing\raycaster.comp)");
     raycastShaderID = rayShader->getHandle();
@@ -65,11 +66,7 @@ void VoxelRender::render(const double& deltaTime) const {
 }
 
 void VoxelRender::updateWorld() const {
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, worldBufferID);
-    glBufferData(GL_SHADER_STORAGE_BUFFER,
-                 world->getOctree().nodesCount() * sizeof(Node),
-                 world->getOctree().getData(), GL_STATIC_DRAW);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, worldBufferID);
+    world->getOctreeSpace().fillBuffers(worldBufferID, matrixBufferID);
 }
 
 // Texture for display window

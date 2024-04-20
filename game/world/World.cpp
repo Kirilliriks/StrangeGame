@@ -3,8 +3,6 @@
 //
 
 #include "World.hpp"
-#include <random>
-#include "glm/gtc/noise.hpp"
 #include "imgui.h"
 
 static float editColor[] = {0, 0, 0};
@@ -15,7 +13,7 @@ World::World(Game* game) : game(game), camera(game->getWindow()) {
 void World::update(const double& deltaTime) {
     camera.update(deltaTime);
 
-    const glm::ivec3 v = octree.voxelRaycastDDA(camera.getDirection(), camera.getPosition(), 100).voxelPos;
+    const glm::ivec3 v = octreeSpace.voxelRaycast(camera.getDirection(), camera.getPosition(), 100).voxelPos;
     frontVoxel = glm::vec3(v);
 
     if (!Game::focused) {
@@ -24,12 +22,12 @@ void World::update(const double& deltaTime) {
 
     if (!Game::debugRender) {
         if (Input::LEFT_CLICK.pressed || (Input::LEFT_CLICK.down && Input::LEFT_SHIFT.down)) {
-            octree.setVoxel(traceCast.preVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
+            //octree.setVoxel(traceCast.preVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
             game->getRenderer()->updateWorld();
         }
 
         if (Input::RIGHT_CLICK.pressed || (Input::RIGHT_CLICK.down && Input::LEFT_SHIFT.down)) {
-            octree.removeVoxel(v);
+            //octree.removeVoxel(v);
             game->getRenderer()->updateWorld();
         }
     } else {
@@ -77,36 +75,16 @@ void World::imgui(const double& deltaTime) {
 }
 
 void World::setVoxel(const glm::ivec3&vec, const glm::vec4&color) {
-    octree.setVoxel(vec, color);
+    octreeSpace.setVoxel(vec, color);
 }
 
 void World::createWorld() {
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<int> rand(0, 100);
-
-    const int worldSize = octree.getSize();
-    for (int z = 0; z < worldSize; z++) {
-        for (int x = 0; x < worldSize; x++) {
-            constexpr float divider = 32.0f;
-            float per = glm::simplex(glm::vec3(x / divider, z / divider, 21));
-            per = (per + 1) / 2.0f;
-
-            const int y = static_cast<int>(per * divider);
-            if (y < 0 || y > worldSize) continue;
-
-            for (int i = 0; i <= y; i++) {
-                setVoxel(glm::ivec3(x, i, z), glm::vec4(per, per, per, 1.0f));
-            }
-        }
-    }
-
-    std::cout << "Generation end, nodes count: " << octree.nodesCount() << std::endl;
+    octreeSpace.updateSpaceCenter(glm::ivec3(camera.getPosition()));
 }
 
 
-Octree& World::getOctree() {
-    return octree;
+OctreeSpace& World::getOctreeSpace() {
+    return octreeSpace;
 }
 
 Camera& World::getCamera() {
@@ -124,49 +102,7 @@ glm::ivec3& World::getFrontVoxel() {
 TraceStack World::voxelRaycast(
     const glm::vec3& rayDirection,
     const glm::vec3& startPosition,
-    float maxDistance
-) const {
-    TraceStack traceStack;
-
-    const float octreeSize = octree.getSize();
-    const auto step = glm::ivec3(glm::sign(rayDirection));
-
-    const glm::vec3 rayStepSizeSingle = 1.0f / glm::max(glm::abs(rayDirection), 0.001f);
-    const glm::vec3 rayStepSize = rayStepSizeSingle * octreeSize;
-
-    auto octreePosition = glm::ivec3(startPosition / octreeSize);
-    octreePosition += glm::min(glm::vec3(0), glm::sign(startPosition));
-
-    // std::cout << "SP x=" << startPosition.x << " y=" << startPosition.y << " z=" << startPosition.z << std::endl;
-    // std::cout << "SP / OS x=" << startPositionDivideOctreePosition.x << " y=" << startPositionDivideOctreePosition.y << " z=" << startPositionDivideOctreePosition.z << std::endl;
-    // std::cout << "OP x=" << octreePosition.x << " y=" << octreePosition.y << " z=" << octreePosition.z << std::endl;
-    // std::cout << "OS " << octreeSize << std::endl;
-
-    const float halfOctreeSize = octreeSize / 2;
-    auto rayLength = -(glm::sign(rayDirection) * (glm::mod(startPosition, octreeSize) - halfOctreeSize) - halfOctreeSize) * rayStepSizeSingle;
-
-    glm::bvec3 mask;
-
-    float distance = 0.0f;
-    while (distance < maxDistance) {
-        if (octreePosition == glm::ivec3(0)) {
-            return octree.voxelRaycastTraversal(rayDirection, glm::abs(startPosition + rayDirection * distance));
-        }
-
-        mask = glm::lessThanEqual(
-            rayLength,
-            glm::min(
-                glm::vec3(rayLength.y, rayLength.z, rayLength.x),
-                glm::vec3(rayLength.z, rayLength.x, rayLength.y)
-            )
-        );
-
-        rayLength += glm::vec3(mask) * rayStepSize;
-        distance = glm::length(glm::vec3(mask) * (rayLength - rayStepSize));
-        octreePosition += glm::ivec3(glm::vec3(mask)) * step;
-
-        traceStack.entryStack.push_back(startPosition + rayDirection * distance);
-    }
-
-    return traceStack;
+    const float maxDistance
+) {
+    return octreeSpace.voxelRaycast(rayDirection, startPosition, maxDistance);
 }

@@ -6,12 +6,10 @@
 #define TRACESTACK_HPP
 
 #include <vector>
-#include <glm/glm.hpp>
 
 #include "Node.hpp"
 
-class TraceStack {
-public:
+struct TraceStack {
     std::vector<glm::vec3> entryStack;
     std::vector<Node> nodesStack;
     std::vector<Node> pathNodesStack;
@@ -22,7 +20,6 @@ public:
     int iterationsF;
     float distance;
 };
-
 
 
 #endif //TRACESTACK_HPP

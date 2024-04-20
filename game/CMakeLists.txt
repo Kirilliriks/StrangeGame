@@ -11,8 +11,8 @@ add_library(
         render/Window.cpp render/Window.hpp
         utils/Input.hpp
         render/shaders/RaycastShader.cpp render/shaders/RaycastShader.hpp
-        world/Octree.cpp world/Octree.hpp
-        world/Node.hpp world/Node.cpp
+        world/octree/Octree.cpp world/octree/Octree.hpp
+        world/octree/Node.hpp world/octree/Node.cpp
         utils/Paths.hpp
         world/World.cpp world/World.hpp
         utils/Input.cpp
@@ -27,6 +27,7 @@ add_library(
         render/polygon/object/Object.hpp
         render/polygon/mesh/MeshStorage.cpp
         render/polygon/mesh/MeshStorage.hpp
-        world/TraceStack.cpp
-        world/TraceStack.hpp
+        world/octree/TraceStack.hpp
+        world/octree/OctreeSpace.cpp
+        world/octree/OctreeSpace.hpp
 )
