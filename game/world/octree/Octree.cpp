@@ -42,7 +42,7 @@ void Octree::setVoxel(const int& index, const int& depth, const glm::ivec3& vec,
 }
 
 Node Octree::getVoxel(const int& index, const int& depth, const glm::ivec3& vec) {
-    Node currentNode = nodes.at(index);
+    Node currentNode = nodes[index];
 
     if (depth == maxDepth) {
         return currentNode;
