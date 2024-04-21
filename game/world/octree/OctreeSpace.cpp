@@ -79,7 +79,7 @@ int OctreeSpace::getRadius() const {
 }
 
 int OctreeSpace::getDiameter() const {
-    return radius;
+    return diameter;
 }
 
 glm::ivec3 OctreeSpace::getSpaceCenter() const {
@@ -88,17 +88,17 @@ glm::ivec3 OctreeSpace::getSpaceCenter() const {
 
 void OctreeSpace::fillBuffers(const int& worldBuffer, const int& matrixBuffer) {
     std::vector<int> ids;
+    ids.resize(diameter * diameter * diameter, -1);
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, worldBuffer);
-
     glBufferData(GL_SHADER_STORAGE_BUFFER, dataSize, nullptr, GL_STATIC_DRAW);
 
     int lastNodesCount = 0;
     int offset = 0;
-    for (int z = -radius; z <= radius; z++) {
-        for (int y = -radius; y <= radius; y++) {
-            for (int x = -radius; x <= radius; x++) {
-                const auto octree = getOctree(glm::ivec3(x, y, z), true);
+    for (int z = 0; z < diameter; z++) {
+        for (int y = 0; y < diameter; y++) {
+            for (int x = 0; x < diameter; x++) {
+                const auto octree = getOctree(glm::ivec3(x, y, z) - radius, true);
 
                 const int nodesCount = octree->nodesCount();
                 const int size = nodesCount * sizeof(Node);
@@ -111,7 +111,7 @@ void OctreeSpace::fillBuffers(const int& worldBuffer, const int& matrixBuffer) {
                 );
 
                 offset += size;
-                ids.push_back(lastNodesCount);
+                ids[x + (z * diameter + y) * diameter] = lastNodesCount;
                 lastNodesCount += nodesCount;
             }
         }
@@ -120,9 +120,7 @@ void OctreeSpace::fillBuffers(const int& worldBuffer, const int& matrixBuffer) {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, worldBuffer);
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, matrixBuffer);
-
-    glBufferData(GL_SHADER_STORAGE_BUFFER, ids.size(), ids.data(), GL_STATIC_DRAW);
-
+    glBufferData(GL_SHADER_STORAGE_BUFFER, ids.size() * sizeof(int), ids.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, matrixBuffer);
 }
 
@@ -195,7 +193,7 @@ void OctreeSpace::updateOctrees() {
                 const int realX = spaceCenter.x + x;
 
                 auto octree = std::make_shared<Octree>(octreeSideSize, maxDepth);
-                if (y == 1) {
+                if (y == 0) {
                     generateOctree(glm::ivec3(x, radius / 2, z), octree);
                 }
 
@@ -226,6 +224,4 @@ void OctreeSpace::generateOctree(const glm::ivec3& position, const std::shared_p
             }
         }
     }
-
-    std::cout << "Generation end, nodes count: " << octree->nodesCount() << std::endl;
 }

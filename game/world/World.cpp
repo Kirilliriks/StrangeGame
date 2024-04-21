@@ -63,6 +63,12 @@ void World::imgui(const double& deltaTime) {
         frontVoxel.y,
         frontVoxel.z
     );
+    const auto octreee = octreeSpace.getOctreePosition(glm::ivec3(camera.getPosition()));
+    ImGui::Text("Octree x=%d y=%d z=%d",
+        static_cast<int>(octreee.x),
+        static_cast<int>(octreee.y),
+        static_cast<int>(octreee.z)
+    );
     ImGui::Text("Distance %f", traceCast.distance);
 
     ImGui::ColorPicker3("Choose voxel color", editColor);

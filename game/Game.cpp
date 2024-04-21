@@ -13,22 +13,22 @@ Game::Game(Window *window) : window(window) {
     polygonRenderer = new PolygonRender(this);
     world->createWorld();
     renderer->updateWorld();
-    polygonRenderer->rebuildWorld();
+    //polygonRenderer->rebuildWorld();
 }
 
 void Game::update(const double& deltaTime) const {
     world->update(deltaTime);
-    polygonRenderer->update();
+    //polygonRenderer->update();
 }
 
 void Game::render(const double& deltaTime) const {
-    //renderer->render(deltaTime);
-    polygonRenderer->render(deltaTime);
+    renderer->render(deltaTime);
+    //polygonRenderer->render(deltaTime);
 }
 
 void Game::imgui(const double& deltaTime) const {
     world->imgui(deltaTime);
-    polygonRenderer->imgui();
+    //polygonRenderer->imgui();
 }
 
 Window *Game::getWindow() const {
