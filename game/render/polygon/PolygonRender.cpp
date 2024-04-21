@@ -74,20 +74,22 @@ void PolygonRender::rebuildWorld() {
     world.clear();
 
     OctreeSpace octreeSpace = game.getWorld()->getOctreeSpace();
-    const int halfSize = octreeSpace.getOctreeSideSize();
-    for (int zOctree = -octreeSpace.getRadius(); zOctree <= 0; zOctree++) {
-        for (int yOctree = -octreeSpace.getRadius(); yOctree <= 0; yOctree++) {
-            for (int xOctree = -octreeSpace.getRadius(); xOctree <= 0; xOctree++) {
-                MeshBuilder meshBuilder;
+    const int octreeSize = octreeSpace.getOctreeSideSize();
+    const int radius = octreeSpace.getRadius();
+    for (int zOctree = -radius; zOctree <= radius; zOctree++) {
+        for (int yOctree = -radius; yOctree <= radius; yOctree++) {
+            for (int xOctree = -radius; xOctree <= radius; xOctree++) {
 
                 auto octree = octreeSpace.getOctree(glm::ivec3(xOctree, yOctree, zOctree), true);
                 if (octree->nodesCount() <= 1) {
                     continue;
                 }
 
-                for (int y = 0; y < halfSize; y++) {
-                    for (int z = 0; z < halfSize; z++) {
-                        for (int x = 0; x < halfSize; x++) {
+                MeshBuilder meshBuilder;
+
+                for (int z = 0; z < octreeSize; z++) {
+                    for (int y = 0; y < octreeSize; y++) {
+                        for (int x = 0; x < octreeSize; x++) {
                             Node node = octree->getVoxel(glm::ivec3(x, y, z));
                             if (node.position.x <= -1 || node.color.a <= 0.0f) {
                                 continue;
@@ -99,15 +101,19 @@ void PolygonRender::rebuildWorld() {
                 }
 
                 const auto mesh = new Mesh(meshBuilder);
-                MeshStorage::pushMesh("world_mesh" + std::to_string(xOctree) + " " + std::to_string(yOctree) + " " + std::to_string(zOctree) + " ", mesh);
+                MeshStorage::pushMesh(
+                    "world_mesh-" + std::to_string(xOctree) +
+                    "-" + std::to_string(yOctree) +
+                    "-" + std::to_string(zOctree),
+                    mesh
+                );
 
-                auto object = Object(glm::vec3(xOctree * halfSize, 0, zOctree * halfSize), mesh);
+                auto object = Object(glm::vec3(xOctree * octreeSize, yOctree * octreeSize, zOctree * octreeSize), mesh);
                 world.emplace_back(object);
                 objects.emplace_back(object);
             }
         }
     }
-
 }
 
 void PolygonRender::update() {

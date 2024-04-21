@@ -33,6 +33,10 @@ layout(location=5) uniform ivec3 front_voxel;
 
 layout(location=6) uniform ivec3 debug_voxel;
 
+layout(location=7) uniform int octrees_radius;
+layout(location=8) uniform int octrees_diameter;
+layout(location=9) uniform ivec3 space_center;
+
 bool nodeIsLeaf(const in Node node) {
     return node.color.a != -1.0;
 }
@@ -120,8 +124,8 @@ vec4 debugCast(const in vec3 rayDirection) {
     return vec4(color, 1.0);
 }
 
-bool getNode(const in ivec3 voxelPos, const in int nodeDepth, out Node node) {
-    int index = 0;
+bool getNode(const int octreeBaseNodeID, const in ivec3 voxelPos, const in int nodeDepth, out Node node) {
+    int index = octreeBaseNodeID;
     int depth = 0;
     while (index != -1) {
         const Node currentNode = nodes[index];
@@ -151,11 +155,11 @@ vec3 insideCubeHit(
     return -(signedDirection * (localRayPosition - size) - size) * rayStepSizeSingle;
 }
 
-vec4 castRay(const in vec3 rayDirection, const in vec3 rayStartPosition) {
+vec4 castRay(const int octreeBaseNodeID, const in vec3 rayDirection, const in vec3 rayStartPosition) {
     const vec3 signedDirection = sign(rayDirection);
     const vec3 rayStepSizeSingle = 1.0 / max(abs(rayDirection), 0.001);
 
-    float size = nodes[0].halfSize * 2;
+    float size = nodes[octreeBaseNodeID].halfSize * 2;
 
     vec3 localRayPosition = mod(rayStartPosition, size);
     vec3 voxelRayPosition = rayStartPosition - localRayPosition;
@@ -188,7 +192,7 @@ vec4 castRay(const in vec3 rayDirection, const in vec3 rayStartPosition) {
         }
 
         Node node;
-        if (!getNode(ivec3(voxelRayPosition), depth, node)) {
+        if (!getNode(octreeBaseNodeID, ivec3(voxelRayPosition), depth, node)) {
             return vec4(0);
         }
 
@@ -223,6 +227,18 @@ vec4 castRay(const in vec3 rayDirection, const in vec3 rayStartPosition) {
     return vec4(0);
 }
 
+int getOctreeBaseNodeId(const in ivec3 octreePosition) {
+    ivec3 relativeOctree = octreePosition;
+    if (relativeOctree.x < octrees_radius || relativeOctree.x > octrees_radius ||
+        relativeOctree.y < octrees_radius || relativeOctree.y > octrees_radius ||
+        relativeOctree.z < octrees_radius || relativeOctree.z > octrees_radius
+    ) {
+        return -1;
+    }
+
+    relativeOctree += octrees_radius;
+    return octrees[relativeOctree.x + (relativeOctree.z * octrees_diameter + relativeOctree.y) * octrees_diameter];
+}
 
 vec4 castWorld(const in vec3 rayDirection) {
     const float octreeSize = nodes[0].halfSize * 2.0;
@@ -240,8 +256,22 @@ vec4 castWorld(const in vec3 rayDirection) {
 
     float distance = 0.0;
     for (int iterations = 0; iterations < 200; iterations++) {
-        if (octreePosition == ivec3(0)) {
-            return castRay(rayDirection, abs(start_position + rayDirection * distance));
+        const int octreeID = getOctreeBaseNodeId(octreePosition);
+        if (octreeID != -1) {
+
+            vec3 pos = abs(start_position + rayDirection * distance - octreePosition * octreeSize);
+
+            const vec4 res = castRay(0, rayDirection, pos);
+            if (res != vec4(0)) {
+//                if (octreeID > 10000) {
+//                    return vec4(0, 255, 0, 255);
+//                } else {
+//                    return vec4(0, 0, 255, 255);
+//                }
+                return res;
+            } else {
+                return vec4(octreeID > 10000 ? 255 : 10, 0, 0, 255);
+            }
         }
 
         mask = vec3(lessThanEqual(rayLength.xyz, min(rayLength.yzx, rayLength.zxy)));

@@ -14,14 +14,17 @@ OctreeSpace::OctreeSpace(const int& radius) : radius(radius), diameter(radius * 
     octrees.resize(diameter * diameter * diameter, std::shared_ptr<Octree>(nullptr));
 }
 
-void OctreeSpace::updateSpaceCenter(const glm::ivec3& position) {
+void OctreeSpace::updateSpaceCenter(const glm::ivec3& position, const bool& updateOctrees) {
     const glm::ivec3 newCenter = getOctreePosition(position);
     if (spaceCenter == newCenter) {
         return;
     }
 
     spaceCenter = newCenter;
-    updateOctrees();
+
+    if (updateOctrees) {
+        this->updateOctrees();
+    }
 }
 
 void OctreeSpace::setVoxel(const glm::ivec3& position, const glm::vec4& color) {
@@ -39,7 +42,8 @@ void OctreeSpace::setOctree(const glm::ivec3& position, std::shared_ptr<Octree> 
     glm::ivec3 relativeOctree = spaceCenter - position;
     if (relativeOctree.x < radius || relativeOctree.x > radius ||
         relativeOctree.y < radius || relativeOctree.y > radius ||
-        relativeOctree.z < radius || relativeOctree.z > radius) {
+        relativeOctree.z < radius || relativeOctree.z > radius
+    ) {
         return;
     }
 
@@ -49,22 +53,21 @@ void OctreeSpace::setOctree(const glm::ivec3& position, std::shared_ptr<Octree> 
 
 
 std::shared_ptr<Octree> OctreeSpace::getOctree(const glm::ivec3& position, const bool& local) {
-    glm::ivec3 relativeOctree = local ? position : spaceCenter - position;
+    glm::ivec3 relativeOctree = local || !spaceShift ? position : spaceCenter - position;
     if (relativeOctree.x < -radius || relativeOctree.x > radius ||
         relativeOctree.y < -radius || relativeOctree.y > radius ||
-        relativeOctree.z < -radius || relativeOctree.z > radius) {
+        relativeOctree.z < -radius || relativeOctree.z > radius
+    ) {
         return {nullptr};
     }
 
-    //std::cout << "REALLY " << relativeOctree.x << " " << relativeOctree.y << " " << relativeOctree.z << std::endl;
     relativeOctree += radius;
-    //std::cout << "@ " << relativeOctree.x + (relativeOctree.y * diameter + relativeOctree.z) * diameter << std::endl;
 
     return octrees[relativeOctree.x + (relativeOctree.z * diameter + relativeOctree.y) * diameter];
 }
 
 glm::ivec3 OctreeSpace::getOctreePosition(const glm::ivec3& position) const {
-    return position / octreeSideSize;
+    return glm::ivec3(glm::floor(glm::vec3(position) / static_cast<float>(octreeSideSize)));
 }
 
 int OctreeSpace::getOctreeSideSize() const {
@@ -136,8 +139,7 @@ TraceStack OctreeSpace::voxelRaycast(
     const glm::vec3 rayStepSizeSingle = 1.0f / glm::max(glm::abs(rayDirection), 0.001f);
     const glm::vec3 rayStepSize = rayStepSizeSingle * octreeSize;
 
-    auto octreePosition = glm::ivec3(startPosition / octreeSize);
-    octreePosition += glm::min(glm::vec3(0), glm::sign(startPosition));
+    auto rayOctreePosition = glm::ivec3(glm::floor(startPosition / octreeSize));
 
     // std::cout << "SP x=" << startPosition.x << " y=" << startPosition.y << " z=" << startPosition.z << std::endl;
     // std::cout << "SP / OS x=" << startPositionDivideOctreePosition.x << " y=" << startPositionDivideOctreePosition.y << " z=" << startPositionDivideOctreePosition.z << std::endl;
@@ -151,8 +153,15 @@ TraceStack OctreeSpace::voxelRaycast(
 
     float distance = 0.0f;
     while (distance < maxDistance) {
-        if (const std::shared_ptr<Octree> octree = getOctree(octreePosition)) {
-            return octree->voxelRaycastTraversal(rayDirection, glm::abs(startPosition + rayDirection * distance));
+        if (const std::shared_ptr<Octree> octree = getOctree(rayOctreePosition)) {
+
+            auto octreeGlobalPosition = glm::vec3(rayOctreePosition);
+            octreeGlobalPosition *= octreeSideSize;
+
+            const auto result = octree->voxelRaycastTraversal(rayDirection, startPosition + rayDirection * distance, octreeGlobalPosition);
+            if (result.voxelPos != glm::ivec3(0)) {
+                return result;
+            }
         }
 
         mask = glm::lessThanEqual(
@@ -165,7 +174,7 @@ TraceStack OctreeSpace::voxelRaycast(
 
         rayLength += glm::vec3(mask) * rayStepSize;
         distance = glm::length(glm::vec3(mask) * (rayLength - rayStepSize));
-        octreePosition += glm::ivec3(glm::vec3(mask)) * step;
+        rayOctreePosition += glm::ivec3(glm::vec3(mask)) * step;
 
         traceStack.entryStack.push_back(startPosition + rayDirection * distance);
     }
@@ -186,11 +195,10 @@ void OctreeSpace::updateOctrees() {
                 const int realX = spaceCenter.x + x;
 
                 auto octree = std::make_shared<Octree>(octreeSideSize, maxDepth);
-                if (y == 0) {
-                    generateOctree(glm::ivec3(realX, radius / 2, realZ), octree);
+                if (y == 1) {
+                    generateOctree(glm::ivec3(x, radius / 2, z), octree);
                 }
-                // std::cout << "GENERATED " << x << " " << y << " " << z << std::endl;
-                // std::cout << "@ " << x + (y * diameter + z) * diameter << std::endl; // 2 + (8) * 3
+
                 octrees[x + (z * diameter + y) * diameter] = octree;
 
                 dataSize += octree->nodesCount() * sizeof(Node);
@@ -200,10 +208,6 @@ void OctreeSpace::updateOctrees() {
 }
 
 void OctreeSpace::generateOctree(const glm::ivec3& position, const std::shared_ptr<Octree>& octree) const {
-    //std::random_device dev;
-    //std::mt19937 rng(dev());
-    //std::uniform_int_distribution<int> rand(0, 100);
-
     const int worldSize = octreeSideSize;
     for (int z = 0; z < worldSize; z++) {
         const auto realZ = static_cast<float>(position.z * octreeSideSize + z);
@@ -214,7 +218,7 @@ void OctreeSpace::generateOctree(const glm::ivec3& position, const std::shared_p
             constexpr float divider = 32.0f;
             const float per = (glm::simplex(glm::vec3(realX / divider, realZ / divider, 21)) + 1) / 2.0f;
 
-            const int y = static_cast<int>(per * divider);
+            const int y = position.x != 0 ? 21 : static_cast<int>(per * divider);
             if (y < 0 || y > worldSize) continue;
 
             for (int i = 0; i <= y; i++) {

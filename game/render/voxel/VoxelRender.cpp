@@ -51,6 +51,11 @@ void VoxelRender::render(const double& deltaTime) const {
     glUniform2f(4, window->width, window->height);
     glUniform3i(5, voxelPos.x, voxelPos.y, voxelPos.z);
     glUniform3i(6, voxelPos.x, voxelPos.y, voxelPos.z);
+    glUniform1i(7, world->getOctreeSpace().getRadius());
+    glUniform1i(8, world->getOctreeSpace().getDiameter());
+
+    const glm::ivec3 spaceCenter = world->getOctreeSpace().getSpaceCenter();
+    glUniform3i(9, spaceCenter.x, spaceCenter.y, spaceCenter.z);
 
     glDispatchCompute(window->width / groupSize, window->height / groupSize, 1);
 

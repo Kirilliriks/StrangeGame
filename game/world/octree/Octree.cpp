@@ -213,15 +213,15 @@ glm::vec3 insideCubeHit(
     return -(glm::sign(rayDirection) * (localRayPosition - size) - size) * rayStepSizeSingle;
 }
 
-TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const glm::vec3& rayStartPosition) const {
+TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const glm::vec3& rayStartPosition, const glm::vec3& octreePosition) const {
     TraceStack traceStack;
 
     const glm::vec3 rayStepSizeSingle = 1.0f / glm::max(glm::abs(rayDirection), 0.001f);
 
     float size = nodes[0].halfSize * 2;
 
-    glm::vec3 localRayPosition = glm::mod(rayStartPosition, size);
-    glm::vec3 voxelRayPosition = rayStartPosition - localRayPosition;
+    glm::vec3 localRayPosition = rayStartPosition - octreePosition;
+    glm::vec3 voxelRayPosition = glm::vec3(0);
 
     //std::cout << "RSP x=" << rayStartPosition.x << " y=" << rayStartPosition.y << " z=" << rayStartPosition.z << std::endl;
     //std::cout << "LRP x=" << localRayPosition.x << " y=" << localRayPosition.y << " z=" << localRayPosition.z << std::endl;
@@ -259,7 +259,7 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
         traceStack.nodesStack.push_back(node);
 
         if (node.color.a != -1.0f) {
-            traceStack.voxelPos = glm::ivec3(voxelRayPosition);
+            traceStack.voxelPos = glm::ivec3(octreePosition + voxelRayPosition);
             break;
         }
 

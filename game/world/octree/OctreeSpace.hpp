@@ -15,7 +15,7 @@ public:
     explicit OctreeSpace(const int& radius);
     ~OctreeSpace() = default;
 
-    void updateSpaceCenter(const glm::ivec3& position);
+    void updateSpaceCenter(const glm::ivec3&position, const bool& updateOctrees);
     void setVoxel(const glm::ivec3& position, const glm::vec4& color);
     void setOctree(const glm::ivec3& position, std::shared_ptr<Octree> octree);
     auto getOctree(const glm::ivec3& position, const bool& local = false) -> std::shared_ptr<Octree>;
@@ -34,7 +34,7 @@ private:
     void updateOctrees();
     void generateOctree(const glm::ivec3& position, const std::shared_ptr<Octree>& octree) const;
 
-    const int maxDepth = 8;
+    const int maxDepth = 7;
     const int octreeSideSize = 1 << maxDepth; // std::pow(2, maxDepth);
 
     int radius;
@@ -42,6 +42,7 @@ private:
     int dataSize;
     std::vector<std::shared_ptr<Octree>> octrees;
 
+    bool spaceShift = false;
     glm::ivec3 spaceCenter = glm::ivec3(-1, -1, -1);
 };
 

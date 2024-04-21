@@ -13,8 +13,8 @@ World::World(Game* game) : game(game), camera(game->getWindow()) {
 void World::update(const double& deltaTime) {
     camera.update(deltaTime);
 
-    const glm::ivec3 v = octreeSpace.voxelRaycast(camera.getDirection(), camera.getPosition(), 100).voxelPos;
-    frontVoxel = glm::vec3(v);
+    //const glm::ivec3 v = octreeSpace.voxelRaycast(camera.getDirection(), camera.getPosition(), 100).voxelPos;
+    //frontVoxel = glm::vec3(v);
 
     if (!Game::focused) {
         return;
@@ -79,7 +79,7 @@ void World::setVoxel(const glm::ivec3&vec, const glm::vec4&color) {
 }
 
 void World::createWorld() {
-    octreeSpace.updateSpaceCenter(glm::ivec3(camera.getPosition()));
+    octreeSpace.updateSpaceCenter(glm::ivec3(camera.getPosition()), true);
 }
 
 
