@@ -18,6 +18,7 @@ public:
     void removeVoxel(const glm::ivec3& vec);
 
     Node *getData();
+    std::vector<Node>& getDataVector();
     int nodesCount() const;
 
     TraceStack voxelRaycastDDA(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance) const;

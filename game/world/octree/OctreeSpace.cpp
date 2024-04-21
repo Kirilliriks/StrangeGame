@@ -111,7 +111,7 @@ void OctreeSpace::fillBuffers(const int& worldBuffer, const int& matrixBuffer) {
                 );
 
                 offset += size;
-                ids[x + (z * diameter + y) * diameter] = lastNodesCount;
+                ids[x + (z * diameter + y) * diameter] = nodesCount > 1 ? lastNodesCount : -1;
                 lastNodesCount += nodesCount;
             }
         }
@@ -194,7 +194,7 @@ void OctreeSpace::updateOctrees() {
 
                 auto octree = std::make_shared<Octree>(octreeSideSize, maxDepth);
                 if (y == 0) {
-                    generateOctree(glm::ivec3(x, radius / 2, z), octree);
+                    generateOctree(glm::ivec3(realX, radius / 2, realZ), octree);
                 }
 
                 octrees[x + (z * diameter + y) * diameter] = octree;
@@ -216,7 +216,7 @@ void OctreeSpace::generateOctree(const glm::ivec3& position, const std::shared_p
             constexpr float divider = 32.0f;
             const float per = (glm::simplex(glm::vec3(realX / divider, realZ / divider, 21)) + 1) / 2.0f;
 
-            const int y = position.x != 0 ? 21 : static_cast<int>(per * divider);
+            const int y = static_cast<int>(per * divider);
             if (y < 0 || y > worldSize) continue;
 
             for (int i = 0; i <= y; i++) {

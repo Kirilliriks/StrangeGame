@@ -137,7 +137,7 @@ bool getNode(const int octreeBaseNodeID, const in ivec3 voxelPos, const in int n
         const int subIndex = getSubIndex(voxelPos, currentNode);
         if (subIndex < 0) return false;
 
-        index = currentNode.sub + subIndex;
+        index = octreeBaseNodeID + currentNode.sub + subIndex;
         depth++;
     }
 
@@ -156,7 +156,7 @@ vec3 insideCubeHit(
 }
 
 vec4 castRay(
-    const int octreeBaseNodeID,
+    const in int octreeBaseNodeID,
     const in vec3 rayDirection,
     const in vec3 rayStartPosition,
     const in vec3 octreePosition

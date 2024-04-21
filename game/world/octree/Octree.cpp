@@ -96,6 +96,10 @@ Node* Octree::getData() {
     return nodes.data();
 }
 
+std::vector<Node>& Octree::getDataVector() {
+    return nodes;
+}
+
 int Octree::nodesCount() const {
     return nodes.size();
 }
