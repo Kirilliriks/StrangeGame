@@ -1,3 +1,4 @@
-width = 2560
-height = 1440
-radius = 2
+force_resolution = false
+width = 640
+height = 320
+radius = 0

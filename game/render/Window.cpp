@@ -8,6 +8,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "../options/Options.hpp"
 
 Window::Window() {
     if (!glfwInit()) {
@@ -21,15 +22,22 @@ Window::Window() {
 
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    width = mode->width;
-    height = mode->height;
+
+    if (!Avox::Options::forceResolution) {
+        width = mode->width;
+        height = mode->height;
+    } else {
+        width = Avox::Options::width;
+        height = Avox::Options::height;
+    }
 
     glfwWindowHint(GLFW_RED_BITS, mode->redBits);
     glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
     glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
     glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+    glfwWindowHint(GLFW_MAXIMIZED, true);
 
-    glWindow = glfwCreateWindow(width, height, "StrangeGame",
+    glWindow = glfwCreateWindow(mode->width, mode->height, "StrangeGame",
                                 nullptr, nullptr);
     if (glWindow == nullptr) {
         std::cerr << "Failed to open GLFW window" << std::endl;
@@ -41,7 +49,7 @@ Window::Window() {
     glfwSwapInterval(1); // Vsync
     glfwShowWindow(glWindow);
 
-    //glfwSetWindowSize(glWindow, width, height); // TODO POLYGONAL
+    //glfwSetWindowSize(glWindow, mode->width, mode->height); // TODO POLYGONAL
     glfwSetInputMode(glWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGL(glfwGetProcAddress)) {
@@ -63,8 +71,7 @@ Window::Window() {
     glDepthFunc(GL_LESS);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // glViewport(0, 0, width, height);
-
+    glViewport(0, 0, mode->width, mode->height);
 
     const std::string title("Avox");
     glfwSetWindowTitle(glWindow, title.c_str());

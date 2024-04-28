@@ -7,6 +7,7 @@
 #include "imgui_impl_glfw.h"
 
 int main() {
+    Avox::Options::loadOptions();
     const auto window = new Window();
     const auto game = new Game(window);
 

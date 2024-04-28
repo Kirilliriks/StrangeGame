@@ -6,7 +6,6 @@
 #define OPTIONS_HPP
 #include <fstream>
 #include <iostream>
-#include <exception>
 #include <toml++/toml.hpp>
 
 #endif //OPTIONS_HPP
@@ -17,20 +16,22 @@ namespace Avox {
         static void loadOptions() {
             try {
                 toml::table table = toml::parse_file(R"(..\game\resources\options.toml)");
+                forceResolution = table["force_resolution"].as_boolean()->get();
                 width = table["width"].as_integer()->get();
                 height = table["height"].as_integer()->get();
                 radius = table["radius"].as_integer()->get();
-            } catch (const std::exception& err) {
+            } catch (const toml::parse_error& err) {
+                forceResolution = false;
                 width = 2560;
                 height = 1440;
                 radius = 2;
-                std::cerr << "Parsing failed:\n" << err.what() << "\n";
+                std::cerr << "Parsing failed:\n" << err << "\n";
             }
         }
 
+        static bool forceResolution;
         static int radius;
         static int width;
         static int height;
-    private:
     };
 }
