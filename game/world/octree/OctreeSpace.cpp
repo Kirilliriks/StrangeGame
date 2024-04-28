@@ -6,12 +6,23 @@
 
 #include <gl.h>
 #include <iostream>
-#include <bits/random.h>
+#include <random>
 #include <glm/gtc/noise.hpp>
 #include <utility>
 
+#define OGT_VOX_IMPLEMENTATION
+#include "../dependency/ogt/ogt_vox.h"
+
 OctreeSpace::OctreeSpace(const int& radius) : radius(radius), diameter(radius * 2 + 1), dataSize(0) {
-    octrees.resize(diameter * diameter * diameter, std::shared_ptr<Octree>(nullptr));
+    octrees.resize(diameter * diameter * diameter);
+
+    for (int z = 0; z < diameter; z++) {
+        for (int y = 0; y < diameter; y++) {
+            for (int x = 0; x < diameter; x++) {
+                octrees[x + (z * diameter + y) * diameter] = std::make_shared<Octree>(octreeSideSize, maxDepth);
+            }
+        }
+    }
 }
 
 void OctreeSpace::updateSpaceCenter(const glm::ivec3& position, const bool& updateOctrees) {
@@ -23,7 +34,7 @@ void OctreeSpace::updateSpaceCenter(const glm::ivec3& position, const bool& upda
     spaceCenter = newCenter;
 
     if (updateOctrees) {
-        this->updateOctrees();
+        this->generateNoiseOctrees();
     }
 }
 
@@ -35,7 +46,8 @@ void OctreeSpace::setVoxel(const glm::ivec3& position, const glm::vec4& color) {
         return;
     }
 
-    octree->setVoxel(position, color);
+    const glm::ivec3 localPosition = position - octreePosition * octreeSideSize;
+    octree->setVoxel(localPosition, color);
 }
 
 void OctreeSpace::setOctree(const glm::ivec3& position, std::shared_ptr<Octree> octree) {
@@ -180,7 +192,46 @@ TraceStack OctreeSpace::voxelRaycast(
     return traceStack;
 }
 
-void OctreeSpace::updateOctrees() {
+void OctreeSpace::calculateDataSize() {
+    for (int z = -radius; z <= radius; z++) {
+        for (int y = -radius; y <= radius; y++) {
+            for (int x = -radius; x <= radius; x++) {
+                const auto octree = getOctree(glm::ivec3(x, y, z), true);
+
+                dataSize += octree->nodesCount() * sizeof(Node);
+            }
+        }
+    }
+}
+
+void OctreeSpace::loadModels() {
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<int> rand(0, 100);
+
+    const ogt_vox_scene* scene = load_vox_scene("vox/emil.vox");
+    const ogt_vox_model* model = scene->models[0];
+    const auto [color] = scene->palette;
+
+    uint32_t voxel_index = 0;
+    for (uint32_t z = 0; z < model->size_z; z++) {
+        for (uint32_t y = 0; y < model->size_y; y++) {
+            for (uint32_t x = 0; x < model->size_x; x++, voxel_index++) {
+
+                const uint32_t color_index = model->voxel_data[voxel_index];
+                if (color_index == 0) {
+                    continue;
+                }
+
+                auto [r, g, b, a] = color[color_index];
+                auto col = rand(rng);
+                setVoxel(glm::ivec3(x, z - 480, y), glm::vec4(col, col, col, 255) / 255.0f);
+            }
+        }
+    }
+}
+
+void OctreeSpace::generateNoiseOctrees() {
     dataSize = 0;
 
     for (int z = 0; z < diameter; z++) {
@@ -192,17 +243,18 @@ void OctreeSpace::updateOctrees() {
             for (int x = 0; x < diameter; x++) {
                 const int realX = spaceCenter.x + x;
 
-                auto octree = std::make_shared<Octree>(octreeSideSize, maxDepth);
+                auto octree = octrees[x + (z * diameter + y) * diameter];
+
                 if (y == 0) {
                     generateOctree(glm::ivec3(realX, radius / 2, realZ), octree);
                 }
-
-                octrees[x + (z * diameter + y) * diameter] = octree;
-
-                dataSize += octree->nodesCount() * sizeof(Node);
             }
         }
     }
+
+    loadModels();
+
+    calculateDataSize();
 }
 
 void OctreeSpace::generateOctree(const glm::ivec3& position, const std::shared_ptr<Octree>& octree) const {

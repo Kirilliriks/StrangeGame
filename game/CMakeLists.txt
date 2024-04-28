@@ -4,7 +4,9 @@ include_directories(../glm/)
 include_directories(../imgui/)
 
 add_library(
-        Game ../dependency/glad/gl.c Game.cpp
+        Game
+        ../dependency/glad/gl.c ../dependency/ogt/ogt_vox.h
+        Game.cpp
         render/shaders/Shader.cpp render/shaders/Shader.hpp
         render/voxel/VoxelRender.cpp render/voxel/VoxelRender.hpp
         render/Camera.cpp render/Camera.hpp

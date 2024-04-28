@@ -30,7 +30,7 @@ private:
     Game* game;
 
     Camera camera;
-    OctreeSpace octreeSpace = OctreeSpace(1);
+    OctreeSpace octreeSpace = OctreeSpace(2);
 
     TraceStack traceCast;
     glm::ivec3 frontVoxel;

@@ -80,7 +80,7 @@ void World::imgui(const double& deltaTime) {
     ImGui::End();
 }
 
-void World::setVoxel(const glm::ivec3&vec, const glm::vec4&color) {
+void World::setVoxel(const glm::ivec3& vec, const glm::vec4& color) {
     octreeSpace.setVoxel(vec, color);
 }
 

@@ -31,10 +31,12 @@ public:
 
     TraceStack voxelRaycast(const glm::vec3& rayDirection, const glm::vec3& startPosition, float maxDistance);
 private:
-    void updateOctrees();
+    void loadModels();
+    void generateNoiseOctrees();
+    void calculateDataSize();
     void generateOctree(const glm::ivec3& position, const std::shared_ptr<Octree>& octree) const;
 
-    const int maxDepth = 7;
+    const int maxDepth = 8;
     const int octreeSideSize = 1 << maxDepth; // std::pow(2, maxDepth);
 
     int radius;
