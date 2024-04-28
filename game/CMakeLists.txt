@@ -32,4 +32,6 @@ add_library(
         world/octree/TraceStack.hpp
         world/octree/OctreeSpace.cpp
         world/octree/OctreeSpace.hpp
+        options/Options.hpp
+        options/Options.cpp
 )

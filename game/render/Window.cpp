@@ -3,7 +3,6 @@
 //
 #include <gl.h>
 #include <iostream>
-#include <fstream>
 
 #include "Window.hpp"
 #include "imgui.h"
@@ -11,15 +10,6 @@
 #include "imgui_impl_opengl3.h"
 
 Window::Window() {
-    std::ifstream input("options.opt");
-    std::string line;
-
-    std::getline(input, line);
-    width = 2560; //std::stoi(line);
-
-    std::getline(input, line);
-    height = 1440; //std::stoi(line);
-
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return;

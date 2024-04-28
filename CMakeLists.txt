@@ -13,6 +13,15 @@ include_directories(glm)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -Wextra -std=c++20")
 set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static -lpthread")
 
+include(FetchContent)
+FetchContent_Declare(
+        tomlplusplus
+        GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+        GIT_TAG        v3.4.0
+)
+FetchContent_MakeAvailable(tomlplusplus)
+target_link_libraries(Game tomlplusplus::tomlplusplus)
+
 set(SOURCE_FILES main.cpp dependency/glad/gl.c)
 add_executable(StrangeGame ${SOURCE_FILES})
 

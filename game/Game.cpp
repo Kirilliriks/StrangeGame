@@ -7,6 +7,8 @@ bool Game::focused = true;
 bool Game::debugRender = true;
 
 Game::Game(Window *window) : window(window) {
+    Avox::Options::loadOptions();
+
     input = new Input(window->getGLWindow());
     world = new World(this);
     renderer = new VoxelRender(this);

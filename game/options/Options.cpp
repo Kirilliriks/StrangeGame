@@ -1,0 +1,8 @@
+//
+// Created by KirilliriK on 28.04.2024.
+//
+
+#include "Options.hpp"
+int Avox::Options::width = 2560;
+int Avox::Options::height = 1440;
+int Avox::Options::radius = 2;

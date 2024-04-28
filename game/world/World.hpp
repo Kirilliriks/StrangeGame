@@ -8,6 +8,7 @@
 #include "../render/Camera.hpp"
 #include "../Game.hpp"
 #include "octree/OctreeSpace.hpp"
+#include "../options/Options.hpp"
 
 class Game;
 class World {
@@ -30,7 +31,7 @@ private:
     Game* game;
 
     Camera camera;
-    OctreeSpace octreeSpace = OctreeSpace(2);
+    OctreeSpace octreeSpace = OctreeSpace(Avox::Options::radius);
 
     TraceStack traceCast;
     glm::ivec3 frontVoxel;
