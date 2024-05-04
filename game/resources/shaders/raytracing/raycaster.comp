@@ -1,6 +1,8 @@
 #version 430
 
 #define maxDepth 8
+#define octreeSize (1 << maxDepth)
+#define octreeHalfSize (octreeSize / 2)
 
 layout(local_size_x = 8, local_size_y = 8) in;
 
@@ -37,41 +39,10 @@ layout(location=7) uniform int octrees_radius;
 layout(location=8) uniform int octrees_diameter;
 layout(location=9) uniform ivec3 space_center;
 
-bool nodeIsLeaf(const in Node node) {
-    return node.color.a != -1.0;
-}
-
-ivec3 getSubVector(const in ivec3 vec, const in Node node) {
-    const ivec3 pos = node.position.xyz;
-    if (vec.x < pos.x || vec.y < pos.y || vec.z < pos.z) return ivec3(-1);
-
-    const int halfSize = node.halfSize;
-    const int size = halfSize * 2;
-    if (vec.x > pos.x + size || vec.y > pos.y + size || vec.z > pos.z + size) return ivec3(-1);
-
-    ivec3 subVector = ivec3(0);
-    subVector.x = vec.x >= pos.x + halfSize? 1 : 0;
-    subVector.y = vec.y >= pos.y + halfSize? 1 : 0;
-    subVector.z = vec.z >= pos.z + halfSize? 1 : 0;
-
-    return subVector;
-}
-
-int getSubIndexFromSubVector(const in ivec3 vec) {
-    if (min(vec.x, min(vec.y, vec.z)) < 0 || max(vec.x, max(vec.y, vec.z)) > 1) return -1;
-
-    int subIndex = 0;
-    subIndex |= (vec.x >= 1 ? 2 : 0);
-    subIndex |= (vec.y >= 1 ? 4 : 0);
-    subIndex |= (vec.z >= 1 ? 1 : 0);
-    return subIndex;
-}
-
-int getSubIndex(const in ivec3 vec, const in Node node) {
+int getSubIndex(const in int halfSize, const in ivec3 vec, const in Node node) {
     const ivec3 pos = node.position.xyz;
     if (vec.x < pos.x || vec.y < pos.y || vec.z < pos.z) return -1;
 
-    const int halfSize = node.halfSize;
     const int size = halfSize * 2;
     if (vec.x > pos.x + size || vec.y > pos.y + size || vec.z > pos.z + size) return -1;
 
@@ -85,6 +56,7 @@ int getSubIndex(const in ivec3 vec, const in Node node) {
 
 bool findVoxel(const in ivec3 voxelPos, out vec3 color) {
     int index = 0;
+    float halfSize = octreeHalfSize;
     while (index != -1) {
         const Node currentNode = nodes[index];
         if (currentNode.sub == -1) {
@@ -95,38 +67,19 @@ bool findVoxel(const in ivec3 voxelPos, out vec3 color) {
             return false;
         }
 
-        const int subIndex = getSubIndex(voxelPos, currentNode);
+        const int subIndex = getSubIndex(int(halfSize), voxelPos, currentNode);
         if (subIndex < 0) return false;
 
         index = currentNode.sub + subIndex;
+        halfSize *= 0.5;
     }
     return false;
-}
-
-vec4 debugCast(const in vec3 rayDirection) {
-    vec3 color = vec3(0);
-
-    const vec3 rayStepSize = abs(1.0f / rayDirection);
-    const ivec3 step = ivec3(sign(rayDirection));
-    ivec3 voxelPos = ivec3(start_position);
-    vec3 rayLength = (step * (voxelPos - start_position) + (step * 0.5) + 0.5) * rayStepSize;
-
-    const int maxSize = nodes[0].halfSize * 2;
-    bvec3 mask;
-    int iter = 0;
-    while (iter++ < 700) {
-        mask = lessThanEqual(rayLength.xyz, min(rayLength.yzx, rayLength.zxy));
-        rayLength += vec3(mask) * rayStepSize;
-        voxelPos += ivec3(vec3(mask)) * step;
-
-        if (findVoxel(voxelPos, color)) return vec4(color, 1.0);
-    }
-    return vec4(color, 1.0);
 }
 
 bool getNode(const int octreeBaseNodeID, const in ivec3 voxelPos, const in int nodeDepth, out Node node) {
     int index = octreeBaseNodeID;
     int depth = 0;
+    float halfSize = octreeHalfSize;
     while (index != -1) {
         const Node currentNode = nodes[index];
         if (depth == nodeDepth) {
@@ -134,11 +87,12 @@ bool getNode(const int octreeBaseNodeID, const in ivec3 voxelPos, const in int n
             return true;
         }
 
-        const int subIndex = getSubIndex(voxelPos, currentNode);
+        const int subIndex = getSubIndex(int(halfSize), voxelPos, currentNode);
         if (subIndex < 0) return false;
 
         index = octreeBaseNodeID + currentNode.sub + subIndex;
         depth++;
+        halfSize *= 0.5;
     }
 
     return false;
@@ -164,7 +118,7 @@ vec4 castRay(
     const vec3 signedDirection = sign(rayDirection);
     const vec3 rayStepSizeSingle = 1.0 / max(abs(rayDirection), 0.001);
 
-    float size = nodes[octreeBaseNodeID].halfSize * 2;
+    float size = octreeSize;
 
     vec3 localRayPosition = rayStartPosition - octreePosition;
     vec3 voxelRayPosition = vec3(0);
@@ -246,7 +200,6 @@ int getOctreeBaseNodeId(ivec3 octreePosition) {
 }
 
 vec4 castWorld(const in vec3 rayDirection) {
-    const float octreeSize = nodes[0].halfSize * 2.0;
     const ivec3 step = ivec3(sign(rayDirection));
 
     const vec3 rayStepSizeSingle = 1.0 / max(abs(rayDirection), 0.001);
@@ -254,8 +207,7 @@ vec4 castWorld(const in vec3 rayDirection) {
 
     ivec3 octreePosition = ivec3(floor(start_position / octreeSize));
 
-    const float halfOctreeSize = octreeSize / 2.0;
-    vec3 rayLength = -(step * (mod(start_position, octreeSize) - halfOctreeSize) - halfOctreeSize) * rayStepSizeSingle;
+    vec3 rayLength = -(step * (mod(start_position, octreeSize) - octreeHalfSize) - octreeHalfSize) * rayStepSizeSingle;
 
     vec3 mask;
 
@@ -294,3 +246,28 @@ void main() {
 
     imageStore(img_output, pixel_coord, castWorld(rayDir));
 }
+
+/*
+
+vec4 debugCast(const in vec3 rayDirection) {
+    vec3 color = vec3(0);
+
+    const vec3 rayStepSize = abs(1.0f / rayDirection);
+    const ivec3 step = ivec3(sign(rayDirection));
+    ivec3 voxelPos = ivec3(start_position);
+    vec3 rayLength = (step * (voxelPos - start_position) + (step * 0.5) + 0.5) * rayStepSize;
+
+    const int maxSize = nodes[0].halfSize * 2;
+    bvec3 mask;
+    int iter = 0;
+    while (iter++ < 700) {
+        mask = lessThanEqual(rayLength.xyz, min(rayLength.yzx, rayLength.zxy));
+        rayLength += vec3(mask) * rayStepSize;
+        voxelPos += ivec3(vec3(mask)) * step;
+
+        if (findVoxel(voxelPos, color)) return vec4(color, 1.0);
+    }
+    return vec4(color, 1.0);
+}
+
+*/
