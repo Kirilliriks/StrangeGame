@@ -19,7 +19,7 @@ OctreeSpace::OctreeSpace(const int& radius) : radius(radius), diameter(radius * 
     for (int z = 0; z < diameter; z++) {
         for (int y = 0; y < diameter; y++) {
             for (int x = 0; x < diameter; x++) {
-                octrees[x + (z * diameter + y) * diameter] = std::make_shared<Octree>(octreeSideSize, maxDepth);
+                octrees[x + (z * diameter + y) * diameter] = std::make_shared<Octree>(maxDepth);
             }
         }
     }

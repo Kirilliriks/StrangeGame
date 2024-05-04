@@ -7,8 +7,8 @@
 #include <iostream>
 #include <random>
 
-Octree::Octree(const int& size, const int& maxDepth) : maxDepth(maxDepth) {
-    nodes.emplace_back(size, glm::ivec3(0));
+Octree::Octree(const int& maxDepth) : maxDepth(maxDepth) {
+    nodes.emplace_back(glm::ivec3(0));
 }
 
 void Octree::setVoxel(const glm::ivec3& vec, const glm::vec4& color) {
@@ -23,6 +23,27 @@ Node Octree::getNode(const glm::ivec3& vec, const int depth) const {
     return getNode(0, 0, depth, vec);
 }
 
+void Octree::divide(const int& halfSize, Node& currentNode) {
+    currentNode.sub = nodes.size();
+    for (int i = 0; i < 8; i++) {
+        auto pos = glm::ivec3(currentNode.position);
+
+        if ((i & 2) == 2) {
+            pos.x += halfSize;
+        }
+
+        if ((i & 4) == 4) {
+            pos.y += halfSize;
+        }
+
+        if ((i & 1) == 1) {
+            pos.z += halfSize;
+        }
+
+        nodes.emplace_back(pos);
+    }
+}
+
 void Octree::setVoxel(const int& index, const int& depth, const glm::ivec3& vec, const glm::vec4& color) {
     Node currentNode = nodes.at(index);
 
@@ -32,12 +53,13 @@ void Octree::setVoxel(const int& index, const int& depth, const glm::ivec3& vec,
         return;
     } // else go deeper
 
+    const int halfSize = (1 << 8 - depth) / 2;
     if (currentNode.isEmpty()) {
-        currentNode.divide(nodes);
+        divide(halfSize, currentNode);
         nodes[index] = currentNode;
     }
 
-    const int nextIndex = currentNode.getSubNodeIndex(vec);
+    const int nextIndex = currentNode.getSubNodeIndex(halfSize, vec);
     setVoxel(nextIndex, depth + 1, vec, color);
 }
 
@@ -49,10 +71,10 @@ Node Octree::getVoxel(const int& index, const int& depth, const glm::ivec3& vec)
     } // else go deeper
 
     if (currentNode.isEmpty()) { // Hasn't voxel
-        return {-1, glm::ivec3(-1)};
+        return {glm::ivec3(-1)};
     }
 
-    const int nextIndex = currentNode.getSubNodeIndex(vec);
+    const int nextIndex = currentNode.getSubNodeIndex((1 << 8 - depth) / 2, vec);
     return getVoxel(nextIndex, depth + 1, vec);
 }
 
@@ -64,10 +86,10 @@ Node Octree::getNode(const int& index, const int& depth, const int& nodeDepth, c
     } // else go deeper
 
     if (currentNode.isEmpty()) { // Hasn't voxel
-        return {-1, glm::ivec3(-1)};
+        return {glm::ivec3(-1)};
     }
 
-    const int nextIndex = currentNode.getSubNodeIndex(vec);
+    const int nextIndex = currentNode.getSubNodeIndex((1 << (8 - depth)) / 2, vec);
     return getNode(nextIndex, depth + 1, nodeDepth, vec);
 }
 
@@ -88,7 +110,7 @@ void Octree::removeVoxel(const int& index, const int& depth, const glm::ivec3& v
         return;
     }
 
-    const int nextIndex = currentNode.getSubNodeIndex(vec);
+    const int nextIndex = currentNode.getSubNodeIndex((1 << 8 - depth) / 2, vec);
     removeVoxel(nextIndex, depth + 1, vec);
 }
 
@@ -104,13 +126,12 @@ int Octree::nodesCount() const {
     return nodes.size();
 }
 
-int getSubIndexFromVector(const glm::ivec3& vec, const Node& node) {
+int getSubIndexFromVector(const int& halfSize, const glm::ivec3& vec, const Node& node) {
     const auto pos = glm::ivec3(node.position);
     if (vec.x < pos.x) return -1;
     if (vec.y < pos.y) return -2;
     if (vec.z < pos.z) return -3;
 
-    const int halfSize = node.halfSize;
     const int size = halfSize * 2;
     if (vec.x > pos.x + size) return -4;
     if (vec.y > pos.y + size) return -5;
@@ -126,6 +147,8 @@ int getSubIndexFromVector(const glm::ivec3& vec, const Node& node) {
 
 int Octree::findVoxel(const glm::ivec3& voxelPos) const {
     int index = 0;
+
+    int halfSize = (1 << maxDepth) / 2;
     while (index != -1) {
         const Node currentNode = nodes[index];
         if (currentNode.sub == -1) {
@@ -135,10 +158,11 @@ int Octree::findVoxel(const glm::ivec3& voxelPos) const {
             return 2;
         }
 
-        const int subIndex = getSubIndexFromVector(voxelPos, currentNode);
+        const int subIndex = getSubIndexFromVector(halfSize, voxelPos, currentNode);
         if (subIndex < 0) return -1;
 
         index = currentNode.sub + subIndex;
+        halfSize /= 2;
     }
     return -1;
 }
@@ -222,7 +246,7 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
 
     const glm::vec3 rayStepSizeSingle = 1.0f / glm::max(glm::abs(rayDirection), 0.001f);
 
-    float size = nodes[0].halfSize * 2;
+    float size = (1 << maxDepth);
 
     glm::vec3 localRayPosition = rayStartPosition - octreePosition;
     glm::vec3 voxelRayPosition = glm::vec3(0);

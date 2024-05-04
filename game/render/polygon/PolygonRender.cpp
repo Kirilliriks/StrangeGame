@@ -53,7 +53,7 @@ void PolygonRender::traceLine(const TraceStack& testStack, const TraceStack& tra
         const Node& node = nodes[nodeIndex[0]];
 
         MeshBuilder meshNodeBuilder;
-        meshNodeBuilder.cube(glm::vec3(node.halfSize), color, node.halfSize);
+        //meshNodeBuilder.cube(glm::vec3(node.halfSize), color, node.halfSize); TODO
 
         mesh = new Mesh(meshNodeBuilder);
         MeshStorage::pushMesh("node_mesh", mesh);
