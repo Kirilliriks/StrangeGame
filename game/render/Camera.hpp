@@ -6,6 +6,7 @@
 #define STRANGEGAME_CAMERA_H
 
 #define GLFW_INCLUDE_NONE
+
 #include "glm/glm.hpp"
 #include "Window.hpp"
 

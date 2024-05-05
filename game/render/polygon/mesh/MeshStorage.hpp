@@ -8,7 +8,6 @@
 #include <string>
 #include <unordered_map>
 
-
 class Mesh;
 
 class MeshStorage {
@@ -19,7 +18,5 @@ public:
 private:
     static std::unordered_map<std::string, Mesh*> storage;
 };
-
-
 
 #endif //MESHSTORAGE_HPP

@@ -28,5 +28,3 @@ void MeshStorage::clear() {
         delete mesh;
     }
 }
-
-
