@@ -15,7 +15,6 @@ add_library(
         render/shaders/RaycastShader.cpp render/shaders/RaycastShader.hpp
         world/octree/Octree.cpp world/octree/Octree.hpp
         world/octree/Node.hpp world/octree/Node.cpp
-        utils/Paths.hpp
         world/World.cpp world/World.hpp
         utils/Input.cpp
         render/polygon/PolygonRender.cpp

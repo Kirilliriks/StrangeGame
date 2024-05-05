@@ -16,12 +16,12 @@ namespace Avox {
         static void loadOptions() {
             try {
                 toml::table table = toml::parse_file(R"(..\game\resources\options.toml)");
-                forceResolution = table["force_resolution"].as_boolean()->get();
+                useConfiguration = table["use_configuration"].as_boolean()->get();
                 width = table["width"].as_integer()->get();
                 height = table["height"].as_integer()->get();
                 radius = table["radius"].as_integer()->get();
             } catch (const toml::parse_error& err) {
-                forceResolution = false;
+                useConfiguration = false;
                 width = 2560;
                 height = 1440;
                 radius = 2;
@@ -29,7 +29,7 @@ namespace Avox {
             }
         }
 
-        static bool forceResolution;
+        static bool useConfiguration;
         static int radius;
         static int width;
         static int height;

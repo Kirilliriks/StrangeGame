@@ -23,7 +23,7 @@ Window::Window() {
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
-    if (!Avox::Options::forceResolution) {
+    if (!Avox::Options::useConfiguration) {
         width = mode->width;
         height = mode->height;
     } else {
