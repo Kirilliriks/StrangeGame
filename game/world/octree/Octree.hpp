@@ -26,7 +26,7 @@ public:
     TraceStack voxelRaycastTraversal(const glm::vec3& rayDirection, const glm::vec3& rayStartPosition, const glm::vec3& octreePosition) const;
 private:
     void setVoxel(const int& index, const int& depth, const glm::ivec3& vec, const glm::vec4& color);
-    Node getVoxel(const int& index, const int& depth, const glm::ivec3& vec);
+    Node getVoxel(const int& index, const int& depth, const glm::ivec3& vec) const;
     Node getNode(const int& index, const int& depth, const int& nodeDepth, const glm::ivec3& vec) const;
     void removeVoxel(const int& index, const int& depth, const glm::ivec3& vec);
     int findVoxel(const glm::ivec3 &voxelPos) const;

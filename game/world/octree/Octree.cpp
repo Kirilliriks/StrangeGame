@@ -53,7 +53,7 @@ void Octree::setVoxel(const int& index, const int& depth, const glm::ivec3& vec,
         return;
     } // else go deeper
 
-    const int halfSize = (1 << 8 - depth) / 2;
+    const int halfSize = (1 << maxDepth - depth) / 2;
     if (currentNode.isEmpty()) {
         divide(halfSize, currentNode);
         nodes[index] = currentNode;
@@ -63,7 +63,7 @@ void Octree::setVoxel(const int& index, const int& depth, const glm::ivec3& vec,
     setVoxel(nextIndex, depth + 1, vec, color);
 }
 
-Node Octree::getVoxel(const int& index, const int& depth, const glm::ivec3& vec) {
+Node Octree::getVoxel(const int& index, const int& depth, const glm::ivec3& vec) const {
     return getNode(index, depth + 1, maxDepth, vec);
 }
 
@@ -78,7 +78,7 @@ Node Octree::getNode(const int& index, const int& depth, const int& nodeDepth, c
         return {glm::ivec3(-1)};
     }
 
-    const int nextIndex = currentNode.getSubNodeIndex((1 << (8 - depth)) / 2, vec);
+    const int nextIndex = currentNode.getSubNodeIndex((1 << maxDepth - depth) / 2, vec);
     return getNode(nextIndex, depth + 1, nodeDepth, vec);
 }
 
@@ -99,7 +99,7 @@ void Octree::removeVoxel(const int& index, const int& depth, const glm::ivec3& v
         return;
     }
 
-    const int nextIndex = currentNode.getSubNodeIndex((1 << 8 - depth) / 2, vec);
+    const int nextIndex = currentNode.getSubNodeIndex((1 << maxDepth - depth) / 2, vec);
     removeVoxel(nextIndex, depth + 1, vec);
 }
 

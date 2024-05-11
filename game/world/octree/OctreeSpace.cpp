@@ -168,7 +168,11 @@ TraceStack OctreeSpace::voxelRaycast(
             auto octreeGlobalPosition = glm::vec3(rayOctreePosition);
             octreeGlobalPosition *= octreeSideSize;
 
-            const auto result = octree->voxelRaycastTraversal(rayDirection, startPosition + rayDirection * distance, octreeGlobalPosition);
+            const auto result = octree->voxelRaycastTraversal(
+                rayDirection,
+                startPosition + rayDirection * distance,
+                octreeGlobalPosition
+            );
             if (result.voxelPos != glm::ivec3(0)) {
                 return result;
             }
@@ -207,7 +211,7 @@ void OctreeSpace::calculateDataSize() {
 void OctreeSpace::loadModels() {
     std::random_device dev;
     std::mt19937 rng(dev());
-    std::uniform_int_distribution<int> rand(0, 100);
+    std::uniform_int_distribution rand(0, 100);
 
     const ogt_vox_scene* scene = load_vox_scene("vox/emil.vox");
     const ogt_vox_model* model = scene->models[0];
