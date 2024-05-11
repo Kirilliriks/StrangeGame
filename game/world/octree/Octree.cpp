@@ -64,18 +64,7 @@ void Octree::setVoxel(const int& index, const int& depth, const glm::ivec3& vec,
 }
 
 Node Octree::getVoxel(const int& index, const int& depth, const glm::ivec3& vec) {
-    Node currentNode = nodes[index];
-
-    if (depth == maxDepth) {
-        return currentNode;
-    } // else go deeper
-
-    if (currentNode.isEmpty()) { // Hasn't voxel
-        return {glm::ivec3(-1)};
-    }
-
-    const int nextIndex = currentNode.getSubNodeIndex((1 << 8 - depth) / 2, vec);
-    return getVoxel(nextIndex, depth + 1, vec);
+    return getNode(index, depth + 1, maxDepth, vec);
 }
 
 Node Octree::getNode(const int& index, const int& depth, const int& nodeDepth, const glm::ivec3& vec) const {

@@ -15,7 +15,7 @@ public:
     void setVoxel(const glm::ivec3& vec, const glm::vec4& color);
     Node getVoxel(const glm::ivec3& vec);
     Node getNode(const glm::ivec3& vec, int depth) const;
-    void divide(const int&halfSize, Node&currentNode);
+    void divide(const int& halfSize, Node& currentNode);
     void removeVoxel(const glm::ivec3& vec);
 
     Node *getData();
