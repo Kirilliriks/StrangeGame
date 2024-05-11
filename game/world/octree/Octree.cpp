@@ -140,7 +140,7 @@ int Octree::findVoxel(const glm::ivec3& voxelPos) const {
     while (index != -1) {
         const Node currentNode = nodes[index];
         if (currentNode.sub == -1) {
-            if (currentNode.color.a != -1.0f) {
+            if (currentNode.color.a >= 0.0f) {
                 return 1;
             }
             return 2;
@@ -274,7 +274,7 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
         const Node node = getNode(glm::ivec3(voxelRayPosition), depth);
         traceStack.nodesStack.push_back(node);
 
-        if (node.color.a > 0.0f) {
+        if (node.color.a >= 0.0f) {
             traceStack.voxelPos = glm::ivec3(octreePosition + voxelRayPosition);
             break;
         }
