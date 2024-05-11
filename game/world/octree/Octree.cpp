@@ -74,7 +74,7 @@ Node Octree::getNode(const int& index, const int& depth, const int& nodeDepth, c
         return currentNode;
     } // else go deeper
 
-    if (currentNode.isEmpty()) { // Hasn't voxel
+    if (currentNode.isEmpty()) { // Hasn't child nodes
         return {glm::ivec3(-1)};
     }
 
