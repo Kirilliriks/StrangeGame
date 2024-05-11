@@ -25,8 +25,10 @@ Node Octree::getNode(const glm::ivec3& vec, const int depth) {
 
 void Octree::divide(const int& halfSize, Node& currentNode) {
     currentNode.sub = nodes.size();
+
+    const auto nodePosition = glm::ivec3(currentNode.position);
     for (int i = 0; i < 8; i++) {
-        auto pos = glm::ivec3(currentNode.position);
+        auto pos = glm::ivec3(nodePosition);
 
         if ((i & 2) == 2) {
             pos.x += halfSize;
