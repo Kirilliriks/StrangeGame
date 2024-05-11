@@ -14,7 +14,7 @@ public:
     Octree(const int& maxDepth);
     void setVoxel(const glm::ivec3& vec, const glm::vec4& color);
     Node getVoxel(const glm::ivec3& vec);
-    Node getNode(const glm::ivec3& vec, int depth) const;
+    Node getNode(const glm::ivec3& vec, int depth);
     void divide(const int& halfSize, Node& currentNode);
     void removeVoxel(const glm::ivec3& vec);
 
@@ -23,11 +23,11 @@ public:
     int nodesCount() const;
 
     TraceStack voxelRaycastDDA(const glm::vec3 &rayDirection, const glm::vec3 &start_position, float maxDistance) const;
-    TraceStack voxelRaycastTraversal(const glm::vec3& rayDirection, const glm::vec3& rayStartPosition, const glm::vec3& octreePosition) const;
+    TraceStack voxelRaycastTraversal(const glm::vec3& rayDirection, const glm::vec3& rayStartPosition, const glm::vec3& octreePosition);
 private:
     void setVoxel(const int& index, const int& depth, const glm::ivec3& vec, const glm::vec4& color);
-    Node getVoxel(const int& index, const int& depth, const glm::ivec3& vec) const;
-    Node getNode(const int& index, const int& depth, const int& nodeDepth, const glm::ivec3& vec) const;
+    Node getVoxel(const int& index, const int& depth, const glm::ivec3& vec);
+    Node getNode(const int& index, const int& depth, const int& nodeDepth, const glm::ivec3& vec);
     void removeVoxel(const int& index, const int& depth, const glm::ivec3& vec);
     int findVoxel(const glm::ivec3 &voxelPos) const;
 

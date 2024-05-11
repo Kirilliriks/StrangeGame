@@ -19,7 +19,7 @@ Node Octree::getVoxel(const glm::ivec3& vec) {
     return getVoxel(0, 0, vec);
 }
 
-Node Octree::getNode(const glm::ivec3& vec, const int depth) const {
+Node Octree::getNode(const glm::ivec3& vec, const int depth) {
     return getNode(0, 0, depth, vec);
 }
 
@@ -45,30 +45,28 @@ void Octree::divide(const int& halfSize, Node& currentNode) {
 }
 
 void Octree::setVoxel(const int& index, const int& depth, const glm::ivec3& vec, const glm::vec4& color) {
-    Node currentNode = nodes.at(index);
+    Node& currentNode = nodes[index];
 
     if (depth == maxDepth) { // If in voxel depth
         currentNode.setVoxel(color);
-        nodes[index] = currentNode;
         return;
     } // else go deeper
 
     const int halfSize = (1 << maxDepth - depth) / 2;
     if (currentNode.isEmpty()) {
         divide(halfSize, currentNode);
-        nodes[index] = currentNode;
     }
 
-    const int nextIndex = currentNode.getSubNodeIndex(halfSize, vec);
+    const int nextIndex = nodes[index].getSubNodeIndex(halfSize, vec);
     setVoxel(nextIndex, depth + 1, vec, color);
 }
 
-Node Octree::getVoxel(const int& index, const int& depth, const glm::ivec3& vec) const {
+Node Octree::getVoxel(const int& index, const int& depth, const glm::ivec3& vec) {
     return getNode(index, depth + 1, maxDepth, vec);
 }
 
-Node Octree::getNode(const int& index, const int& depth, const int& nodeDepth, const glm::ivec3& vec) const {
-    Node currentNode = nodes[index];
+Node Octree::getNode(const int& index, const int& depth, const int& nodeDepth, const glm::ivec3& vec)  {
+    Node& currentNode = nodes[index];
 
     if (depth == nodeDepth) {
         return currentNode;
@@ -87,11 +85,10 @@ void Octree::removeVoxel(const glm::ivec3& vec) {
 }
 
 void Octree::removeVoxel(const int& index, const int& depth, const glm::ivec3& vec) {
-    Node currentNode = nodes.at(index);
+    Node& currentNode = nodes.at(index);
 
     if (depth == maxDepth) { // If in voxel depth
         currentNode.setVoxel(glm::vec4(0, 0, 0, -1));
-        nodes[index] = currentNode;
         return;
     } // else go deeper
 
@@ -230,7 +227,7 @@ glm::vec3 insideCubeHit(
     return -(glm::sign(rayDirection) * (localRayPosition - size) - size) * rayStepSizeSingle;
 }
 
-TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const glm::vec3& rayStartPosition, const glm::vec3& octreePosition) const {
+TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const glm::vec3& rayStartPosition, const glm::vec3& octreePosition) {
     TraceStack traceStack;
 
     const glm::vec3 rayStepSizeSingle = 1.0f / glm::max(glm::abs(rayDirection), 0.001f);
@@ -272,7 +269,7 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
             continue;
         }
 
-        const Node& node = getNode(glm::ivec3(voxelRayPosition), depth);
+        Node node = getNode(glm::ivec3(voxelRayPosition), depth);
         traceStack.nodesStack.push_back(node);
 
         if (node.color.a != -1.0f) {
