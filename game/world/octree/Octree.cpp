@@ -67,14 +67,14 @@ Node Octree::getVoxel(const int& index, const int& depth, const glm::ivec3& vec)
     return getNode(index, depth + 1, maxDepth, vec);
 }
 
-Node Octree::getNode(const int& index, const int& depth, const int& nodeDepth, const glm::ivec3& vec)  {
+Node Octree::getNode(const int& index, const int& depth, const int& nodeDepth, const glm::ivec3& vec) {
     Node& currentNode = nodes[index];
 
     if (depth == nodeDepth) {
         return currentNode;
     } // else go deeper
 
-    if (currentNode.isEmpty()) { // Hasn't child nodes
+    if (currentNode.isEmpty()) {// Hasn't child nodes
         return {glm::vec4(-1)};
     }
 
@@ -100,6 +100,22 @@ void Octree::removeVoxel(const int& index, const int& depth, const glm::ivec3& v
 
     const int nextIndex = currentNode.getSubNodeIndex((1 << maxDepth - depth) / 2, vec);
     removeVoxel(nextIndex, depth + 1, vec);
+
+    bool needMarkEmpty = true;
+    const int sub = currentNode.sub;
+    for (int i = 0; i < 8; i++) {
+        const Node& childNode = nodes[sub + i];
+
+        if (depth == maxDepth - 1 && !childNode.isEmptyVoxel()) {
+            needMarkEmpty = false;
+        } else if (!childNode.isEmpty()) {
+            needMarkEmpty = false;
+        }
+    }
+
+    if (needMarkEmpty) {
+        currentNode.sub = -1;
+    }
 }
 
 Node* Octree::getData() {
@@ -140,7 +156,7 @@ int Octree::findVoxel(const glm::ivec3& voxelPos) const {
     while (index != -1) {
         const Node currentNode = nodes[index];
         if (currentNode.sub == -1) {
-            if (currentNode.color.a >= 0.0f) {
+            if (!currentNode.isEmptyVoxel()) {
                 return 1;
             }
             return 2;
@@ -155,7 +171,8 @@ int Octree::findVoxel(const glm::ivec3& voxelPos) const {
     return -1;
 }
 
-TraceStack Octree::voxelRaycastDDA(const glm::vec3& rayDirection, const glm::vec3& start_position, float maxDistance) const {
+TraceStack Octree::voxelRaycastDDA(const glm::vec3& rayDirection, const glm::vec3& start_position,
+                                   float maxDistance) const {
     TraceStack traceStack;
     traceStack.distance = 0;
     traceStack.iterations = 0;
@@ -229,7 +246,8 @@ glm::vec3 insideCubeHit(
     return -(glm::sign(rayDirection) * (localRayPosition - size) - size) * rayStepSizeSingle;
 }
 
-TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const glm::vec3& rayStartPosition, const glm::vec3& octreePosition) {
+TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const glm::vec3& rayStartPosition,
+                                         const glm::vec3& octreePosition) {
     TraceStack traceStack;
 
     const glm::vec3 rayStepSizeSingle = 1.0f / glm::max(glm::abs(rayDirection), 0.001f);
@@ -250,7 +268,6 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
 
     int iterations;
     for (iterations = 0; iterations < 100 && distance < 200; iterations++) {
-
         if (exitOctree) {
             size *= 2.0;
             glm::vec3 newVoxelRayPosition = glm::floor(voxelRayPosition / size) * size;
@@ -261,20 +278,20 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
             depth--;
 
             exitOctree = depth > 0 &&
-                glm::abs(
-                            glm::dot(
+                         glm::abs(
+                             glm::dot(
                                  glm::mod(voxelRayPosition / size + 0.5f, 2.0)
                                  - 1.0f + mask * glm::sign(rayDirection) * 0.5f,
                                  mask
                              )
-                        ) < 0.1f;
+                         ) < 0.1f;
             continue;
         }
 
         const Node node = getNode(glm::ivec3(voxelRayPosition), depth);
         traceStack.nodesStack.push_back(node);
 
-        if (node.color.a >= 0.0f) {
+        if (!node.isEmptyVoxel()) {
             traceStack.voxelPos = glm::ivec3(octreePosition + voxelRayPosition);
             break;
         }

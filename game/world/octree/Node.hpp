@@ -12,6 +12,7 @@ struct Node {
     Node(const glm::vec4& color);
 
     bool isEmpty() const;
+    bool isEmptyVoxel() const;
     int getSubIndex(const int& halfSize, const glm::ivec3& vec) const;
     void setVoxel(const glm::vec4& color);
     int getSubNodeIndex(const int& halfSize, const glm::ivec3& vec) const;

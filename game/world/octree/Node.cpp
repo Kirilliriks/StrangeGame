@@ -31,6 +31,10 @@ bool Node::isEmpty() const {
     return sub == -1;
 }
 
+bool Node::isEmptyVoxel() const {
+    return color.a <= 0.0f;
+}
+
 void Node::setVoxel(const glm::vec4& color) {
     this->color = color;
 }
