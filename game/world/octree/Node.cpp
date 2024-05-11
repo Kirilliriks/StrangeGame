@@ -17,8 +17,14 @@
 
 Node::Node(const glm::ivec3& position) {
     this->position = glm::vec4(position, 0.0f);
-    sub = -1;
     color = glm::vec4(0.0f, 0.0f, 0.0f, -1.0f);
+    sub = -1;
+}
+
+Node::Node(const glm::vec4& color) {
+    position = glm::vec4(-1.0f);
+    this->color = color;
+    sub = -1;
 }
 
 bool Node::isEmpty() const {

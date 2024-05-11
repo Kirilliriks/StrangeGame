@@ -9,6 +9,7 @@
 
 struct Node {
     Node(const glm::ivec3& position);
+    Node(const glm::vec4& color);
 
     bool isEmpty() const;
     int getSubIndex(const int& halfSize, const glm::ivec3& vec) const;

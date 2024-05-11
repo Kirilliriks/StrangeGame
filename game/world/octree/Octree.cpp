@@ -75,7 +75,7 @@ Node Octree::getNode(const int& index, const int& depth, const int& nodeDepth, c
     } // else go deeper
 
     if (currentNode.isEmpty()) { // Hasn't child nodes
-        return {glm::ivec3(-1)};
+        return {glm::vec4(-1)};
     }
 
     const int nextIndex = currentNode.getSubNodeIndex((1 << maxDepth - depth) / 2, vec);
@@ -234,7 +234,7 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
 
     const glm::vec3 rayStepSizeSingle = 1.0f / glm::max(glm::abs(rayDirection), 0.001f);
 
-    float size = (1 << maxDepth);
+    auto size = static_cast<float>(1 << maxDepth);
 
     glm::vec3 localRayPosition = rayStartPosition - octreePosition;
     glm::vec3 voxelRayPosition = glm::vec3(0);
@@ -271,10 +271,10 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
             continue;
         }
 
-        Node node = getNode(glm::ivec3(voxelRayPosition), depth);
+        const Node node = getNode(glm::ivec3(voxelRayPosition), depth);
         traceStack.nodesStack.push_back(node);
 
-        if (node.color.a != -1.0f) {
+        if (node.color.a > 0.0f) {
             traceStack.voxelPos = glm::ivec3(octreePosition + voxelRayPosition);
             break;
         }

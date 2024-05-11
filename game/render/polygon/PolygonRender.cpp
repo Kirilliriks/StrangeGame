@@ -90,8 +90,8 @@ void PolygonRender::rebuildWorld() {
                 for (int z = 0; z < octreeSize; z++) {
                     for (int y = 0; y < octreeSize; y++) {
                         for (int x = 0; x < octreeSize; x++) {
-                            Node node = octree->getVoxel(glm::ivec3(x, y, z));
-                            if (node.position.x <= -1 || node.color.a <= 0.0f) {
+                            const Node node = octree->getVoxel(glm::ivec3(x, y, z));
+                            if (node.color.a <= 0.0f) {
                                 continue;
                             }
 
