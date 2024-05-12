@@ -158,9 +158,9 @@ vec4 castRay(
             depth++;
             size *= 0.5;
 
-            const vec3 upMask = step(vec3(size), localRayPosition) * size;
-            voxelRayPosition += upMask;
-            localRayPosition -= upMask;
+            const vec3 downMask = step(vec3(size), localRayPosition) * size;
+            voxelRayPosition += downMask;
+            localRayPosition -= downMask;
         } else if (node.sub == -1 || depth > maxDepth) {
             const vec3 hit = insideCubeHit(localRayPosition, signedDirection, rayStepSizeSingle, size);
 
