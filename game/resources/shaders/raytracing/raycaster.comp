@@ -150,12 +150,8 @@ vec4 castRay(
         }
 
         Node node;
-        if (!getNode(octreeBaseNodeID, ivec3(voxelRayPosition), depth, node)) {
-            return vec4(0);
-        }
-
-        if (node.color.a > 0) {
-            return node.color;
+        if (!getNode(octreeBaseNodeID, ivec3(voxelRayPosition), depth, node) || node.color.a > 0) {
+            return node.color; // !getNode, alghorithm return color == vec4(0)
         }
 
         if (node.sub != -1 && depth <= maxDepth) {
