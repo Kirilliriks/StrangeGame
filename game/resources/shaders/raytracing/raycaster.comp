@@ -131,7 +131,7 @@ vec4 castRay(
 
         if (exitOctree) {
             size *= 2.0;
-            vec3 newVoxelRayPosition = floor(voxelRayPosition / size) * size;
+            const vec3 newVoxelRayPosition = floor(voxelRayPosition / size) * size;
 
             localRayPosition += voxelRayPosition - newVoxelRayPosition;
             voxelRayPosition = newVoxelRayPosition;
@@ -154,14 +154,14 @@ vec4 castRay(
             return node.color; // !getNode, alghorithm return color == vec4(0)
         }
 
-        if (node.sub != -1 && depth <= maxDepth) {
+        if (node.sub != -1) {
             depth++;
             size *= 0.5;
 
             const vec3 downMask = step(vec3(size), localRayPosition) * size;
             voxelRayPosition += downMask;
             localRayPosition -= downMask;
-        } else if (node.sub == -1 || depth > maxDepth) {
+        } else if (node.sub == -1) {
             const vec3 hit = insideCubeHit(localRayPosition, signedDirection, rayStepSizeSingle, size);
 
             mask = vec3(lessThan(hit, min(hit.yzx, hit.zxy)));
@@ -171,8 +171,7 @@ vec4 castRay(
             localRayPosition += rayDirection * len - mask * signedDirection * size;
 
             const vec3 newVoxelRayPosition = voxelRayPosition + mask * signedDirection * size;
-            exitOctree = (floor(newVoxelRayPosition / size * 0.5) != floor(voxelRayPosition / size * 0.5))
-            && (depth > 0);
+            exitOctree = (floor(newVoxelRayPosition / size * 0.5) != floor(voxelRayPosition / size * 0.5));
 
             voxelRayPosition = newVoxelRayPosition;
         }
