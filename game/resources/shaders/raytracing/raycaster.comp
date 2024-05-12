@@ -154,8 +154,8 @@ vec4 castRay(
             return vec4(0);
         }
 
-        if (node.color.a != -1.0) {
-            return depth < maxDepth ? vec4(255, 0, 0, 255) : node.color;
+        if (node.color.a > 0) {
+            return node.color;
         }
 
         if (node.sub != -1 && depth <= maxDepth) {
@@ -215,7 +215,7 @@ vec4 castWorld(const in vec3 rayDirection) {
         const int octreeID = getOctreeBaseNodeId(octreePosition);
         if (octreeID != -1) {
             const vec4 res = castRay(octreeID, rayDirection, start_position + rayDirection * distance, octreePosition * octreeSize);
-            if (res.a != 0) {
+            if (res.a > 0) {
                 return res;
             }
         }
