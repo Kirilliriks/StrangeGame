@@ -161,7 +161,7 @@ vec4 castRay(
             const vec3 downMask = step(vec3(size), localRayPosition) * size;
             voxelRayPosition += downMask;
             localRayPosition -= downMask;
-        } else if (node.sub == -1) {
+        } else {
             const vec3 hit = insideCubeHit(localRayPosition, signedDirection, rayStepSizeSingle, size);
 
             mask = vec3(lessThan(hit, min(hit.yzx, hit.zxy)));
