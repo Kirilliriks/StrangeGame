@@ -99,6 +99,8 @@ glm::ivec3 OctreeSpace::getSpaceCenter() const {
 }
 
 void OctreeSpace::fillBuffers(const int& worldBuffer, const int& matrixBuffer) {
+    recalculateDataSize();
+
     std::vector<int> ids;
     ids.resize(diameter * diameter * diameter, -1);
 
@@ -196,7 +198,9 @@ TraceStack OctreeSpace::voxelRaycast(
     return traceStack;
 }
 
-void OctreeSpace::calculateDataSize() {
+void OctreeSpace::recalculateDataSize() {
+    dataSize = 0;
+
     for (int z = -radius; z <= radius; z++) {
         for (int y = -radius; y <= radius; y++) {
             for (int x = -radius; x <= radius; x++) {
@@ -236,8 +240,6 @@ void OctreeSpace::loadModels() {
 }
 
 void OctreeSpace::generateNoiseOctrees() {
-    dataSize = 0;
-
     for (int z = 0; z < diameter; z++) {
         const int realZ = spaceCenter.z + z;
 
@@ -257,8 +259,6 @@ void OctreeSpace::generateNoiseOctrees() {
     }
 
     loadModels();
-
-    calculateDataSize();
 }
 
 void OctreeSpace::generateOctree(const glm::ivec3& position, const std::shared_ptr<Octree>& octree) const {

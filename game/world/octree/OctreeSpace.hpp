@@ -33,7 +33,7 @@ public:
 private:
     void loadModels();
     void generateNoiseOctrees();
-    void calculateDataSize();
+    void recalculateDataSize();
     void generateOctree(const glm::ivec3& position, const std::shared_ptr<Octree>& octree) const;
 
     const int maxDepth = 8;
