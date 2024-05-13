@@ -17,6 +17,7 @@ public:
 
     void updateSpaceCenter(const glm::ivec3&position, const bool& updateOctrees);
     void setVoxel(const glm::ivec3& position, const glm::vec4& color);
+    void removeVoxel(const glm::ivec3& position);
     void setOctree(const glm::ivec3& position, std::shared_ptr<Octree> octree);
     auto getOctree(const glm::ivec3& position, const bool& local = false) -> std::shared_ptr<Octree>;
     glm::ivec3 getOctreePosition(const glm::ivec3& position) const;

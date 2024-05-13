@@ -50,6 +50,18 @@ void OctreeSpace::setVoxel(const glm::ivec3& position, const glm::vec4& color) {
     octree->setVoxel(localPosition, color);
 }
 
+void OctreeSpace::removeVoxel(const glm::ivec3& position) {
+    const glm::ivec3 octreePosition = getOctreePosition(position);
+
+    const std::shared_ptr<Octree> octree = getOctree(octreePosition);
+    if (!octree) {
+        return;
+    }
+
+    const glm::ivec3 localPosition = position - octreePosition * octreeSideSize;
+    octree->removeVoxel(localPosition);
+}
+
 void OctreeSpace::setOctree(const glm::ivec3& position, std::shared_ptr<Octree> octree) {
     glm::ivec3 relativeOctree = spaceCenter - position;
     if (relativeOctree.x < radius || relativeOctree.x > radius ||

@@ -4,7 +4,7 @@
 #include "Game.hpp"
 
 bool Game::focused = true;
-bool Game::debugRender = true;
+bool Game::debugRender = false;
 
 Game::Game(Window *window) : window(window) {
     input = new Input(window->getGLWindow());
