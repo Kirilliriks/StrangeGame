@@ -44,12 +44,13 @@ void VoxelRender::render(const double& deltaTime) const {
     glUseProgram(raycastShaderID);
 
     const Camera& camera = world->getCamera();
+    const glm::ivec3& previouseVoxelPos = world->getTraceCast().previousVoxelPos;
     const glm::ivec3& voxelPos = world->getTraceCast().voxelPos;
 
     glUniform3f(2, camera.getX(), camera.getY(), camera.getZ());
     glUniform2f(3, glm::radians(camera.getYaw()), glm::radians(camera.getPitch()));
     glUniform2f(4, window->width, window->height);
-    glUniform3i(5, voxelPos.x, voxelPos.y, voxelPos.z);
+    glUniform3i(5, previouseVoxelPos.x, previouseVoxelPos.y, previouseVoxelPos.z);
     glUniform3i(6, voxelPos.x, voxelPos.y, voxelPos.z);
     glUniform1i(7, world->getOctreeSpace().getRadius());
     glUniform1i(8, world->getOctreeSpace().getDiameter());

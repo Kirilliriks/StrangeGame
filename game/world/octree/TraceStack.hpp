@@ -15,7 +15,7 @@ struct TraceStack {
     std::vector<Node> pathNodesStack;
 
     glm::ivec3 voxelPos;
-    glm::ivec3 preVoxelPos;
+    glm::ivec3 previousVoxelPos;
     int iterations;
     int iterationsF;
     float distance;

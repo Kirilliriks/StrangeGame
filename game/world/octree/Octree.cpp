@@ -74,7 +74,7 @@ Node Octree::getNode(const int& index, const int& depth, const int& nodeDepth, c
         return currentNode;
     } // else go deeper
 
-    if (currentNode.isEmpty()) {// Hasn't child nodes
+    if (currentNode.isEmpty()) { // Hasn't child nodes
         return {glm::vec4(-1)};
     }
 
@@ -191,7 +191,7 @@ TraceStack Octree::voxelRaycastDDA(const glm::vec3& rayDirection, const glm::vec
         traceStack.entryStack.emplace_back(start_position + distance * rayDirection);
 
         iter++;
-        traceStack.preVoxelPos = voxelPos;
+        traceStack.previousVoxelPos = voxelPos;
         if (rayLength.x < rayLength.y) {
             if (rayLength.x < rayLength.z) {
                 voxelPos.x += step.x;
@@ -225,16 +225,6 @@ TraceStack Octree::voxelRaycastDDA(const glm::vec3& rayDirection, const glm::vec
     return traceStack;
 }
 
-int getSubIndexFromSubVector(const glm::ivec3& vec) {
-    if (glm::min(vec.x, glm::min(vec.y, vec.z)) < 0 || glm::max(vec.x, glm::max(vec.y, vec.z)) > 1) return -1;
-
-    int subIndex = 0;
-    subIndex |= (vec.x >= 1 ? 2 : 0);
-    subIndex |= (vec.y >= 1 ? 4 : 0);
-    subIndex |= (vec.z >= 1 ? 1 : 0);
-    return subIndex;
-}
-
 glm::vec3 insideCubeHit(
     const glm::vec3& localRayPosition,
     const glm::vec3& rayDirection,
@@ -250,6 +240,7 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
                                          const glm::vec3& octreePosition) {
     TraceStack traceStack;
 
+    const auto step = glm::ivec3(glm::sign(rayDirection));
     const glm::vec3 rayStepSizeSingle = 1.0f / glm::max(glm::abs(rayDirection), 0.001f);
 
     auto size = static_cast<float>(1 << maxDepth);
@@ -293,6 +284,7 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
 
         if (!node.isEmptyVoxel()) {
             traceStack.voxelPos = glm::ivec3(octreePosition + voxelRayPosition);
+            traceStack.previousVoxelPos = traceStack.voxelPos - glm::ivec3(mask) * step;
             break;
         }
 

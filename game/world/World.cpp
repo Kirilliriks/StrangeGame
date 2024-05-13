@@ -13,8 +13,8 @@ World::World(Game* game) : game(game), camera(game->getWindow()) {
 void World::update(const double& deltaTime) {
     camera.update(deltaTime);
 
-    //const glm::ivec3 v = octreeSpace.voxelRaycast(camera.getDirection(), camera.getPosition(), 100).voxelPos;
-    //frontVoxel = glm::vec3(v);
+    traceCast = octreeSpace.voxelRaycast(camera.getDirection(), camera.getPosition(), 100);
+    frontVoxel = glm::vec3(traceCast.voxelPos);
 
     if (!Game::focused) {
         return;
@@ -22,12 +22,12 @@ void World::update(const double& deltaTime) {
 
     if (!Game::debugRender) {
         if (Input::LEFT_CLICK.pressed || (Input::LEFT_CLICK.down && Input::LEFT_SHIFT.down)) {
-            //octree.setVoxel(traceCast.preVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
+            octreeSpace.setVoxel(traceCast.previousVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
             game->getRenderer()->updateWorld();
         }
 
         if (Input::RIGHT_CLICK.pressed || (Input::RIGHT_CLICK.down && Input::LEFT_SHIFT.down)) {
-            //octree.removeVoxel(v);
+            //octreeSpace.removeVoxel(frontVoxel);
             game->getRenderer()->updateWorld();
         }
     } else {
@@ -62,6 +62,11 @@ void World::imgui(const double& deltaTime) {
         frontVoxel.x,
         frontVoxel.y,
         frontVoxel.z
+    );
+    ImGui::Text("Place x=%d y=%d z=%d",
+        traceCast.previousVoxelPos.x,
+        traceCast.previousVoxelPos.y,
+        traceCast.previousVoxelPos.z
     );
     const auto octreee = octreeSpace.getOctreePosition(glm::ivec3(camera.getPosition()));
     ImGui::Text("Octree x=%d y=%d z=%d",
