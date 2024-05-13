@@ -10,7 +10,8 @@
 #include "../game/world/octree/Octree.hpp"
 
 TEST_CASE("Octree instancing") {
-    CHECK(Octree(8).nodesCount() == 1);
+    const Octree octree(8);
+    CHECK(octree.nodesCount() == 1);
 }
 
 TEST_CASE("Octree set voxel") {
@@ -24,5 +25,23 @@ TEST_CASE("Octree remove voxel") {
     octree.setVoxel(glm::ivec3(0), glm::vec4(255));
     octree.removeVoxel(glm::ivec3(0));
     CHECK(octree.getVoxel(glm::ivec3(0)).color != glm::vec4(255));
+}
+
+TEST_CASE("Node instancing") {
+    Node node(glm::ivec3(0));
+    CHECK(node.isEmpty());
+    CHECK(node.isEmptyVoxel());
+}
+
+TEST_CASE("Node get sub index") {
+    const Node node(glm::ivec3(0));
+    CHECK(node.getSubIndex(2, glm::ivec3(0, 0, 0)) == 0);
+    CHECK(node.getSubIndex(2, glm::ivec3(0, 0, 2)) == 1);
+    CHECK(node.getSubIndex(2, glm::ivec3(2, 0, 0)) == 2);
+    CHECK(node.getSubIndex(2, glm::ivec3(2, 0, 2)) == 3);
+    CHECK(node.getSubIndex(2, glm::ivec3(0, 2, 0)) == 4);
+    CHECK(node.getSubIndex(2, glm::ivec3(0, 2, 2)) == 5);
+    CHECK(node.getSubIndex(2, glm::ivec3(2, 2, 0)) == 6);
+    CHECK(node.getSubIndex(2, glm::ivec3(2, 2, 2)) == 7);
 }
 #endif //STRANGEGAME_TESTUNG_H
