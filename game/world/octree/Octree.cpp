@@ -16,7 +16,7 @@ void Octree::setVoxel(const glm::ivec3& vec, const glm::vec4& color) {
 }
 
 Node Octree::getVoxel(const glm::ivec3& vec) {
-    return getVoxel(0, 0, vec);
+    return getNode(0, 0, maxDepth, vec);
 }
 
 Node Octree::getNode(const glm::ivec3& vec, const int depth) {
@@ -61,10 +61,6 @@ void Octree::setVoxel(const int& index, const int& depth, const glm::ivec3& vec,
 
     const int nextIndex = nodes[index].getSubNodeIndex(halfSize, vec);
     setVoxel(nextIndex, depth + 1, vec, color);
-}
-
-Node Octree::getVoxel(const int& index, const int& depth, const glm::ivec3& vec) {
-    return getNode(index, depth + 1, maxDepth, vec);
 }
 
 Node Octree::getNode(const int& index, const int& depth, const int& nodeDepth, const glm::ivec3& vec) {
