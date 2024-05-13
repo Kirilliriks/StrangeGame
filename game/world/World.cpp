@@ -20,7 +20,7 @@ void World::update(const double& deltaTime) {
         return;
     }
 
-    if (true) {
+    if (!Game::debugRender) {
         if (Input::LEFT_CLICK.pressed || (Input::LEFT_CLICK.down && Input::LEFT_SHIFT.down)) {
             octreeSpace.setVoxel(traceCast.previousVoxelPos, glm::vec4(editColor[0], editColor[1], editColor[2], 255));
             game->getRenderer()->updateWorld();

@@ -43,9 +43,9 @@ int Node::getSubIndex(const int& halfSize, const glm::ivec3& vec) const {
     if (vec.x < position.x || vec.y < position.y || vec.z < position.z) return -1;
 
     if (const int size = halfSize * 2;
-        vec.x > position.x + size ||
-        vec.y > position.y + size ||
-        vec.z > position.z + size
+        vec.x >= position.x + size ||
+        vec.y >= position.y + size ||
+        vec.z >= position.z + size
     ) {
         return -1;
     }

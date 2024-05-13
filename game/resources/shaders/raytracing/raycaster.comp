@@ -43,7 +43,7 @@ int getSubIndex(const in int halfSize, const in ivec3 vec, const in Node node) {
     if (vec.x < pos.x || vec.y < pos.y || vec.z < pos.z) return -1;
 
     const int size = halfSize * 2;
-    if (vec.x > pos.x + size || vec.y > pos.y + size || vec.z > pos.z + size) return -1;
+    if (vec.x >= pos.x + size || vec.y >= pos.y + size || vec.z >= pos.z + size) return -1;
 
     int subIndex = 0;
     subIndex |= vec.x >= pos.x + halfSize ? 2 : 0;
