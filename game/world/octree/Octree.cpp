@@ -283,6 +283,7 @@ TraceStack Octree::voxelRaycastTraversal(const glm::vec3& rayDirection, const gl
         traceStack.nodesStack.push_back(node);
 
         if (!node.isEmptyVoxel()) {
+            traceStack.distance = distance;
             traceStack.voxelPos = glm::ivec3(octreePosition + voxelRayPosition);
             traceStack.previousVoxelPos = traceStack.voxelPos - glm::ivec3(mask) * step;
             break;

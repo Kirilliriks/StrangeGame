@@ -171,23 +171,24 @@ TraceStack OctreeSpace::voxelRaycast(
     // std::cout << "OS " << octreeSize << std::endl;
 
     const float halfOctreeSize = octreeSize / 2;
-    auto rayLength = -(glm::sign(rayDirection) * (glm::mod(startPosition, octreeSize) - halfOctreeSize) - halfOctreeSize) * rayStepSizeSingle;
+    auto rayLength = -(glm::sign(rayDirection) * (glm::mod(startPosition, octreeSize) - halfOctreeSize) -
+                       halfOctreeSize) * rayStepSizeSingle;
 
     glm::bvec3 mask;
 
     float distance = 0.0f;
     while (distance < maxDistance) {
         if (const std::shared_ptr<Octree> octree = getOctree(rayOctreePosition)) {
-
             auto octreeGlobalPosition = glm::vec3(rayOctreePosition);
             octreeGlobalPosition *= octreeSideSize;
 
-            const auto result = octree->voxelRaycastTraversal(
-                rayDirection,
-                startPosition + rayDirection * distance,
-                octreeGlobalPosition
-            );
-            if (result.voxelPos != glm::ivec3(0)) {
+            if (auto result = octree->voxelRaycastTraversal(
+                    rayDirection,
+                    startPosition + rayDirection * distance,
+                    octreeGlobalPosition);
+                result.voxelPos != glm::ivec3(0)
+            ) {
+                result.distance += distance;
                 return result;
             }
         }
@@ -237,7 +238,6 @@ void OctreeSpace::loadModels() {
     for (uint32_t z = 0; z < model->size_z; z++) {
         for (uint32_t y = 0; y < model->size_y; y++) {
             for (uint32_t x = 0; x < model->size_x; x++, voxel_index++) {
-
                 const uint32_t color_index = model->voxel_data[voxel_index];
                 if (color_index == 0) {
                     continue;

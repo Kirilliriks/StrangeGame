@@ -34,7 +34,7 @@ namespace Avox {
             useConfiguration = false;
             width = 2560;
             height = 1440;
-            radius = 2;
+            radius = 0;
         }
 
         static bool useConfiguration;
