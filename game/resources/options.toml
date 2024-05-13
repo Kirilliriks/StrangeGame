@@ -1,4 +1,4 @@
 use_configuration = false
 width = 640
 height = 320
-radius = 0
+radius = 2
