@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(glfw)
 add_subdirectory(game)
+add_subdirectory(testing)
 
 include_directories(dependency/glad/)
 include_directories(glfw/include)
