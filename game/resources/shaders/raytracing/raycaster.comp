@@ -151,9 +151,9 @@ vec4 castRay(
 
         Node node;
         if (!getNode(octreeBaseNodeID, ivec3(voxelRayPosition), depth, node) || node.color.a > 0) {
-            if (voxelRayPosition == debug_voxel && voxelRayPosition - mask * signedDirection == front_voxel) {
-                return vec4(0, 255, 255, 255);
-            }
+//            if (voxelRayPosition == debug_voxel && voxelRayPosition - mask * signedDirection == front_voxel) {
+//                return vec4(0, 255, 255, 255);
+//            }
 
             return node.color; // !getNode, alghorithm return color == vec4(0)
         }

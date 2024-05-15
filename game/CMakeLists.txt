@@ -5,7 +5,16 @@ include_directories(../imgui/)
 
 add_library(
         Game
-        ../dependency/glad/gl.c ../dependency/ogt/ogt_vox.h
+        ../dependency/glad/gl.c
+        ../dependency/ogt/ogt_vox.h
+        ../dependency/dep/laynii_lib.cpp
+        ../dependency/dep/laynii_lib.h
+        ../dependency/dep/nifti1.h
+        ../dependency/dep/nifti2.h
+        ../dependency/dep/nifti2_io.cpp
+        ../dependency/dep/nifti2_io.h
+        ../dependency/dep/znzlib.cpp
+        ../dependency/dep/znzlib.h
         Game.cpp
         render/shaders/Shader.cpp render/shaders/Shader.hpp
         render/voxel/VoxelRender.cpp render/voxel/VoxelRender.hpp

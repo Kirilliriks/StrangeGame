@@ -13,6 +13,9 @@
 #define OGT_VOX_IMPLEMENTATION
 #include "../dependency/ogt/ogt_vox.h"
 
+#include "../dep/nifti2_io.h"
+#include "../dep/laynii_lib.h"
+
 OctreeSpace::OctreeSpace(const int& radius) : radius(radius), diameter(radius * 2 + 1), dataSize(0) {
     octrees.resize(diameter * diameter * diameter);
 
@@ -225,7 +228,37 @@ void OctreeSpace::recalculateDataSize() {
     }
 }
 
-void OctreeSpace::loadModels() {
+void OctreeSpace::loadVoxScene() {
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution rand(0, 100);
+
+    nifti_image* image = nifti_image_read("nift/chris_t1.nii", 1);
+    // Prepare images
+    const nifti_image* imageInt = copy_nifti_as_int32(image);
+    const auto imageIntData = static_cast<int32_t*>(imageInt->data);
+
+    uint32_t voxel_index = 0;
+    for (uint32_t z = 0; z < image->nz; z++) {
+        for (uint32_t y = 0; y < image->ny; y++) {
+            for (uint32_t x = 0; x < image->nx; x++, voxel_index++) {
+                const int32_t color = imageIntData[voxel_index];
+                int r = (color >> 24) & 0xff;
+                int g = (color >> 16) & 0xff;
+                int b = (color >> 8) & 0xff;
+                int a = (color) & 0xff;
+                if (a <= 50) {
+                    continue;
+                }
+
+                auto col = rand(rng);
+                setVoxel(glm::ivec3(x, z, y), glm::vec4(r, g, a, 255) / 255.0f);
+            }
+        }
+    }
+}
+
+void OctreeSpace::loadBrainScene() {
     std::random_device dev;
     std::mt19937 rng(dev());
     std::uniform_int_distribution rand(0, 100);
@@ -269,11 +302,13 @@ void OctreeSpace::generateNoiseOctrees() {
             }
         }
     }
-
-    loadModels();
 }
 
 void OctreeSpace::generateOctree(const glm::ivec3& position, const std::shared_ptr<Octree>& octree) const {
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution rand(0, 255);
+
     const int worldSize = octreeSideSize;
     for (int z = 0; z < worldSize; z++) {
         const auto realZ = static_cast<float>(position.z * octreeSideSize + z);
@@ -281,15 +316,13 @@ void OctreeSpace::generateOctree(const glm::ivec3& position, const std::shared_p
         for (int x = 0; x < worldSize; x++) {
             const auto realX = static_cast<float>(position.x * octreeSideSize + x);
 
-            constexpr float divider = 32.0f;
+            const float divider = worldSize;
             const float per = (glm::simplex(glm::vec3(realX / divider, realZ / divider, 21)) + 1) / 2.0f;
 
-            const int y = static_cast<int>(per * divider);
+            const int y = static_cast<int>(per * (worldSize / 2.0f));
             if (y < 0 || y > worldSize) continue;
 
-            for (int i = 0; i <= y; i++) {
-                octree->setVoxel(glm::ivec3(x, i, z), glm::vec4(per, per, per, 1.0f));
-            }
+            octree->setVoxel(glm::ivec3(x, y, z), glm::vec4(per, per, per, 1.0f));
         }
     }
 }
