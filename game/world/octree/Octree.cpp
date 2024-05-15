@@ -82,6 +82,11 @@ void Octree::removeVoxel(const glm::ivec3& vec) {
     removeVoxel(0, 0, vec);
 }
 
+void Octree::clear() {
+    nodes.clear();
+    nodes.emplace_back(glm::ivec3(0));
+}
+
 void Octree::removeVoxel(const int& index, const int& depth, const glm::ivec3& vec) {
     Node& currentNode = nodes.at(index);
 

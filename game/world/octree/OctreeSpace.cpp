@@ -97,6 +97,12 @@ glm::ivec3 OctreeSpace::getOctreePosition(const glm::ivec3& position) const {
     return glm::ivec3(glm::floor(glm::vec3(position) / static_cast<float>(octreeSideSize)));
 }
 
+void OctreeSpace::clear() {
+    for (const auto& octree : octrees) {
+        octree->clear();
+    }
+}
+
 int OctreeSpace::getOctreeSideSize() const {
     return octreeSideSize;
 }
@@ -233,36 +239,6 @@ void OctreeSpace::loadVoxScene() {
     std::mt19937 rng(dev());
     std::uniform_int_distribution rand(0, 100);
 
-    nifti_image* image = nifti_image_read("nift/chris_t1.nii", 1);
-    // Prepare images
-    const nifti_image* imageInt = copy_nifti_as_int32(image);
-    const auto imageIntData = static_cast<int32_t*>(imageInt->data);
-
-    uint32_t voxel_index = 0;
-    for (uint32_t z = 0; z < image->nz; z++) {
-        for (uint32_t y = 0; y < image->ny; y++) {
-            for (uint32_t x = 0; x < image->nx; x++, voxel_index++) {
-                const int32_t color = imageIntData[voxel_index];
-                int r = (color >> 24) & 0xff;
-                int g = (color >> 16) & 0xff;
-                int b = (color >> 8) & 0xff;
-                int a = (color) & 0xff;
-                if (a <= 50) {
-                    continue;
-                }
-
-                auto col = rand(rng);
-                setVoxel(glm::ivec3(x, z, y), glm::vec4(r, g, a, 255) / 255.0f);
-            }
-        }
-    }
-}
-
-void OctreeSpace::loadBrainScene() {
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution rand(0, 100);
-
     const ogt_vox_scene* scene = load_vox_scene("vox/emil.vox");
     const ogt_vox_model* model = scene->models[0];
     const auto [color] = scene->palette;
@@ -278,7 +254,37 @@ void OctreeSpace::loadBrainScene() {
 
                 auto [r, g, b, a] = color[color_index];
                 auto col = rand(rng);
-                setVoxel(glm::ivec3(x, z - 480, y), glm::vec4(col, col, col, 255) / 255.0f);
+                setVoxel(glm::ivec3(x, z, y), glm::vec4(col, col, col, 255) / 255.0f);
+            }
+        }
+    }
+}
+
+void OctreeSpace::loadBrainScene() {
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution rand(0, 100);
+
+    nifti_image* image = nifti_image_read("nift/chris_t1.nii", 1);
+    // Prepare images
+    const nifti_image* imageInt = copy_nifti_as_int32(image);
+    const auto imageIntData = static_cast<int32_t*>(imageInt->data);
+
+    uint32_t voxel_index = 0;
+    for (uint32_t z = 0; z < image->nz; z++) {
+        for (uint32_t y = 0; y < image->ny; y++) {
+            for (uint32_t x = 0; x < image->nx; x++, voxel_index++) {
+                const int32_t color = imageIntData[voxel_index];
+                int r = (color >> 24) & 0xff;
+                int g = (color >> 16) & 0xff;
+                int b = (color >> 8) & 0xff;
+                int a = (color) & 0xff;
+                if (a <= 0) {
+                    continue;
+                }
+
+                auto col = rand(rng);
+                setVoxel(glm::ivec3(x, z, y), glm::vec4(a, a, a, 255) / 255.0f);
             }
         }
     }

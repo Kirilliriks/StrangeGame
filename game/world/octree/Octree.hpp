@@ -18,6 +18,7 @@ public:
     void divide(const int& halfSize, Node& currentNode);
     void removeVoxel(const glm::ivec3& vec);
 
+    void clear();
     Node *getData();
     std::vector<Node>& getDataVector();
     int nodesCount() const;

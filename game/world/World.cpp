@@ -41,6 +41,28 @@ void World::update(const double& deltaTime) {
 static int cameraSpeed[] = {30};
 
 void World::imgui(const double& deltaTime) {
+    ImGui::Begin("Scene selector");
+
+    if (ImGui::Button("Load noise")) {
+        octreeSpace.clear();
+        octreeSpace.generateNoiseOctrees();
+        game->getRenderer()->updateWorld();
+    }
+
+    if (ImGui::Button("Load voxel model")) {
+        octreeSpace.clear();
+        octreeSpace.loadVoxScene();
+        game->getRenderer()->updateWorld();
+    }
+
+    if (ImGui::Button("Load brain scan")) {
+        octreeSpace.clear();
+        octreeSpace.loadBrainScene();
+        game->getRenderer()->updateWorld();
+    }
+
+    ImGui::End();
+
     ImGui::Begin("Info window");
     ImGui::SetWindowCollapsed(false);
 
@@ -92,7 +114,6 @@ void World::setVoxel(const glm::ivec3& vec, const glm::vec4& color) {
 void World::createWorld() {
     octreeSpace.updateSpaceCenter(glm::ivec3(camera.getPosition()), true);
 }
-
 
 OctreeSpace& World::getOctreeSpace() {
     return octreeSpace;
