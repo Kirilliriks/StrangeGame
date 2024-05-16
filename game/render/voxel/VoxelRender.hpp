@@ -19,6 +19,8 @@ public:
 
     void updateWorld() const;
     void render(const double& deltaTime) const;
+
+    static float backgroundColor[4];
 private:
     void genTexture();
 

@@ -41,7 +41,7 @@ void World::update(const double& deltaTime) {
 static int cameraSpeed[] = {30};
 
 void World::imgui(const double& deltaTime) {
-    ImGui::Begin("Scene selector");
+    ImGui::Begin("Scene tool");
 
     if (ImGui::Button("Load noise")) {
         octreeSpace.clear();
@@ -99,6 +99,7 @@ void World::imgui(const double& deltaTime) {
     ImGui::Text("Distance %f", traceCast.distance);
 
     ImGui::ColorPicker3("Choose voxel color", editColor);
+    ImGui::ColorPicker4("Choose background color", game->getRenderer()->backgroundColor);
 
     if (ImGui::InputInt("Camera speed", cameraSpeed)) {
         camera.setSpeed(cameraSpeed[0]);

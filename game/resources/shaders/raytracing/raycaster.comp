@@ -37,6 +37,7 @@ layout(location=6) uniform ivec3 debug_voxel;
 layout(location=7) uniform int octrees_radius;
 layout(location=8) uniform int octrees_diameter;
 layout(location=9) uniform ivec3 space_center;
+layout(location=10) uniform vec4 background_color;
 
 int getSubIndex(const in int halfSize, const in ivec3 vec, const in Node node) {
     const ivec3 pos = node.position.xyz;
@@ -155,7 +156,7 @@ vec4 castRay(
 //                return vec4(0, 255, 255, 255);
 //            }
 
-            return node.color; // !getNode, alghorithm return color == vec4(0)
+            return node.color; // !getNode, alghorithm return color == background_color
         }
 
         if (node.sub != -1) {
@@ -181,7 +182,7 @@ vec4 castRay(
         }
     }
 
-    return vec4(0);
+    return background_color;
 }
 
 int getOctreeBaseNodeId(ivec3 octreePosition) {
@@ -226,7 +227,7 @@ vec4 castWorld(const in vec3 rayDirection) {
         octreePosition += ivec3(mask) * step;
     }
 
-    return vec4(0);
+    return background_color;
 }
 
 void rotate(inout vec3 v, const in vec3 axis, const in float theta) {

@@ -284,7 +284,7 @@ void OctreeSpace::loadBrainScene() {
                 }
 
                 auto col = rand(rng);
-                setVoxel(glm::ivec3(x, z, y), glm::vec4(a, a, a, 255) / 255.0f);
+                setVoxel(glm::ivec3(x, z, y), glm::vec4(a, a, a, a) / 255.0f);
             }
         }
     }

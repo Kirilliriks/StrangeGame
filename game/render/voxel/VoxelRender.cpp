@@ -6,6 +6,8 @@
 #include "VoxelRender.hpp"
 #include "../shaders/RaycastShader.hpp"
 
+float VoxelRender::backgroundColor[4] = {0, 0, 0, 1};
+
 VoxelRender::VoxelRender(Game *game) : world(game->getWorld()) {
     this->game = game;
     window = game->getWindow();
@@ -57,6 +59,8 @@ void VoxelRender::render(const double& deltaTime) const {
 
     const glm::ivec3 spaceCenter = world->getOctreeSpace().getSpaceCenter();
     glUniform3i(9, spaceCenter.x, spaceCenter.y, spaceCenter.z);
+
+    glUniform4f(10, backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
 
     glDispatchCompute(window->width / groupSize, window->height / groupSize, 1);
 
