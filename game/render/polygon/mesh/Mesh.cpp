@@ -18,16 +18,11 @@
 // };
 
 Mesh::Mesh(MeshBuilder& meshBuilder)
-: Mesh(meshBuilder.getBuffer(), meshBuilder.getVertexes(), meshBuilder.getAttributes()) {
+    : Mesh(meshBuilder.getBuffer(), meshBuilder.getVertexes(), meshBuilder.getAttributes()) {
 }
 
 Mesh::Mesh(const std::vector<float>& buffer, const int& vertices, const std::vector<int>& attributes) {
     this->vertices = vertices;
-
-    int vertexSize = 0;
-    for (const int attribute : attributes) {
-        vertexSize += attribute;
-    }
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
@@ -36,11 +31,20 @@ Mesh::Mesh(const std::vector<float>& buffer, const int& vertices, const std::vec
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * buffer.size(), &buffer.front(), GL_STATIC_DRAW);
 
+    int vertexSize = 0;
+    for (const int attribute: attributes) {
+        vertexSize += attribute;
+    }
+
     // attributes
     int offset = 0;
     int i = 0;
-    for (const int attribute : attributes) {
-        glVertexAttribPointer(i, attribute, GL_FLOAT, GL_FALSE, vertexSize * sizeof(float), reinterpret_cast<GLvoid*>(offset * sizeof(float)));
+    for (const int attribute: attributes) {
+        glVertexAttribPointer(
+            i, attribute, GL_FLOAT, GL_FALSE,
+            static_cast<int>(vertexSize * sizeof(float)),
+            reinterpret_cast<GLvoid *>(offset * sizeof(float))
+        );
         glEnableVertexAttribArray(i);
         offset += attribute;
         i++;

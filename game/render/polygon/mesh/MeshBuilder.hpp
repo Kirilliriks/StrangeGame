@@ -30,7 +30,7 @@ public:
     const int& getVertexes() const;
 private:
     std::vector<float> buffer;
-    std::vector<int> attruibutes;
+    std::vector<int> attributes;
     int vertexes = 0;
 };
 

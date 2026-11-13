@@ -8,8 +8,8 @@
 #include <glm/core/type.hpp>
 
 MeshBuilder::MeshBuilder() {
-    attruibutes.push_back(3); //XYZ
-    attruibutes.push_back(4); //RGBA
+    attributes.push_back(3); //XYZ
+    attributes.push_back(4); //RGBA
 }
 
 void MeshBuilder::cube(const glm::vec3& pos, const glm::vec4& color, const float& size) {
@@ -74,7 +74,7 @@ const std::vector<float>& MeshBuilder::getBuffer() {
 }
 
 const std::vector<int>& MeshBuilder::getAttributes() {
-    return attruibutes;
+    return attributes;
 }
 
 const int& MeshBuilder::getVertexes() const {

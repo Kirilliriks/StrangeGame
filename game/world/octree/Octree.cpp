@@ -4,7 +4,6 @@
 
 #include "Octree.hpp"
 
-#include <iostream>
 #include <random>
 
 Octree::Octree(const int& maxDepth) : maxDepth(maxDepth) {

@@ -5,10 +5,10 @@
 
 // Little help struct, TODO delete
 //enum nodeIndex {
-//    DOWN_LEFT_FRONT = 0, //000
-//    DOWN_LEFT_BACK = 1,  //001
-//    DOWN_RIGHT_FRONT = 2,//010
-//    DOWN_RIGHT_BACK = 3, //011
+//    DOWN_LEFT_FRONT = 0,   //000
+//    DOWN_LEFT_BACK = 1,    //001
+//    DOWN_RIGHT_FRONT = 2,  //010
+//    DOWN_RIGHT_BACK = 3,   //011
 //    UPPER_LEFT_FRONT = 4,  //100
 //    UPPER_LEFT_BACK = 5,   //101
 //    UPPER_RIGHT_FRONT = 6, //110

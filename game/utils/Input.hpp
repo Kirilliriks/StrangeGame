@@ -5,36 +5,19 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include <ranges>
-
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include "imgui_impl_glfw.h"
-#include <unordered_map>
 
 class Input {
 public:
-    struct Key {
-        const int code;
+    struct InputKey {
+        inline static int KEY_INDEX_COUNTER = 0;
+
+        const int code = KEY_INDEX_COUNTER++;
         bool down = false;
         bool pressed = false;
         bool wasDown = false;
-
-        explicit Key(const int& code) : code(code) { }
-
-        void tick() {
-            pressed = !wasDown && down;
-            wasDown = down;
-        }
-    };
-
-    struct Button {
-        const int code;
-        bool down = false;
-        bool pressed = false;
-        bool wasDown = false;
-
-        explicit Button(const int& code) : code(code) { }
 
         void tick() {
             pressed = !wasDown && down;
@@ -44,56 +27,47 @@ public:
 
     static glm::vec3 mousePos;
     static glm::vec3 lastMousePos;
-    static std::unordered_map<int, Key*> keys;
-    static std::unordered_map<int, Button*> buttons;
+    static InputKey keys[];
 
-    static Key &ENTER;
-    static Key &TAB;
-    static Key &LEFT_SHIFT;
-    static Key &Q;
-    static Key &E;
-    static Key &F;
-    static Key &T;
+    static InputKey& ENTER;
+    static InputKey& TAB;
+    static InputKey& LEFT_SHIFT;
+    static InputKey& Q;
+    static InputKey& E;
+    static InputKey& F;
+    static InputKey& T;
 
-    static Button &LEFT_CLICK;
-    static Button &RIGHT_CLICK;
-
-    explicit Input(GLFWwindow *window) {
-        glfwSetKeyCallback(window, [](GLFWwindow*, const int key, const int, const int action, const int) {
-            if (const auto pair = keys.find(key); pair != keys.end()) {
-                const bool act = action != GLFW_RELEASE;
-                pair->second->down = act;
-            }
-        });
-
-        glfwSetMouseButtonCallback(window, [](GLFWwindow* window, const int button, const int action, const int mods) {
-            ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-
-            if (const auto pair = buttons.find(button); pair != buttons.end()) {
-                const bool act = action != GLFW_RELEASE;
-                pair->second->down = act;
-            }
-        });
-    }
+    static InputKey& LEFT_CLICK;
+    static InputKey& RIGHT_CLICK;
 
     static void tick() {
-        for (Key* key : std::ranges::views::values(keys)) {
-            key->tick();
-        }
-
-        for (Button* button: std::ranges::views::values(buttons)) {
-            button->tick();
+        for (InputKey& key: keys) {
+            key.tick();
         }
     }
 
-    static Key &registerKey(Key *key) {
-        keys[key->code] = key;
-        return *key;
+    static InputKey& registerKey(const int& code) {
+        return keys[code];
     }
 
-    static Button &registerButton(Button *button) {
-        buttons[button->code] = button;
-        return *button;
+    explicit Input(GLFWwindow* window) {
+        glfwSetKeyCallback(
+            window,
+            [](GLFWwindow*, const int key, const int, const int action, const int) {
+                const bool act = action != GLFW_RELEASE;
+                keys[key].down = act;
+            }
+        );
+
+        glfwSetMouseButtonCallback(
+            window,
+            [](GLFWwindow* callbackWindow, const int button, const int action, const int mods) {
+                ImGui_ImplGlfw_MouseButtonCallback(callbackWindow, button, action, mods);
+
+                const bool act = action != GLFW_RELEASE;
+                keys[button].down = act;
+            }
+        );
     }
 };
 
